@@ -1,0 +1,27 @@
+{
+  "name": "crudsify",
+  "version": "1.0.0",
+  "description": "CRUDSIFY - A Simplified RESTful API generator",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "api",
+    "restful api",
+    "rest api",
+    "restapi",
+    "crud",
+    "operations"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/prudradeep/crudsify.git"
+  },
+  "author": "PRadeep Kumar",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/prudradeep/crudsify/issues"
+  },
+  "homepage": "https://github.com/prudradeep/crudsify#readme"
+}
