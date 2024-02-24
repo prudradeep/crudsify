@@ -6,6 +6,7 @@ const Confidence = require("confidence");
 const dbConfig = require("./config");
 
 const constants = {
+  WEB_TITLE: "Crudsify API",
   AUTH_STRATEGIES: {
     TOKEN: "standard-jwt",
     SESSION: "jwt-with-session",
@@ -139,6 +140,34 @@ const Config = {
     uat: "verbose",
     production: "error",
     $default: "silly",
+  },
+
+  enableSwagger: {
+    $filter: "env",
+    production: false,
+    $default: true,
+  },
+  /**
+   * Set swagger options as per https://github.com/swagger-api/swagger-ui/blob/master/docs/usage/configuration.md
+   * Options set here will override swagger config options below
+   * @type {Object}
+   */
+  swaggerOptions: {
+    $filter: "env",
+    production: {
+      explorer: true,
+      swaggerOptions: {
+        docExpansion: "none",
+      },
+      customSiteTitle: constants.WEB_TITLE,
+    },
+    $default: {
+      explorer: true,
+      swaggerOptions: {
+        docExpansion: "none",
+      },
+      customSiteTitle: constants.WEB_TITLE,
+    },
   },
 };
 
