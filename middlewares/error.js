@@ -59,9 +59,9 @@ const errorResponder = (err, req, res, next) => {
   }
 };
 
-const handleNotFound = (req, res, next) => {
+const handleNotFoundError = (req, res, next) => {
   Log.error(`${req.path} URL not found error!`);
   return sendResponse(Boom.notFound("URL not found"), res);
 };
 
-module.exports = { errorResponder, handleNotFound };
+module.exports = { errorResponder, handleNotFoundError };

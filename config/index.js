@@ -5,7 +5,7 @@ require("dotenv").config();
 const Confidence = require("confidence");
 const dbConfig = require("./config");
 
-exports.constants = {
+const constants = {
   AUTH_STRATEGIES: {
     TOKEN: "standard-jwt",
     SESSION: "jwt-with-session",
@@ -21,7 +21,19 @@ exports.constants = {
  */
 const Config = {
   service: "APIs",
+  port: process.env.SERVER_PORT,
   logDir: "./logs/",
+  cors: {
+    $filter: "env",
+    production: {
+      origin: "*",
+      exposedHeaders: ["X-Access-Token", "X-Refresh-Token"],
+    },
+    $default: {
+      origin: "*",
+      exposedHeaders: ["X-Access-Token", "X-Refresh-Token"],
+    },
+  },
   basicAuth: {
     username: process.env.BASIC_AUTH_USERNAME,
     password: process.env.BASIC_AUTH_PASSWORD,

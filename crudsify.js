@@ -1,11 +1,33 @@
-const { get, meta, constants } = require("./config");
-const modelsUtil = require("./utils/model");
-const utils = require('./utils');
+"use strict";
 
-module.exports = {
-  getConfig: get,
-  metaConfig: meta,
-  constConfig: constants,
-  ...modelsUtil,
-  ...utils
+const express = require("express");
+const http = require("http");
+const cors = require("cors");
+const Log = require("./helpers/logger");
+const { sequelize } = require("./models");
+const configStore = require("./config");
+const { errorResponder, handleNotFoundError } = require("./middlewares/error");
+const PORT = configStore.get("/port");
+
+const Crudsify = express();
+Crudsify.plugins = {};
+const CrudsifyServer = http.createServer(Crudsify);
+Crudsify.use(cors(configStore.get("/cors")));
+Crudsify.use(express.json());
+
+const start = async () => {
+  try {
+    await sequelize.authenticate();
+    Crudsify.use(errorResponder);
+    Crudsify.use(handleNotFoundError);
+    CrudsifyServer.listen(PORT, () => {
+      Log.info(`Crudsify Server listening on port ${PORT}`);
+    });
+  } catch (err) {
+    Log.error(`Something went wrong:`);
+    console.log(error);
+    process.exit();
+  }
 };
+
+start();
