@@ -18,6 +18,8 @@ Crudsify.use(express.json());
 const start = async () => {
   try {
     await sequelize.authenticate();
+    const { swaggerRouter } = require("./helpers/swagger");
+    if (configStore.get("/enableSwagger")) Crudsify.use("/", swaggerRouter);
     Crudsify.use(errorResponder);
     Crudsify.use(handleNotFoundError);
     CrudsifyServer.listen(PORT, () => {
