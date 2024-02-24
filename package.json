@@ -2,7 +2,7 @@
   "name": "crudsify",
   "version": "1.0.0",
   "description": "CRUDSIFY - A Simplified RESTful API generator",
-  "main": "server.js",
+  "main": "crudsify.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

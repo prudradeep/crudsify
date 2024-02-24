@@ -5,7 +5,7 @@ require("dotenv").config();
 const Confidence = require("confidence");
 const dbConfig = require("./config");
 
-const constants = {
+export const constants = {
   AUTH_STRATEGIES: {
     TOKEN: "standard-jwt",
     SESSION: "jwt-with-session",
@@ -32,12 +32,12 @@ const Config = {
     production: {
       name: "id",
       type: "BIGINT",
-      autoIncrement: true
+      autoIncrement: true,
     },
     $default: {
       name: "idKey",
       type: "BIGINT",
-      autoIncrement: true
+      autoIncrement: true,
     },
   },
 
@@ -55,10 +55,10 @@ const Config = {
   },
 
   /**
-   * MetaData options 
-   * - createdBy: (default: false) dbPrimaryKey of user that created the document.
-   * - updatedBy: (default: false) dbPrimaryKey of user that last updated the document.
-   * - deletedBy: (default: false) dbPrimaryKey of user that soft deleted the document.
+   * MetaData options
+   * - createdBy: dbPrimaryKey of user that created the document.
+   * - updatedBy: dbPrimaryKey of user that last updated the document.
+   * - deletedBy: dbPrimaryKey of user that soft deleted the document.
    */
   enableCreatedBy: {
     $filter: "env",
@@ -79,7 +79,6 @@ const Config = {
   /**
    * Authentication strategy to be used for all generated endpoints.
    * Set to false for no authentication.
-   * default: false
    * @type {boolean/string}
    */
   authStrategy: {
@@ -87,6 +86,21 @@ const Config = {
     production: constants.AUTH_STRATEGIES.REFRESH,
     $default: constants.AUTH_STRATEGIES.REFRESH,
   },
+
+  /**
+   * Salt rounds for generating hash
+   */
+  saltRounds: {
+    $filter: "env",
+    production: 15,
+    uat: 12,
+    $default: 10,
+  },
+
+  /**
+   * Secret for JWT token creation
+   */
+  jwtSecret: process.env.JWT_SECRET,
 };
 
 const configStore = new Confidence.Store(Config);
