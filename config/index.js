@@ -20,6 +20,8 @@ export const constants = {
  * - $default
  */
 const Config = {
+  service: "APIs",
+  logDir: './logs/',
   database: {
     $meta: "Database configuration",
     $filter: "env",
@@ -101,6 +103,16 @@ const Config = {
    * Secret for JWT token creation
    */
   jwtSecret: process.env.JWT_SECRET,
+
+  /**
+   * Logging configuration
+   */
+  logLevel: {
+    $filter: "env",
+    uat: "verbose",
+    production: "error",
+    $default: "silly",
+  },
 };
 
 const configStore = new Confidence.Store(Config);
