@@ -2,7 +2,7 @@
 
 const Bcrypt = require("bcryptjs");
 const { v4: uuidv4 } = require("uuid");
-const Jwt = require('jsonwebtoken')
+const Jwt = require("jsonwebtoken");
 const configStore = require("../config");
 
 module.exports = {
@@ -34,10 +34,61 @@ module.exports = {
     );
   },
   generateToken: (data, expirationPeriod) => {
-    try{
-        return Jwt.sign(data, configStore.get('/jwtSecret'), {algorithm: "HS256", expiresIn: expirationPeriod})
-    }catch(err){
-        throw err;
+    try {
+      const jwtConfig = configStore.get("/jwt");
+      return Jwt.sign(data, jwtConfig.secret, {
+        algorithm: jwtConfig.algo,
+        expiresIn: expirationPeriod,
+      });
+    } catch (err) {
+      throw err;
     }
-  }
+  },
+  getScopes: (model, type) => {
+    const routeScope = model.routeScopes || {};
+    const rootScope = routeScope.rootScope;
+    let scope = [];
+
+    let additionalScope = null;
+
+    switch (type) {
+      case "create":
+        additionalScope = routeScope.createScope;
+        break;
+      case "read":
+        additionalScope = routeScope.readScope;
+        break;
+      case "update":
+        additionalScope = routeScope.updateScope;
+        break;
+      case "delete":
+        additionalScope = routeScope.deleteScope;
+        break;
+      case "associate":
+        additionalScope = routeScope.associateScope;
+        break;
+      default:
+        if (routeScope[type]) {
+          scope = routeScope[type];
+          if (!_.isArray(scope)) {
+            scope = [scope];
+          }
+        }
+        return scope;
+    }
+
+    if (rootScope && _.isArray(rootScope)) {
+      scope = scope.concat(rootScope);
+    } else if (rootScope) {
+      scope.push(rootScope);
+    }
+
+    if (additionalScope && _.isArray(additionalScope)) {
+      scope = scope.concat(additionalScope);
+    } else if (additionalScope) {
+      scope.push(additionalScope);
+    }
+
+    return scope;
+  },
 };

@@ -5,6 +5,7 @@ const path = require("path");
 const Sequelize = require("sequelize");
 const basename = path.basename(__filename);
 const configStore = require("../config");
+const { routeOptions, routeScopes } = require("../helpers/model");
 const db = {};
 
 let options = {
@@ -50,6 +51,13 @@ fs.readdirSync(__dirname)
 Object.keys(db).forEach((modelName) => {
   if (db[modelName].associate) {
     db[modelName].associate(db);
+  }
+
+  if (configStore.get("/authStrategy")) {
+    routeOptions(db[modelName]);
+    if (configStore.get("/generateRouteScopes")) {
+      routeScopes(db[modelName]);
+    }
   }
 });
 

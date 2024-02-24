@@ -21,7 +21,7 @@ export const constants = {
  */
 const Config = {
   service: "APIs",
-  logDir: './logs/',
+  logDir: "./logs/",
   database: {
     $meta: "Database configuration",
     $filter: "env",
@@ -90,6 +90,14 @@ const Config = {
   },
 
   /**
+   * If set to true, (and authStrategy is not false) then endpoints will be generated with pre-defined
+   * scopes based on the model definition.
+   * default: false
+   * @type {boolean}
+   */
+  generateRouteScopes: false,
+
+  /**
    * Salt rounds for generating hash
    */
   saltRounds: {
@@ -100,9 +108,12 @@ const Config = {
   },
 
   /**
-   * Secret for JWT token creation
+   * Secret for JWT token creation and algo
    */
-  jwtSecret: process.env.JWT_SECRET,
+  jwt: {
+    secret: process.env.JWT_SECRET,
+    algo: "RS512",
+  },
 
   /**
    * Logging configuration
