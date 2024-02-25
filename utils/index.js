@@ -91,4 +91,12 @@ module.exports = {
 
     return scope;
   },
+  getPathName: (model) => {
+    let routePath = model.name;
+    if (model.routeOptions.alias) routePath = model.routeOptions.alias;
+    return routePath;
+  },
+  getModelName: (model) => {
+    return model.name;
+  },
 };

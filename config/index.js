@@ -24,6 +24,7 @@ const Config = {
   service: "APIs",
   port: process.env.SERVER_PORT,
   logDir: "./logs/",
+  constants: constants,
   cors: {
     $filter: "env",
     production: {
@@ -140,6 +141,33 @@ const Config = {
     uat: "verbose",
     production: "error",
     $default: "silly",
+  },
+
+  logRoutes: {
+    $filter: "env",
+    production: false,
+    $default: true,
+  },
+  logScopes: {
+    $filter: "env",
+    production: false,
+    $default: false,
+  },
+
+  enablePolicies: {
+    $filter: "env",
+    production: true,
+    $default: true,
+  },
+  enablePayloadValidation: {
+    $filter: "env",
+    production: true,
+    $default: true,
+  },
+  enableQueryValidation: {
+    $filter: "env",
+    production: true,
+    $default: true,
   },
 
   enableSwagger: {
