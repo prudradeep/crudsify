@@ -53,20 +53,11 @@ Object.keys(db).forEach((modelName) => {
     db[modelName].associate(db);
   }
 
-  if (configStore.get("/authStrategy")) {
-    routeOptions(db[modelName]);
-    if (configStore.get("/generateRouteScopes")) {
-      routeScopes(db[modelName]);
-    } else {
-      db[modelName].routeScopes = {};
-    }
+  routeOptions(db[modelName]);
+  if (configStore.get("/generateRouteScopes")) {
+    routeScopes(db[modelName]);
   } else {
-    db[modelName].routeOptions = {};
-    if (configStore.get("/generateRouteScopes")) {
-      routeScopes(db[modelName]);
-    } else {
-      db[modelName].routeScopes = {};
-    }
+    db[modelName].routeScopes = {};
   }
 });
 

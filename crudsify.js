@@ -12,6 +12,7 @@ const PORT = configStore.get("/port");
 const Crudsify = express();
 Crudsify.plugins = {};
 const CrudsifyServer = http.createServer(Crudsify);
+Crudsify.disable('etag');
 Crudsify.use(cors(configStore.get("/cors")));
 Crudsify.use(express.json());
 

@@ -127,4 +127,4 @@ Logger.error = function (err) {
   }
 };
 
-module.exports = {Logger, AuditLogger};
+module.exports = { Logger, AuditLogger };

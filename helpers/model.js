@@ -1,6 +1,7 @@
 "use strict";
 
 const Sequelize = require("sequelize");
+const _ = require("lodash");
 const configStore = require("../config");
 const { ucfirst } = require("../utils");
 

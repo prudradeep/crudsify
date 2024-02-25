@@ -171,7 +171,7 @@ const Config = {
   auditLogStorage: {
     $filter: "env",
     production: constants.AUDIT_LOG_STORAGE.DB,
-    $default: constants.AUDIT_LOG_STORAGE.FILE,
+    $default: constants.AUDIT_LOG_STORAGE.DB,
   },
   /**
    * Specifies the TTL (time to live/lifetime/expiration) of auditLog documents. Accepts values in seconds unless specified
