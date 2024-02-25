@@ -4,7 +4,7 @@ const _ = require("lodash");
 const Joi = require("joi");
 const { getPathName, getScopes, getModelName } = require("../utils");
 const configStore = require("../config");
-const Log = require("../helpers/logger");
+const { Logger } = require("../helpers/logger");
 const { generateEndpoint } = require("./generate");
 const {
   deleteMiddleware,
@@ -33,7 +33,7 @@ exports.deleteOneEndpoint = function (DB, model) {
     scope = getScopes(model, "delete");
     if (!_.isEmpty(scope)) {
       if (configStore.get("/logScopes")) {
-        Log.debug(`Scope for DELETE/${routePath}/:id => ` + scope);
+        Logger.debug(`Scope for DELETE/${routePath}/:id => ` + scope);
       }
     }
   }
@@ -94,7 +94,7 @@ exports.deleteManyEndpoint = function (DB, model) {
     scope = getScopes(model, "delete");
     if (!_.isEmpty(scope)) {
       if (configStore.get("/logScopes")) {
-        Log.debug(`Scope for DELETE/${routePath} => ` + scope);
+        Logger.debug(`Scope for DELETE/${routePath} => ` + scope);
       }
     }
   }
@@ -180,7 +180,7 @@ exports.associationRemoveOneEndpoint = function (DB, ownerModel, association) {
     scope = scope.concat(getScopes(ownerModel, removeScope));
     if (!_.isEmpty(scope)) {
       if (configStore.get("/logScopes")) {
-        Log.debug(
+        Logger.debug(
           `Scope for DELETE/${ownerAlias}/:ownerId/${childAlias}/:childId => ` +
             scope
         );
@@ -265,7 +265,7 @@ exports.associationRemoveManyEndpoint = function (DB, ownerModel, association) {
     scope = scope.concat(getScopes(ownerModel, removeScope));
     if (!_.isEmpty(scope)) {
       if (configStore.get("/logScopes")) {
-        Log.debug(
+        Logger.debug(
           `Scope for DELETE/${ownerAlias}/:ownerId/${childAlias} => ` + scope
         );
       }

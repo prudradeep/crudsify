@@ -4,7 +4,7 @@ const _ = require("lodash");
 const Joi = require("joi");
 const { getPathName, getScopes, getModelName } = require("../utils");
 const configStore = require("../config");
-const Log = require("../helpers/logger");
+const { Logger } = require("../helpers/logger");
 const {
   generateJoiCreateModel,
   generateJoiUpdateModel,
@@ -39,7 +39,7 @@ exports.createEndpoint = function (DB, model) {
     scope = getScopes(model, "create");
     if (!_.isEmpty(scope)) {
       if (configStore.get("/logScopes")) {
-        Log.debug(`Scope for POST/${routePath} => ` + scope);
+        Logger.debug(`Scope for POST/${routePath} => ` + scope);
       }
     }
   }
@@ -99,7 +99,7 @@ exports.updateEndpoint = function (DB, model) {
     scope = getScopes(model, "update");
     if (!_.isEmpty(scope)) {
       if (configStore.get("/logScopes")) {
-        Log.debug(`Scope for PUT/${routePath}/:id => ` + scope);
+        Logger.debug(`Scope for PUT/${routePath}/:id => ` + scope);
       }
     }
   }
@@ -177,7 +177,7 @@ exports.associationAddManyEndpoint = function (DB, ownerModel, association) {
     scope = scope.concat(getScopes(ownerModel, addScope));
     if (!_.isEmpty(scope)) {
       if (configStore.get("/logScopes")) {
-        Log.debug(
+        Logger.debug(
           `Scope for POST/${ownerAlias}/:ownerId/${childAlias} => ` + scope
         );
       }
@@ -303,7 +303,7 @@ exports.associationAddOneEndpoint = function (DB, ownerModel, association) {
     scope = scope.concat(getScopes(ownerModel, addScope));
     if (!_.isEmpty(scope)) {
       if (configStore.get("/logScopes")) {
-        Log.debug(
+        Logger.debug(
           `Scope for PUT/${ownerAlias}/:ownerId/${childAlias}/:childId => ` +
             scope
         );

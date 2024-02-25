@@ -1,10 +1,12 @@
 "use strict";
 
-const { createLogger, format, transports } = require("winston");
+const { createLogger, format, transports, Container } = require("winston");
 require("winston-daily-rotate-file");
 const { combine, timestamp, label, colorize, printf, prettyPrint } = format;
 const configStore = require("../config");
 const logDir = configStore.get("/logDir");
+
+const winstonContainer = new Container();
 
 const myFormat =
   process.env.NODE_ENV !== "production"
@@ -14,7 +16,6 @@ const myFormat =
     : prettyPrint();
 
 const getTransports = (label_ = "") => {
-  const date = new Date().toJSON().split("T")[0];
   let Transports = [
     new transports.DailyRotateFile({
       dirname: `${logDir}/combined`,
@@ -35,24 +36,24 @@ const getTransports = (label_ = "") => {
       ),
     }),
     new transports.DailyRotateFile({
-        level:"error",
-        dirname: `${logDir}/error`,
-        filename: `error-%DATE%.log`,
-        datePattern: "YYYY-MM-DD",
-        zippedArchive: true,
-        maxSize: "20m",
-        maxFiles: "15d",
-        format: combine(
-          label({
-            label: label_,
-            message: false,
-          }),
-          timestamp({
-            format: "YY-MM-DD HH:MM:SS",
-          }),
-          myFormat
-        ),
-      }),
+      level: "error",
+      dirname: `${logDir}/error`,
+      filename: `error-%DATE%.log`,
+      datePattern: "YYYY-MM-DD",
+      zippedArchive: true,
+      maxSize: "20m",
+      maxFiles: "15d",
+      format: combine(
+        label({
+          label: label_,
+          message: false,
+        }),
+        timestamp({
+          format: "YY-MM-DD HH:MM:SS",
+        }),
+        myFormat
+      ),
+    }),
   ];
 
   if (process.env.NODE_ENV !== "production") {
@@ -79,14 +80,46 @@ const getTransports = (label_ = "") => {
   return Transports;
 };
 
-const logger = createLogger({
+winstonContainer.add("logger", {
   level: configStore.get("/logLevel"),
   defaultMeta: { service: configStore.get("/service") },
   transports: getTransports(),
 });
 
-const logger_error_old = logger.error;
-logger.error = function (err) {
+winstonContainer.add("audit", {
+  levels: {
+    audit: 0,
+  },
+  level: configStore.get("/logLevel"),
+  defaultMeta: { service: configStore.get("/service") },
+  transports: [
+    new transports.DailyRotateFile({
+      level: "audit",
+      dirname: `${logDir}/audit`,
+      filename: `audit-%DATE%.log`,
+      datePattern: "YYYY-MM-DD",
+      zippedArchive: true,
+      maxSize: "20m",
+      maxFiles: configStore.get("/auditLogTTL"),
+      format: combine(
+        label({
+          label: "",
+          message: false,
+        }),
+        timestamp({
+          format: "YY-MM-DD HH:MM:SS",
+        }),
+        myFormat
+      ),
+    }),
+  ],
+});
+
+const Logger = winstonContainer.get("logger");
+const AuditLogger = winstonContainer.get("audit");
+
+const logger_error_old = Logger.error;
+Logger.error = function (err) {
   if (err.message) {
     return logger_error_old.call(this, err.stack);
   } else {
@@ -94,4 +127,4 @@ logger.error = function (err) {
   }
 };
 
-module.exports = logger;
+module.exports = {Logger, AuditLogger};

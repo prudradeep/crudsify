@@ -1,12 +1,12 @@
 'use strict'
-const Log = require("../helpers/logger");
+const { Logger } = require("../helpers/logger");
 
 exports.sendResponse = ({ data, status, res, next, json }) => {
     if (!res)
         return next(new Error('Required res parameter missing in response helper.'))
 
     if(!next)
-        Log.error('Required next parameter missing in response helper.')
+        Logger.error('Required next parameter missing in response helper.')
 
     status = status ? status : 200
 

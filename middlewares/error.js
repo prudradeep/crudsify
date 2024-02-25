@@ -1,7 +1,7 @@
 "use strict";
 
 const Boom = require("@hapi/boom");
-const Log = require("../helpers/logger");
+const { Logger } = require("../helpers/logger");
 const isSequelizeError = (err) => {
   if (err.name && err.name.indexOf("Sequelize") >= 0) return true;
   return false;
@@ -51,16 +51,16 @@ const errorResponder = (err, req, res, next) => {
     message = [...new Set(message)];
     return sendResponse(Boom.preconditionRequired(message), res);
   } else if (err instanceof Error) {
-    Log.error(err);
+    Logger.error(err);
     return sendResponse(Boom.boomify(err, { statusCode: 400 }), res);
   } else {
-    Log.error(err);
+    Logger.error(err);
     return sendResponse(Boom.badImplementation(err.message), res);
   }
 };
 
 const handleNotFoundError = (req, res, next) => {
-  Log.error(`${req.path} URL not found error!`);
+  Logger.error(`${req.path} URL not found error!`);
   return sendResponse(Boom.notFound("URL not found"), res);
 };
 

@@ -4,7 +4,7 @@ const _ = require("lodash");
 const Joi = require("joi");
 const { getPathName, getScopes, getModelName } = require("../utils");
 const configStore = require("../config");
-const Log = require("../helpers/logger");
+const { Logger } = require("../helpers/logger");
 const {
   generateJoiListQueryModel,
   generateJoiFindQueryModel,
@@ -33,7 +33,7 @@ exports.listEndpoint = function (DB, model) {
     scope = getScopes(model, "read");
     if (!_.isEmpty(scope)) {
       if (configStore.get("/logScopes")) {
-        Log.debug(`Scope for GET/${routePath} => ` + scope);
+        Logger.debug(`Scope for GET/${routePath} => ` + scope);
       }
     }
   }
@@ -84,7 +84,7 @@ exports.findEndpoint = function (DB, model) {
     scope = getScopes(model, "read");
     if (!_.isEmpty(scope)) {
       if (configStore.get("/logScopes")) {
-        Log.debug(`Scope for GET/${routePath}/:id => ` + scope);
+        Logger.debug(`Scope for GET/${routePath}/:id => ` + scope);
       }
     }
   }
@@ -157,7 +157,7 @@ exports.associationGetAllEndpoint = function (DB, ownerModel, association) {
     scope = scope.concat(getScopes(ownerModel, getScope));
     if (!_.isEmpty(scope)) {
       if (configStore.get("/logScopes")) {
-        Log.debug(
+        Logger.debug(
           `Scope for GET/${ownerAlias}/:ownerId/${childAlias} => ` + scope
         );
       }

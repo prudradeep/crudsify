@@ -3,7 +3,7 @@
 const express = require("express");
 const Endpoints = express.Router();
 const _ = require("lodash");
-const Log = require("../helpers/logger");
+const { Logger } = require("../helpers/logger");
 const configStore = require("../config");
 const {
   validationMiddleware,
@@ -39,7 +39,7 @@ const generateEndpoint = ({
   afterMiddlewares,
   log,
 }) => {
-  if (configStore.get("/logRoutes")) Log.info(log);
+  if (configStore.get("/logRoutes")) Logger.info(log);
 
   middlewares = middlewares ? middlewares : [];
   validate = validate ? validate : {};
@@ -54,7 +54,7 @@ const generateEndpoint = ({
 
   if (isJsonFields) {
     if (model) middlewares.unshift(jsonFieldQuery(model));
-    else Log.error("Model is not defined");
+    else Logger.error("Model is not defined");
   }
 
   if (scope) {
