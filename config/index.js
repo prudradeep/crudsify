@@ -12,6 +12,10 @@ const constants = {
     SESSION: "jwt-with-session",
     REFRESH: "jwt-with-session-and-refresh-token",
   },
+  AUDIT_LOG_STORAGE: {
+    FILE: "file",
+    DB: "database",
+  },
 };
 
 /* The criteria to filter Config values by (NODE_ENV). Typically includes:
@@ -152,6 +156,34 @@ const Config = {
     $filter: "env",
     production: false,
     $default: false,
+  },
+
+  enableAuditLog: {
+    $filter: "env",
+    production: true,
+    $default: true,
+  },
+  /**
+   * Specifies audit log storage
+   * default: database
+   * available: database | file
+   */
+  auditLogStorage: {
+    $filter: "env",
+    production: constants.AUDIT_LOG_STORAGE.DB,
+    $default: constants.AUDIT_LOG_STORAGE.FILE,
+  },
+  /**
+   * Specifies the TTL (time to live/lifetime/expiration) of auditLog documents. Accepts values in seconds unless specified
+   * (Ex: 60 = 60 seconds, '1m' = 1 minute, or '1d' = 1 day)
+   * See: http://nicoll.io/mongottl/
+   * default: null (does not expire)
+   * @type {string}
+   */
+  auditLogTTL: {
+    $filter: "env",
+    production: "60d",
+    $default: "20d",
   },
 
   enablePolicies: {

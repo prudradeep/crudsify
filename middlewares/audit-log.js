@@ -274,7 +274,11 @@ exports.logApiMiddleware = (options = {}) => {
 
 exports.saveLogMiddleware = (req, res, next) => {
   try {
+    const logStorage = configStore.get("/constants/AUDIT_LOG_STORAGE");
     if (req.auditLog) {
+      if (configStore.get("/auditLogStorage") === logStorage.FILE) {
+      } else if (configStore.get("/auditLogStorage") === logStorage.DB) {
+      }
       console.log(req.auditLog);
       next();
     }
