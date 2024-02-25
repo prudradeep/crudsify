@@ -16,6 +16,16 @@ const constants = {
     FILE: "file",
     DB: "database",
   },
+  PERMISSION_STATES: {
+    INCLUDED: "Included",
+    EXCLUDED: "Excluded",
+    FORBIDDEN: "Forbidden",
+  },
+  USER_ROLES: {
+    USER: "User",
+    ADMIN: "Admin",
+    SUPER_ADMIN: "Super Admin",
+  },
 };
 
 /* The criteria to filter Config values by (NODE_ENV). Typically includes:
