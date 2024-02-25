@@ -9,7 +9,6 @@ const swaggerData = require("../config/swagger");
 const { basicAuthMiddleware } = require("../middlewares/auth");
 const { sortObjectByKeys } = require("../utils");
 
-
 const queryParam = (name, type, description, items = false) => {
   let param = {
     name,
@@ -183,7 +182,7 @@ const swaggerHelper = async ({
   swaggerData.paths = sortObjectByKeys(swaggerData.paths);
   swaggerRouter.use(basicAuthMiddleware);
   swaggerRouter.use(
-    "docs",
+    "/docs",
     swaggerUi.serve,
     swaggerUi.setup(swaggerData, configStore.get("/swaggerOptions"))
   );

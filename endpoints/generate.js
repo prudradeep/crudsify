@@ -1,14 +1,27 @@
 "use strict";
 
-const express = require('express')
-const Endpoints = express.Router()
+const express = require("express");
+const Endpoints = express.Router();
+const _ = require("lodash");
+const Log = require("../helpers/logger");
 const configStore = require("../config");
-const { validationMiddleware, jsonFieldQuery, headerValidationMiddleware } = require('../middlewares/validate');
-const { getScopeMiddleware } = require('../middlewares/scope');
-const { authMiddleware } = require('../middlewares/auth');
-const { createdByMiddleware, updatedByMiddleware, deletedByMiddleware } = require('../middlewares/add-meta-data');
-const { swaggerHelper } = require('../helpers/swagger');
-const { saveLogMiddleware, logApiMiddleware } = require('../middlewares/audit-log');
+const {
+  validationMiddleware,
+  jsonFieldQuery,
+  headerValidationMiddleware,
+} = require("../middlewares/validate");
+const { getScopeMiddleware } = require("../middlewares/scope");
+const { authMiddleware } = require("../middlewares/auth");
+const {
+  createdByMiddleware,
+  updatedByMiddleware,
+  deletedByMiddleware,
+} = require("../middlewares/add-meta-data");
+const { swaggerHelper } = require("../helpers/swagger");
+const {
+  saveLogMiddleware,
+  logApiMiddleware,
+} = require("../middlewares/audit-log");
 
 const generateEndpoint = ({
   method,
@@ -55,19 +68,21 @@ const generateEndpoint = ({
   afterMiddlewares = afterMiddlewares
     ? [...afterMiddlewares, saveLogMiddleware]
     : [logApiMiddleware(), saveLogMiddleware];
-    
 
   method = method.toLowerCase();
   if (auth) {
     switch (method) {
       case "put":
-        if (configStore.get("/enableUpdatedBy")) middlewares.push(updatedByMiddleware);
+        if (configStore.get("/enableUpdatedBy"))
+          middlewares.push(updatedByMiddleware);
         break;
       case "delete":
-        if (configStore.get("/enableDeletedBy")) middlewares.push(deletedByMiddleware);
+        if (configStore.get("/enableDeletedBy"))
+          middlewares.push(deletedByMiddleware);
         break;
       case "post":
-        if (configStore.get("/enableCreatedBy")) middlewares.push(createdByMiddleware);
+        if (configStore.get("/enableCreatedBy"))
+          middlewares.push(createdByMiddleware);
         break;
     }
   }
@@ -82,4 +97,4 @@ const generateEndpoint = ({
   }
 };
 
-module.exports = { generateEndpoint, Endpoints }
+module.exports = { generateEndpoint, Endpoints };

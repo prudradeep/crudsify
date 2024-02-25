@@ -1,5 +1,7 @@
 "use strict";
 
+const _ = require("lodash");
+const Joi = require("joi");
 const { getPathName, getScopes, getModelName } = require("../utils");
 const configStore = require("../config");
 const Log = require("../helpers/logger");
@@ -9,7 +11,11 @@ const {
   associationRemoveOneMiddleware,
   associationRemoveManyMiddleware,
 } = require("../middlewares/handler");
-const { logDeleteMiddleware, logRemoveMiddleware } = require("../middlewares/audit-log");
+const {
+  logDeleteMiddleware,
+  logRemoveMiddleware,
+} = require("../middlewares/audit-log");
+const authStrategy = configStore.get("/authStrategy");
 
 /**
  * Creates an endpoint for DELETE /RESOURCE/{_id}
@@ -210,7 +216,9 @@ exports.associationRemoveOneEndpoint = function (DB, ownerModel, association) {
       authStrategy,
     middlewares,
     handler,
-    afterMiddlewares: [logRemoveMiddleware(ownerModel, target, associationType)],
+    afterMiddlewares: [
+      logRemoveMiddleware(ownerModel, target, associationType),
+    ],
     log:
       "Generating removeOne association endpoint for " +
       getModelName(ownerModel) +
@@ -300,7 +308,9 @@ exports.associationRemoveManyEndpoint = function (DB, ownerModel, association) {
       authStrategy,
     middlewares,
     handler,
-    afterMiddlewares: [logRemoveMiddleware(ownerModel, target, associationType)],
+    afterMiddlewares: [
+      logRemoveMiddleware(ownerModel, target, associationType),
+    ],
     log:
       "Generating removeMany association endpoint for " +
       getModelName(ownerModel) +

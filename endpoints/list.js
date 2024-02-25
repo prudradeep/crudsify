@@ -1,5 +1,7 @@
 "use strict";
 
+const _ = require("lodash");
+const Joi = require("joi");
 const { getPathName, getScopes, getModelName } = require("../utils");
 const configStore = require("../config");
 const Log = require("../helpers/logger");
@@ -13,6 +15,7 @@ const {
   associationGetAllMiddleware,
 } = require("../middlewares/handler");
 const { generateEndpoint } = require("./generate");
+const authStrategy = configStore.get("/authStrategy");
 
 /**
  * Creates an endpoint for GET /RESOURCE.

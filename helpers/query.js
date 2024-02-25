@@ -4,6 +4,17 @@ const _ = require("lodash");
 const configStore = require("../config");
 const { Op, fn, col } = require("sequelize");
 
+const getFieldsType = function (model) {
+  const _fields = model.rawAttributes;
+  const fields = {};
+
+  for (const fieldName in _fields) {
+    const field = _fields[fieldName];
+    fields[fieldName] = field.type.key;
+  }
+  return fields;
+};
+
 module.exports = {
   /**
    * Handle pagination for the query if needed.
@@ -152,20 +163,11 @@ module.exports = {
     return queryableFields;
   },
 
-  getFieldsType: function (model) {
-    const _fields = model.rawAttributes;
-    const fields = {};
-
-    for (const fieldName in _fields) {
-      const field = _fields[fieldName];
-      fields[fieldName] = field.type.key;
-    }
-    return fields;
-  },
+  getFieldsType: getFieldsType,
 
   createWhereCondition: function (query, model) {
     let where = [];
-    const fields = this.getFieldsType(model);
+    const fields = getFieldsType(model);
     const regex = /Oper$/gm;
     let Oper = false;
 

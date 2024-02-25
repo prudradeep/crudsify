@@ -1,5 +1,7 @@
 "use strict";
 
+const _ = require("lodash");
+const Joi = require("joi");
 const { getPathName, getScopes, getModelName } = require("../utils");
 const configStore = require("../config");
 const Log = require("../helpers/logger");
@@ -14,7 +16,12 @@ const {
   associationAddOneMiddleware,
 } = require("../middlewares/handler");
 const { generateEndpoint } = require("./generate");
-const { logCreateMiddleware, logUpdateMiddleware, logAddMiddleware } = require("../middlewares/audit-log");
+const {
+  logCreateMiddleware,
+  logUpdateMiddleware,
+  logAddMiddleware,
+} = require("../middlewares/audit-log");
+const authStrategy = configStore.get("/authStrategy");
 
 /**
  * Creates an endpoint for POST /RESOURCE

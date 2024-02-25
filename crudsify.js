@@ -19,7 +19,9 @@ const start = async () => {
   try {
     await sequelize.authenticate();
     require('./helpers/route')
+    const { Endpoints } = require("./endpoints/generate");
     const { swaggerRouter } = require("./helpers/swagger");
+    Crudsify.use('/', Endpoints)
     if (configStore.get("/enableSwagger")) Crudsify.use("/", swaggerRouter);
     Crudsify.use(errorResponder);
     Crudsify.use(handleNotFoundError);
@@ -27,8 +29,7 @@ const start = async () => {
       Log.info(`Crudsify Server listening on port ${PORT}`);
     });
   } catch (err) {
-    Log.error(`Something went wrong:`);
-    console.log(error);
+    Log.error(err);
     process.exit();
   }
 };

@@ -57,6 +57,15 @@ Object.keys(db).forEach((modelName) => {
     routeOptions(db[modelName]);
     if (configStore.get("/generateRouteScopes")) {
       routeScopes(db[modelName]);
+    } else {
+      db[modelName].routeScopes = {};
+    }
+  } else {
+    db[modelName].routeOptions = {};
+    if (configStore.get("/generateRouteScopes")) {
+      routeScopes(db[modelName]);
+    } else {
+      db[modelName].routeScopes = {};
     }
   }
 });
