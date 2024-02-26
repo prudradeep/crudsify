@@ -2,7 +2,7 @@
 
 const { Boom } = require("@hapi/boom");
 
-exports.tokenStrategy = async function (decoded) {
+exports.tokenStrategy = async function (decoded, next) {
   try {
     const { user, scope } = decoded;
     return {

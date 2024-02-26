@@ -33,6 +33,22 @@ module.exports = {
       req.ip
     );
   },
+  getUserSession: async (sessionId, sessionKey) => {
+    try {
+      const { user: User, session: Session, role } = require("../models");
+      const session = await Session.findByCredentials(sessionId, sessionKey);
+      if(!session){
+        return {user: null, session};
+      }
+      const user = await User.unscoped().findByPk(
+        session[`user${this.ucfirst(configStore.get("/dbPrimaryKey"))}`],
+        { include: { model: role } }
+      );
+      return { user, session };
+    } catch (err) {
+      throw err;
+    }
+  },
   generateToken: (data, expirationPeriod) => {
     try {
       const jwtConfig = configStore.get("/jwt");

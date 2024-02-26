@@ -1,29 +1,30 @@
 "use strict";
 
-exports.sessionStrategy = async function (decoded, res) {
-  /* const { sessionId, sessionKey, passwordHash, scope } = decoded;
-  const { user: User, session: Session, role } = require("../models");
-  let session = {};
+const configStore = require("../config");
+const { generateToken, getUserSession } = require("../utils");
+
+exports.sessionStrategy = async function (decoded, res, next) {
   try {
-    session = await Session.findByCredentials(sessionId, sessionKey);
-    if (!session) {
+    const { sessionId, sessionKey, passwordHash, scope } = decoded;
+    const {user, session } = await getUserSession(sessionId, sessionKey);
+    if (!session || !user || user.password !== passwordHash) {
       return { isValid: false };
     }
-    let user = await User.unscoped().findByPk(
-      session[`user${ucfirst(Config.get("/dbPrimaryKey"))}`],
-      { include: { model: role } }
-    );
-    if (!user) {
-      return { isValid: false };
-    }
-    if (user.password !== passwordHash) {
-      return { isValid: false };
-    }
-    if (res)
+    if (res) {
+      const data = {
+        sessionId: session[configStore.get("/dbPrimaryKey")],
+        sessionKey: session.key,
+        passwordHash: session.passwordHash,
+        scope: scope,
+      };
       res.set(
         "X-Access-Token",
-        Token(null, session, scope, EXPIRATION_PERIOD.LONG)
+        generateToken(
+          data,
+          configStore.get("/constants/EXPIRATION_PERIOD").LONG
+        )
       );
+    }
     return {
       isValid: true,
       credentials: {
@@ -34,5 +35,5 @@ exports.sessionStrategy = async function (decoded, res) {
     };
   } catch (err) {
     next(err);
-  } */
+  }
 };

@@ -18,7 +18,20 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
     }
+
+    static async findByCredentials(id, key) {
+      try {
+        let session = await this.findByPk(id);
+        if (!session) {
+          return false;
+        }
+        return session.key === key ? session : false;
+      } catch (err) {
+        throw err;
+      }
+    }
   }
+  
   session.init(
     {
       ..._.cloneDeep(getPrimaryKey(DataTypes)),
@@ -54,8 +67,8 @@ module.exports = (sequelize, DataTypes) => {
     allowRead: false,
     allowCreate: false,
     allowUpdate: false,
-    allowDelete: false
-  }
+    allowDelete: false,
+  };
 
   return session;
 };

@@ -35,13 +35,13 @@ exports.authMiddleware = async (req, res, next) => {
     const AUTH_STRATEGIES = configStore.get("/constants/AUTH_STRATEGIES");
     switch (authStrategy) {
       case AUTH_STRATEGIES.TOKEN:
-        validate = await tokenStrategy(decoded);
+        validate = await tokenStrategy(decoded, next);
         break;
       case AUTH_STRATEGIES.SESSION:
-        validate = await sessionStrategy(decoded, res);
+        validate = await sessionStrategy(decoded, res, next);
         break;
       case AUTH_STRATEGIES.REFRESH:
-        validate = await refreshStrategy(decoded, res);
+        validate = await refreshStrategy(decoded, res, next);
         break;
       default:
         break;

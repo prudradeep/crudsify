@@ -26,6 +26,11 @@ const constants = {
     ADMIN: "Admin",
     SUPER_ADMIN: "Super Admin",
   },
+  EXPIRATION_PERIOD: {
+    SHORT: '10m',
+    MEDIUM: '4h',
+    LONG: '24h'
+},
 };
 
 /* The criteria to filter Config values by (NODE_ENV). Typically includes:
