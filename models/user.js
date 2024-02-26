@@ -8,6 +8,9 @@ const {
   getMetadata,
 } = require("../helpers/model");
 const { ucfirst } = require("../utils");
+const { rankAuth, promoteAuth } = require("../policies/role-auth");
+const { permissionAuth } = require("../policies/permission-auth");
+const { groupAuth } = require("../policies/group-auth");
 module.exports = (sequelize, DataTypes) => {
   class user extends Model {
     /**
@@ -77,5 +80,19 @@ module.exports = (sequelize, DataTypes) => {
       },
     }
   );
+
+  user.policies = {
+    update: [
+      rankAuth(sequelize, configStore.get("/dbPrimaryKey")),
+      promoteAuth(sequelize),
+    ],
+    delete: [rankAuth(sequelize, configStore.get("/dbPrimaryKey"))],
+    associate: [
+      rankAuth(sequelize, "ownerId"),
+      permissionAuth(sequelize, false),
+      groupAuth(sequelize, false),
+    ],
+  };
+
   return user;
 };

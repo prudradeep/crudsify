@@ -6,6 +6,9 @@ const {
   getTimestamps,
   getMetadata,
 } = require("../helpers/model");
+const { rankAuth } = require("../policies/role-auth");
+const { permissionAuth } = require("../policies/permission-auth");
+const { groupAuth } = require("../policies/group-auth");
 module.exports = (sequelize, DataTypes) => {
   class group extends Model {
     /**
@@ -38,5 +41,14 @@ module.exports = (sequelize, DataTypes) => {
       modelName: "group",
     }
   );
+
+  group.policies = {
+    associate: [
+      rankAuth(sequelize, "child"),
+      permissionAuth(sequelize, false),
+      groupAuth(sequelize, true),
+    ],
+  };
+
   return group;
 };

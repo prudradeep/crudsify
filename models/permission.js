@@ -7,6 +7,8 @@ const {
   getMetadata,
 } = require("../helpers/model");
 const configStore = require("../config");
+const { rankAuth } = require("../policies/role-auth");
+const { permissionAuth } = require("../policies/permission-auth");
 const USER_ROLES = configStore.get("/constants/USER_ROLES");
 module.exports = (sequelize, DataTypes) => {
   class permission extends Model {
@@ -51,5 +53,10 @@ module.exports = (sequelize, DataTypes) => {
       modelName: "permission",
     }
   );
+
+  permission.policies = {
+    associate: [rankAuth(sequelize, "child"), permissionAuth(sequelize, true)],
+  };
+
   return permission;
 };
