@@ -38,6 +38,7 @@
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
     "mysql2": "^3.9.1",
+    "password-generator": "^2.3.2",
     "sequelize": "^6.37.1",
     "swagger-ui-express": "^5.0.0",
     "uuid": "^9.0.1",

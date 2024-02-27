@@ -27,10 +27,15 @@ const constants = {
     SUPER_ADMIN: "Super Admin",
   },
   EXPIRATION_PERIOD: {
-    SHORT: '10m',
-    MEDIUM: '4h',
-    LONG: '24h'
-},
+    SHORT: "10m",
+    MEDIUM: "4h",
+    LONG: "24h",
+  },
+  LOCKOUT_PERIOD: 30, //In minutes
+  AUTH_ATTEMPTS: {
+    FOR_IP: 50,
+    FOR_IP_AND_USER: 5,
+  },
 };
 
 /* The criteria to filter Config values by (NODE_ENV). Typically includes:

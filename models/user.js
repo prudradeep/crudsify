@@ -1,13 +1,15 @@
 "use strict";
-const { Model } = require("sequelize");
+const { Model, Op } = require("sequelize");
 const _ = require("lodash");
+const Bcrypt = require("bcryptjs");
+const GeneratePassword = require("password-generator");
 const configStore = require("../config");
 const {
   getPrimaryKey,
   getTimestamps,
   getMetadata,
 } = require("../helpers/model");
-const { ucfirst } = require("../utils");
+const { ucfirst, generateHash } = require("../utils");
 const { rankAuth, promoteAuth } = require("../policies/role-auth");
 const { permissionAuth } = require("../policies/permission-auth");
 const { groupAuth } = require("../policies/group-auth");
@@ -23,6 +25,44 @@ module.exports = (sequelize, DataTypes) => {
       this.belongsTo(models.role);
       this.belongsToMany(models.permission, { through: "users_permissions" });
       this.belongsToMany(models.group, { through: "users_groups" });
+    }
+
+    static async findByCredentials(mobile_email, password) {
+      try {
+        const query = {
+          where: {
+            [Op.or]: [
+              {
+                mobile: mobile_email,
+              },
+              {
+                email: mobile_email,
+              },
+            ],
+          },
+          include: [
+            { model: sequelize.models.role },
+            { model: sequelize.models.city },
+          ],
+        };
+
+        let user = await this.unscoped().findOne(query);
+
+        if (!user) {
+          return false;
+        }
+
+        const source = user.password;
+
+        let passwordMatch = await Bcrypt.compare(password, source);
+        if (passwordMatch) {
+          return user;
+        } else {
+          return false;
+        }
+      } catch (err) {
+        throw err;
+      }
     }
   }
   user.init(
@@ -80,6 +120,26 @@ module.exports = (sequelize, DataTypes) => {
       },
     }
   );
+
+  user.beforeCreate((request, options) => {
+    try {
+      if (!request.password) request.password = GeneratePassword(10, false);
+      request.password = generateHash(request.password).hash;
+    } catch (err) {
+      throw err;
+    }
+  });
+
+  user.beforeBulkCreate((requests, options) => {
+    requests.forEach((request) => {
+      try {
+        if (!request.password) request.password = GeneratePassword(10, false);
+        request.password = generateHash(request.password).hash;
+      } catch (err) {
+        throw err;
+      }
+    });
+  });
 
   user.policies = {
     update: [

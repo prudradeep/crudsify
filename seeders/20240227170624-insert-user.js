@@ -3,6 +3,8 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
+    const { faker } = require("@faker-js/faker");
+    const ObjectID = require("bson-objectid");
     const { ucfirst } = require("../utils");
     const configStore = require("../config");
     const { role, user } = require("../models");

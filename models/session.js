@@ -1,6 +1,7 @@
 "use strict";
 const { Model } = require("sequelize");
 const _ = require("lodash");
+const { v4: uuidv4 } = require("uuid");
 const configStore = require("../config");
 const {
   getPrimaryKey,
@@ -30,8 +31,37 @@ module.exports = (sequelize, DataTypes) => {
         throw err;
       }
     }
+
+    static async createInstance(user) {
+      try {
+        const document = {
+          [`user${ucfirst(configStore.get("/dbPrimaryKey").name)}`]:
+            user[configStore.get("/dbPrimaryKey").name],
+          key: uuidv4(),
+          passwordHash: user.password,
+        };
+
+        let newSession = await this.create(document);
+
+        /**
+         * Allow only one login at a time.
+         */
+        const query = {
+          where: {
+            [`user${ucfirst(configStore.get("/dbPrimaryKey").name)}`]:
+              user[configStore.get("/dbPrimaryKey").name],
+            key: { [Op.ne]: document.key },
+          },
+        };
+        await this.destroy(query);
+
+        return newSession;
+      } catch (err) {
+        throw err;
+      }
+    }
   }
-  
+
   session.init(
     {
       ..._.cloneDeep(getPrimaryKey(DataTypes)),
