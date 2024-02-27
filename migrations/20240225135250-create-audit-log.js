@@ -39,16 +39,16 @@ module.exports = {
         ),
       },
       documents: {
-        type: Sequelize.TEXT("long"),
+        type: Sequelize.JSON,
       },
       payload: {
-        type: Sequelize.TEXT("long"),
+        type: Sequelize.JSON,
       },
       params: {
-        type: Sequelize.TEXT("long"),
+        type: Sequelize.JSON,
       },
       result: {
-        type: Sequelize.TEXT("long"),
+        type: Sequelize.JSON,
       },
       statusCode: {
         type: Sequelize.INTEGER,

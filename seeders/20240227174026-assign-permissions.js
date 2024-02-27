@@ -23,18 +23,18 @@ module.exports = {
     ) {
       return {
         state: PERMISSION_STATES.INCLUDED,
-        [`permission${ucfirst(configStore.get("/dbPrimaryKey").name)}`]: permissions.find(
-          function (p) {
+        [`permission${ucfirst(configStore.get("/dbPrimaryKey").name)}`]:
+          permissions.find(function (p) {
             return p.name === permissionName;
-          }
-        )[configStore.get("/dbPrimaryKey").name],
+          })[configStore.get("/dbPrimaryKey").name],
         [`role${ucfirst(configStore.get("/dbPrimaryKey").name)}`]:
           roles[2][configStore.get("/dbPrimaryKey").name],
       };
     });
-    await queryInterface.bulkInsert("roles_permissions", userPermissions, {
-      ignoreDuplicates: true,
-    });
+    if (userPermissions.length >= 1)
+      await queryInterface.bulkInsert("roles_permissions", userPermissions, {
+        ignoreDuplicates: true,
+      });
 
     // Admins have access to any permission they can assign.
     const adminPermissions = permissions

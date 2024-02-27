@@ -37,10 +37,10 @@ exports.logCreateMiddleware = (model) => {
         collectionName: model.name,
         childCollectionName: null,
         associationType: null,
-        documents: documents || null,
-        payload: _.isEmpty(req.body) ? null : JSON.stringify(req.body),
-        params: _.isEmpty(req.params) ? null : JSON.stringify(req.params),
-        result: res.data || null,
+        documents: documents || [],
+        payload: _.isEmpty(req.body) ? [] : req.body,
+        params: _.isEmpty(req.params) ? [] : req.params,
+        result: res.data || [],
         isError: _.isError(req.res),
         statusCode: res.statusCode || null,
         responseMessage: res.statusMessage || null,
@@ -76,8 +76,8 @@ exports.logUpdateMiddleware = (model) => {
         childCollectionName: null,
         associationType: null,
         documents: documents || null,
-        payload: _.isEmpty(req.body) ? null : JSON.stringify(req.body),
-        params: _.isEmpty(req.params) ? null : JSON.stringify(req.params),
+        payload: _.isEmpty(req.body) ? null : req.body,
+        params: _.isEmpty(req.params) ? null : req.params,
         result: res.data || null,
         isError: _.isError(req.res),
         statusCode: res.statusCode || null,
@@ -115,8 +115,8 @@ exports.logDeleteMiddleware = (model) => {
         childCollectionName: null,
         associationType: null,
         documents: documents || null,
-        payload: _.isEmpty(req.body) ? null : JSON.stringify(req.body),
-        params: _.isEmpty(req.params) ? null : JSON.stringify(req.params),
+        payload: _.isEmpty(req.body) ? null : req.body,
+        params: _.isEmpty(req.params) ? null : req.params,
         result: res.data || null,
         isError: _.isError(req.res),
         statusCode: res.statusCode || null,
@@ -166,8 +166,8 @@ exports.logAddMiddleware = (ownerModel, childModel, associationType) => {
         childCollectionName: childModel.name,
         associationType: associationType,
         documents: documents || null,
-        payload: _.isEmpty(req.body) ? null : JSON.stringify(req.body),
-        params: _.isEmpty(req.params) ? null : JSON.stringify(req.params),
+        payload: _.isEmpty(req.body) ? null : req.body,
+        params: _.isEmpty(req.params) ? null : req.params,
         result: res.data || null,
         isError: _.isError(req.res),
         statusCode: res.statusCode || null,
@@ -211,8 +211,8 @@ exports.logRemoveMiddleware = (ownerModel, childModel, associationType) => {
         childCollectionName: childModel.name,
         associationType: associationType,
         documents: documents || null,
-        payload: _.isEmpty(req.body) ? null : JSON.stringify(req.body),
-        params: _.isEmpty(req.params) ? null : JSON.stringify(req.params),
+        payload: _.isEmpty(req.body) ? null : req.body,
+        params: _.isEmpty(req.params) ? null : req.params,
         result: res.data || null,
         isError: _.isError(req.res),
         statusCode: res.statusCode || null,
@@ -258,8 +258,8 @@ exports.logApiMiddleware = (options = {}) => {
         childCollectionName: options.child ? options.child.name : null,
         associationType: options.associationType || null,
         documents: options.documents || null,
-        payload: _.isEmpty(payload) ? null : JSON.stringify(payload),
-        params: _.isEmpty(req.params) ? null : JSON.stringify(req.params),
+        payload: _.isEmpty(payload) ? null : payload,
+        params: _.isEmpty(req.params) ? null : req.params,
         result: res.data || null,
         isError: _.isError(req.res),
         statusCode: res.statusCode || null,
@@ -281,6 +281,22 @@ exports.saveLogMiddleware = (req, res, next) => {
       if (configStore.get("/auditLogStorage") === logStorage.FILE) {
         AuditLogger.log("audit", JSON.stringify(req.auditLog));
       } else if (configStore.get("/auditLogStorage") === logStorage.DB) {
+        if (req.auditLog.documents)
+          req.auditLog.documents = JSON.stringify(req.auditLog.documents);
+        else req.auditLog.documents = JSON.stringify([]);
+
+        if (req.auditLog.payload)
+          req.auditLog.payload = JSON.stringify(req.auditLog.payload);
+        else req.auditLog.payload = JSON.stringify([]);
+
+        if (req.auditLog.params)
+          req.auditLog.params = JSON.stringify(req.auditLog.params);
+        else req.auditLog.params = JSON.stringify([]);
+
+        if (req.auditLog.result)
+          req.auditLog.result = JSON.stringify(req.auditLog.result);
+        else req.auditLog.result = JSON.stringify([]);
+
         auditLog.create(req.auditLog);
       }
     }
