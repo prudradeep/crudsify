@@ -249,6 +249,34 @@ const Config = {
       customSiteTitle: constants.WEB_TITLE,
     },
   },
+
+  /**
+   * Flag signifying whether the absolute path to the apis directory is provided
+   * default: false
+   * @type {boolean}
+   */
+  absoluteApiPath: false,
+
+  /**
+   * Path to the apis directory
+   * default: 'apis'
+   * @type {string}
+   */
+  apiPath: "apis",
+
+  /**
+   * Flag signifying whether the absolute path to the plugins directory is provided
+   * default: false
+   * @type {boolean}
+   */
+  absolutePluginPath: false,
+
+  /**
+   * Path to the plugins directory
+   * default: 'plugins'
+   * @type {string}
+   */
+  pluginPath: "plugins",
 };
 
 const configStore = new Confidence.Store(Config);

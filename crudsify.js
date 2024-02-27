@@ -12,14 +12,16 @@ const PORT = configStore.get("/port");
 const Crudsify = express();
 Crudsify.plugins = {};
 const CrudsifyServer = http.createServer(Crudsify);
-Crudsify.disable('etag');
+Crudsify.disable("etag");
 Crudsify.use(cors(configStore.get("/cors")));
 Crudsify.use(express.json());
 
 const start = async () => {
   try {
     await sequelize.authenticate();
+    require("./helpers/plugins")(CrudsifyServer, Crudsify);
     require("./helpers/route");
+    require("./helpers/api");
     const { Endpoints } = require("./endpoints/generate");
     const { swaggerRouter } = require("./helpers/swagger");
     Crudsify.use("/", Endpoints);
