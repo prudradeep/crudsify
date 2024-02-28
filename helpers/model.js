@@ -182,7 +182,8 @@ exports.routeOptions = (model) => {
     allowRead: true, //Omits GET /path and GET /path/{_id} endpoints
     allowCreate: true, //Omits POST /path endpoint
     allowUpdate: true, //Omits PUT /path/{_id} endpoint
-    allowDelete: true, //Omits DELETE /path and DELETE /path/{_id} endpoints
+    allowDelete: true, //Omits DELETE /path/{_id} endpoints
+    allowDeleteMany: true //Omits DELETE /path endpoints
   };
 
   for (const assoc of Object.values(model.associations)) {
@@ -194,7 +195,8 @@ exports.routeOptions = (model) => {
         readAuth: true, //GET /owner/{ownerId}/child endpoint
 
         allowAdd: true, //omits POST /owner/{ownerId}/child and PUT /owner/{ownerId}/child/{childId} endpoints
-        allowRemove: true, //omits DELETE /owner/{ownerId}/child and DELETE /owner/{ownerId}/child/{childId} endpoints
+        allowRemove: true, //omits DELETE /owner/{ownerId}/child/{childId} endpoints
+        allowRemoveMany: true, //omits DELETE /owner/{ownerId}/child endpoints
         allowRead: true, //omits GET /owner/{ownerId}/child endpoint
       };
     }

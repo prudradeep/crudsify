@@ -54,6 +54,7 @@ module.exports = (sequelize, DataTypes) => {
   auditLog.routeOptions = {
     allowCreate: false,
     allowDelete: false,
+    allowDeleteMany: false,
     allowUpdate: false,
   };
 

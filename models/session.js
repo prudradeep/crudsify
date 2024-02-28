@@ -98,6 +98,7 @@ module.exports = (sequelize, DataTypes) => {
     allowCreate: false,
     allowUpdate: false,
     allowDelete: false,
+    allowDeleteMany: false
   };
 
   return session;
