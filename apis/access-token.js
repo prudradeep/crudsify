@@ -1,6 +1,6 @@
 "use strict";
 
-const { Boom } = require("@hapi/boom");
+const Boom = require("@hapi/boom");
 const { generateEndpoint } = require("../endpoints/generate");
 const { sendResponse } = require("../helpers/sendResponse");
 
@@ -9,12 +9,12 @@ generateEndpoint({
   path: `/access-token`,
   summary: `Get new access token.`,
   tags: ["access-token"],
-  auth: true,
+  auth: false,
   handler: (req, res, next) => {
-    const credentials = req.auth.credentials || { session: null };
+    const credentials = (req.auth && req.auth.credentials) || { session: null };
     const session = credentials.session;
     if (session) {
-        sendResponse({
+      sendResponse({
         data: { message: "Success." },
         status: 200,
         res,

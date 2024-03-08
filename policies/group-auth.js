@@ -1,6 +1,6 @@
 "use strict";
 
-const { Boom } = require("@hapi/boom");
+const Boom = require("@hapi/boom");
 
 const checkCanAssign = async (groupId, userScope, sequelize) => {
   try {

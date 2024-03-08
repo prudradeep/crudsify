@@ -1,6 +1,6 @@
 "use strict";
 
-const { Boom } = require("@hapi/boom");
+const Boom = require("@hapi/boom");
 const { handleError } = require("./error");
 const { ucfirst } = require("../utils");
 const configStore = require("../config");

@@ -1,6 +1,6 @@
 "use strict";
 
-const { Boom } = require("@hapi/boom");
+const Boom = require("@hapi/boom");
 
 exports.tokenStrategy = async function (decoded, next) {
   try {

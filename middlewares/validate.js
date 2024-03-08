@@ -1,6 +1,6 @@
 "use strict";
 
-const { Boom } = require("@hapi/boom");
+const Boom = require("@hapi/boom");
 const { getFieldsType } = require("../helpers/query");
 const { headersValidation } = require("../helpers/joi");
 
