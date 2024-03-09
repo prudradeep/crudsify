@@ -11,7 +11,6 @@ module.exports = {
       getPrimaryKey,
       getTimestamps,
       getMetadata,
-      getRecordScopes,
     } = require("../helpers/model");
     await queryInterface.createTable("authAttempts", {
       ...getPrimaryKey(Sequelize),
@@ -34,7 +33,6 @@ module.exports = {
         allowNull: false,
         defaultValue: Sequelize.NOW,
       },
-      ...getRecordScopes(Sequelize),
       ...getTimestamps(Sequelize),
       ...getMetadata(Sequelize),
     });

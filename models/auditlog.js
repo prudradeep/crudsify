@@ -6,7 +6,6 @@ const {
   getPrimaryKey,
   getTimestamps,
   getMetadata,
-  getRecordScopes,
 } = require("../helpers/model");
 module.exports = (sequelize, DataTypes) => {
   class auditLog extends Model {
@@ -43,7 +42,6 @@ module.exports = (sequelize, DataTypes) => {
       isError: DataTypes.BOOLEAN,
       ipAddress: DataTypes.STRING,
       notes: DataTypes.STRING,
-      ..._.cloneDeep(getRecordScopes(DataTypes)),
       ..._.cloneDeep(getTimestamps(DataTypes)),
       ..._.cloneDeep(getMetadata(DataTypes)),
     },

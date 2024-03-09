@@ -6,7 +6,6 @@ const {
   getPrimaryKey,
   getTimestamps,
   getMetadata,
-  getRecordScopes,
 } = require("../helpers/model");
 const { ucfirst } = require("../utils");
 module.exports = (sequelize, DataTypes) => {
@@ -84,7 +83,6 @@ module.exports = (sequelize, DataTypes) => {
       },
       ip: DataTypes.STRING,
       time: DataTypes.DATE,
-      ..._.cloneDeep(getRecordScopes(DataTypes)),
       ..._.cloneDeep(getTimestamps(DataTypes)),
       ..._.cloneDeep(getMetadata(DataTypes)),
     },

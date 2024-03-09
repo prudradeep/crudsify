@@ -8,7 +8,6 @@ module.exports = {
       getPrimaryKey,
       getTimestamps,
       getMetadata,
-      getRecordScopes,
     } = require("../helpers/model");
     await queryInterface.createTable("sessions", {
       ...getPrimaryKey(Sequelize),
@@ -30,7 +29,6 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      ...getRecordScopes(Sequelize),
       ...getTimestamps(Sequelize),
       ...getMetadata(Sequelize),
     });
