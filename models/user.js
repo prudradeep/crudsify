@@ -142,16 +142,18 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   user.policies = {
-    update: [
-      rankAuth(sequelize, configStore.get("/dbPrimaryKey")),
-      promoteAuth(sequelize),
-    ],
-    delete: [rankAuth(sequelize, configStore.get("/dbPrimaryKey"))],
-    associate: [
-      rankAuth(sequelize, "ownerId"),
-      permissionAuth(sequelize, false),
-      groupAuth(sequelize, false),
-    ],
+    pre: {
+      update: [
+        rankAuth(sequelize, configStore.get("/dbPrimaryKey")),
+        promoteAuth(sequelize),
+      ],
+      delete: [rankAuth(sequelize, configStore.get("/dbPrimaryKey"))],
+      associate: [
+        rankAuth(sequelize, "ownerId"),
+        permissionAuth(sequelize, false),
+        groupAuth(sequelize, false),
+      ],
+    },
   };
 
   return user;

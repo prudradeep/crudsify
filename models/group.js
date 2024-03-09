@@ -43,11 +43,13 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   group.policies = {
-    associate: [
-      rankAuth(sequelize, "child"),
-      permissionAuth(sequelize, false),
-      groupAuth(sequelize, true),
-    ],
+    pre: {
+      associate: [
+        rankAuth(sequelize, "child"),
+        permissionAuth(sequelize, false),
+        groupAuth(sequelize, true),
+      ],
+    },
   };
 
   return group;

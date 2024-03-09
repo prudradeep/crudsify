@@ -40,15 +40,29 @@ exports.listEndpoint = function (DB, model) {
 
   const queryModel = generateJoiListQueryModel(model);
 
-  let policies = [];
-
-  if (model.policies && configStore.get("/enablePolicies")) {
-    policies = model.policies;
-    policies = (policies.root || []).concat(policies.read || []);
+  let prePolicies = [];
+  if (
+    model.policies &&
+    model.policies.pre &&
+    configStore.get("/enablePolicies")
+  ) {
+    prePolicies = model.policies.pre;
+    prePolicies = (prePolicies.root || []).concat(prePolicies.read || []);
   }
-  policies.forEach((val) => middlewares.push(val));
+  prePolicies.forEach((val) => middlewares.push(val));
 
   const handler = listMiddleware(DB, model);
+
+  let postPolicies = [];
+  if (
+    model.policies &&
+    model.policies.post &&
+    configStore.get("/enablePolicies")
+  ) {
+    postPolicies = model.policies.post;
+    postPolicies = (postPolicies.root || []).concat(postPolicies.read || []);
+  }
+  postPolicies.forEach((val) => middlewares.push(val));
 
   generateEndpoint({
     method: "get",
@@ -90,15 +104,29 @@ exports.findEndpoint = function (DB, model) {
   }
   const queryModel = generateJoiFindQueryModel(model);
 
-  let policies = [];
-
-  if (model.policies && configStore.get("/enablePolicies")) {
-    policies = model.policies;
-    policies = (policies.root || []).concat(policies.read || []);
+  let prePolicies = [];
+  if (
+    model.policies &&
+    model.policies.pre &&
+    configStore.get("/enablePolicies")
+  ) {
+    prePolicies = model.policies.pre;
+    prePolicies = (prePolicies.root || []).concat(prePolicies.read || []);
   }
-  policies.forEach((val) => middlewares.push(val));
+  prePolicies.forEach((val) => middlewares.push(val));
 
   const handler = findMiddleware(DB, model);
+
+  let postPolicies = [];
+  if (
+    model.policies &&
+    model.policies.post &&
+    configStore.get("/enablePolicies")
+  ) {
+    postPolicies = model.policies.post;
+    postPolicies = (postPolicies.root || []).concat(postPolicies.read || []);
+  }
+  postPolicies.forEach((val) => middlewares.push(val));
 
   generateEndpoint({
     method: "get",
@@ -165,15 +193,29 @@ exports.associationGetAllEndpoint = function (DB, ownerModel, association) {
   }
   const queryModel = generateJoiListQueryModel(target);
 
-  let policies = [];
-
-  if (ownerModel.policies && configStore.get("/enablePolicies")) {
-    policies = ownerModel.policies;
-    policies = (policies.root || []).concat(policies.read || []);
+  let prePolicies = [];
+  if (
+    ownerModel.policies &&
+    ownerModel.policies.pre &&
+    configStore.get("/enablePolicies")
+  ) {
+    prePolicies = ownerModel.policies.pre;
+    prePolicies = (prePolicies.root || []).concat(prePolicies.read || []);
   }
-  policies.forEach((val) => middlewares.push(val));
+  prePolicies.forEach((val) => middlewares.push(val));
 
   const handler = associationGetAllMiddleware(DB, ownerModel, association);
+
+  let postPolicies = [];
+  if (
+    ownerModel.policies &&
+    ownerModel.policies.post &&
+    configStore.get("/enablePolicies")
+  ) {
+    postPolicies = ownerModel.policies.post;
+    postPolicies = (postPolicies.root || []).concat(postPolicies.read || []);
+  }
+  postPolicies.forEach((val) => middlewares.push(val));
 
   generateEndpoint({
     method: "get",

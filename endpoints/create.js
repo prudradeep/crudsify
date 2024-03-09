@@ -56,15 +56,33 @@ exports.createEndpoint = function (DB, model) {
     createModel
   );
 
-  let policies = [];
-
-  if (model.policies && configStore.get("/enablePolicies")) {
-    policies = model.policies;
-    policies = (policies.root || []).concat(policies.create || []);
+  let prePolicies = [];
+  if (
+    model.policies &&
+    model.policies.pre &&
+    configStore.get("/enablePolicies")
+  ) {
+    prePolicies = model.policies.pre;
+    prePolicies = (prePolicies.root || []).concat(
+      prePolicies.create || []
+    );
   }
-  policies.forEach((val) => middlewares.push(val));
+  prePolicies.forEach((val) => middlewares.push(val));
 
   const handler = createMiddleware(DB, model);
+
+  let postPolicies = [];
+  if (
+    model.policies &&
+    model.policies.post &&
+    configStore.get("/enablePolicies")
+  ) {
+    postPolicies = model.policies.post;
+    postPolicies = (postPolicies.root || []).concat(
+      postPolicies.create || []
+    );
+  }
+  postPolicies.forEach((val) => middlewares.push(val));
 
   generateEndpoint({
     method: "post",
@@ -109,15 +127,33 @@ exports.updateEndpoint = function (DB, model) {
     updateModel = Joi.alternatives().try(updateModel, Joi.any()).label(label);
   }
 
-  let policies = [];
-
-  if (model.policies && configStore.get("/enablePolicies")) {
-    policies = model.policies;
-    policies = (policies.root || []).concat(policies.update || []);
+  let prePolicies = [];
+  if (
+    model.policies &&
+    model.policies.pre &&
+    configStore.get("/enablePolicies")
+  ) {
+    prePolicies = model.policies.pre;
+    prePolicies = (prePolicies.root || []).concat(
+      prePolicies.update || []
+    );
   }
-  policies.forEach((val) => middlewares.push(val));
+  prePolicies.forEach((val) => middlewares.push(val));
 
   const handler = updateMiddleware(DB, model);
+
+  let postPolicies = [];
+  if (
+    model.policies &&
+    model.policies.post &&
+    configStore.get("/enablePolicies")
+  ) {
+    postPolicies = model.policies.post;
+    postPolicies = (postPolicies.root || []).concat(
+      postPolicies.update || []
+    );
+  }
+  postPolicies.forEach((val) => middlewares.push(val));
 
   generateEndpoint({
     method: "put",
@@ -228,15 +264,33 @@ exports.associationAddManyEndpoint = function (DB, ownerModel, association) {
       .label(label || "blank");
   }
 
-  let policies = [];
-
-  if (ownerModel.policies && configStore.get("/enablePolicies")) {
-    policies = ownerModel.policies;
-    policies = (policies.root || []).concat(policies.associate || []);
+  let prePolicies = [];
+  if (
+    ownerModel.policies &&
+    ownerModel.policies.pre &&
+    configStore.get("/enablePolicies")
+  ) {
+    prePolicies = ownerModel.policies.pre;
+    prePolicies = (prePolicies.root || []).concat(
+      prePolicies.associate || []
+    );
   }
-  policies.forEach((val) => middlewares.push(val));
+  prePolicies.forEach((val) => middlewares.push(val));
 
   const handler = associationAddManyMiddleware(DB, ownerModel, association);
+
+  let postPolicies = [];
+  if (
+    ownerModel.policies &&
+    ownerModel.policies.post &&
+    configStore.get("/enablePolicies")
+  ) {
+    postPolicies = ownerModel.policies.post;
+    postPolicies = (postPolicies.root || []).concat(
+      postPolicies.associate || []
+    );
+  }
+  postPolicies.forEach((val) => middlewares.push(val));
 
   generateEndpoint({
     method: "post",
@@ -328,15 +382,33 @@ exports.associationAddOneEndpoint = function (DB, ownerModel, association) {
     }
   }
 
-  let policies = [];
-
-  if (ownerModel.policies && configStore.get("/enablePolicies")) {
-    policies = ownerModel.policies;
-    policies = (policies.root || []).concat(policies.associate || []);
+  let prePolicies = [];
+  if (
+    ownerModel.policies &&
+    ownerModel.policies.pre &&
+    configStore.get("/enablePolicies")
+  ) {
+    prePolicies = ownerModel.policies.pre;
+    prePolicies = (prePolicies.root || []).concat(
+      prePolicies.associate || []
+    );
   }
-  policies.forEach((val) => middlewares.push(val));
+  prePolicies.forEach((val) => middlewares.push(val));
 
   const handler = associationAddOneMiddleware(DB, ownerModel, association);
+
+  let postPolicies = [];
+  if (
+    ownerModel.policies &&
+    ownerModel.policies.post &&
+    configStore.get("/enablePolicies")
+  ) {
+    postPolicies = ownerModel.policies.post;
+    postPolicies = (postPolicies.root || []).concat(
+      postPolicies.associate || []
+    );
+  }
+  postPolicies.forEach((val) => middlewares.push(val));
 
   generateEndpoint({
     method: "put",

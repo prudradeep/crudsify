@@ -46,7 +46,12 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   role.policies = {
-    associate: [rankAuth(sequelize, "child"), permissionAuth(sequelize, false)],
+    pre: {
+      associate: [
+        rankAuth(sequelize, "child"),
+        permissionAuth(sequelize, false),
+      ],
+    },
   };
 
   return role;

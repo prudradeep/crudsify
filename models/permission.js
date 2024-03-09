@@ -234,12 +234,17 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   permission.policies = {
-    associate: [rankAuth(sequelize, "child"), permissionAuth(sequelize, true)],
+    pre: {
+      associate: [
+        rankAuth(sequelize, "child"),
+        permissionAuth(sequelize, true),
+      ],
+    },
   };
 
   permission.routeOptions = {
-    alias: "perm"
-  }
+    alias: "perm",
+  };
 
   return permission;
 };

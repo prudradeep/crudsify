@@ -50,9 +50,5 @@ exports.updatedByMiddleware = (req, res, next) => {
 }
 
 exports.deletedByMiddleware = (req, res, next) => {
-    //To do: Update deletedBy metadata on body
-    if (_.isArray(req.body)) {
-        return next()
-    }
     return addMeta('delete', req, next)
 }

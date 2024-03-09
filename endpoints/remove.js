@@ -48,15 +48,29 @@ exports.deleteOneEndpoint = function (DB, model) {
     }
   }
 
-  let policies = [];
-
-  if (model.policies && configStore.get("/enablePolicies")) {
-    policies = model.policies;
-    policies = (policies.root || []).concat(policies.delete || []);
+  let prePolicies = [];
+  if (
+    model.policies &&
+    model.policies.pre &&
+    configStore.get("/enablePolicies")
+  ) {
+    prePolicies = model.policies.pre;
+    prePolicies = (prePolicies.root || []).concat(prePolicies.delete || []);
   }
-  policies.forEach((val) => middlewares.push(val));
+  prePolicies.forEach((val) => middlewares.push(val));
 
   const handler = deleteMiddleware(DB, model);
+
+  let postPolicies = [];
+  if (
+    model.policies &&
+    model.policies.post &&
+    configStore.get("/enablePolicies")
+  ) {
+    postPolicies = model.policies.post;
+    postPolicies = (postPolicies.root || []).concat(postPolicies.read || []);
+  }
+  postPolicies.forEach((val) => middlewares.push(val));
 
   generateEndpoint({
     method: "delete",
@@ -115,15 +129,29 @@ exports.deleteManyEndpoint = function (DB, model) {
     payloadModel = Joi.alternatives().try(payloadModel, Joi.any());
   }
 
-  let policies = [];
-
-  if (model.policies && configStore.get("/enablePolicies")) {
-    policies = model.policies;
-    policies = (policies.root || []).concat(policies.delete || []);
+  let prePolicies = [];
+  if (
+    model.policies &&
+    model.policies.pre &&
+    configStore.get("/enablePolicies")
+  ) {
+    prePolicies = model.policies.pre;
+    prePolicies = (prePolicies.root || []).concat(prePolicies.delete || []);
   }
-  policies.forEach((val) => middlewares.push(val));
+  prePolicies.forEach((val) => middlewares.push(val));
 
   const handler = deleteMiddleware(DB, model);
+
+  let postPolicies = [];
+  if (
+    model.policies &&
+    model.policies.post &&
+    configStore.get("/enablePolicies")
+  ) {
+    postPolicies = model.policies.post;
+    postPolicies = (postPolicies.root || []).concat(postPolicies.delete || []);
+  }
+  postPolicies.forEach((val) => middlewares.push(val));
 
   generateEndpoint({
     method: "delete",
@@ -188,15 +216,29 @@ exports.associationRemoveOneEndpoint = function (DB, ownerModel, association) {
     }
   }
 
-  let policies = [];
-
-  if (ownerModel.policies && configStore.get("/enablePolicies")) {
-    policies = ownerModel.policies;
-    policies = (policies.root || []).concat(policies.associate || []);
+  let prePolicies = [];
+  if (
+    ownerModel.policies &&
+    ownerModel.policies.pre &&
+    configStore.get("/enablePolicies")
+  ) {
+    prePolicies = ownerModel.policies.pre;
+    prePolicies = (prePolicies.root || []).concat(prePolicies.associate || []);
   }
-  policies.forEach((val) => middlewares.push(val));
+  prePolicies.forEach((val) => middlewares.push(val));
 
   const handler = associationRemoveOneMiddleware(DB, ownerModel, association);
+
+  let postPolicies = [];
+  if (
+    ownerModel.policies &&
+    ownerModel.policies.post &&
+    configStore.get("/enablePolicies")
+  ) {
+    postPolicies = ownerModel.policies.post;
+    postPolicies = (postPolicies.root || []).concat(postPolicies.associate || []);
+  }
+  postPolicies.forEach((val) => middlewares.push(val));
 
   generateEndpoint({
     method: "delete",
@@ -280,15 +322,29 @@ exports.associationRemoveManyEndpoint = function (DB, ownerModel, association) {
     "An array of ids to remove."
   );
 
-  let policies = [];
-
-  if (ownerModel.policies && configStore.get("/enablePolicies")) {
-    policies = ownerModel.policies;
-    policies = (policies.root || []).concat(policies.associate || []);
+  let prePolicies = [];
+  if (
+    ownerModel.policies &&
+    ownerModel.policies.pre &&
+    configStore.get("/enablePolicies")
+  ) {
+    prePolicies = ownerModel.policies.pre;
+    prePolicies = (prePolicies.root || []).concat(prePolicies.associate || []);
   }
-  policies.forEach((val) => middlewares.push(val));
+  prePolicies.forEach((val) => middlewares.push(val));
 
   const handler = associationRemoveManyMiddleware(DB, ownerModel, association);
+
+  let postPolicies = [];
+  if (
+    ownerModel.policies &&
+    ownerModel.policies.post &&
+    configStore.get("/enablePolicies")
+  ) {
+    postPolicies = ownerModel.policies.post;
+    postPolicies = (postPolicies.root || []).concat(postPolicies.associate || []);
+  }
+  postPolicies.forEach((val) => middlewares.push(val));
 
   generateEndpoint({
     method: "delete",
