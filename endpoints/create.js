@@ -153,11 +153,11 @@ exports.associationAddManyEndpoint = function (DB, ownerModel, association) {
   )
     return;
 
-  const ownerAlias = routeOptions.alias || getModelName(ownerModel);
+  const ownerAlias = getPathName(ownerModel);
   const childAlias =
     (routeOptions[getModelName(target)] &&
       routeOptions[getModelName(target)].alias) ||
-    getModelName(target);
+    getPathName(target);
 
   let middlewares = [];
   let scope = [];
@@ -279,11 +279,11 @@ exports.associationAddOneEndpoint = function (DB, ownerModel, association) {
   )
     return;
 
-  const ownerAlias = routeOptions.alias || getModelName(ownerModel);
+  const ownerAlias = getPathName(ownerModel);
   const childAlias =
     (routeOptions[getModelName(target)] &&
       routeOptions[getModelName(target)].alias) ||
-    getModelName(target);
+    getPathName(target);
 
   let middlewares = [];
   let scope = [];

@@ -237,5 +237,9 @@ module.exports = (sequelize, DataTypes) => {
     associate: [rankAuth(sequelize, "child"), permissionAuth(sequelize, true)],
   };
 
+  permission.routeOptions = {
+    alias: "perm"
+  }
+
   return permission;
 };
