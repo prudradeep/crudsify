@@ -1,5 +1,6 @@
 "use strict";
 
+const _ = require("lodash");
 const Boom = require("@hapi/boom");
 const { handleError } = require("./error");
 const { ucfirst } = require("../utils");
