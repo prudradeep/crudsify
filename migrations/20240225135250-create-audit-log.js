@@ -8,6 +8,7 @@ module.exports = {
       getPrimaryKey,
       getTimestamps,
       getMetadata,
+      getRecordScopes,
     } = require("../helpers/model");
     await queryInterface.createTable("auditLogs", {
       ...getPrimaryKey(Sequelize),
@@ -38,7 +39,7 @@ module.exports = {
           _.values(["HasMany", "BelongsToMany", "HasOne", "BelongsTo"])
         ),
       },
-      documents: {
+      records: {
         type: Sequelize.JSON,
       },
       payload: {
@@ -65,8 +66,9 @@ module.exports = {
       notes: {
         type: Sequelize.STRING,
       },
+      ...getRecordScopes(Sequelize),
       ...getTimestamps(Sequelize),
-      ...getMetadata(Sequelize)
+      ...getMetadata(Sequelize),
     });
   },
   async down(queryInterface, Sequelize) {

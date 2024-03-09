@@ -17,14 +17,14 @@ exports.logCreateMiddleware = (model) => {
       let userId = null;
       if (configStore.get("/authStrategy"))
         userId = req.auth.credentials.user[configStore.get("/dbPrimaryKey")];
-      let documents = res.data;
-      if (documents) {
-        if (_.isArray(documents)) {
-          documents = documents.map(function (doc) {
+      let records = res.data;
+      if (records) {
+        if (_.isArray(records)) {
+          records = records.map(function (doc) {
             return doc[configStore.get("/dbPrimaryKey")];
           });
         } else {
-          documents = [documents[configStore.get("/dbPrimaryKey")]];
+          records = [records[configStore.get("/dbPrimaryKey")]];
         }
       }
 
@@ -36,7 +36,7 @@ exports.logCreateMiddleware = (model) => {
         collectionName: model.name,
         childCollectionName: null,
         associationType: null,
-        documents: documents || [],
+        records: records || [],
         payload: _.isEmpty(req.body) ? [] : req.body,
         params: _.isEmpty(req.params) ? [] : req.params,
         result: res.data || [],
@@ -65,7 +65,7 @@ exports.logUpdateMiddleware = (model) => {
       let userId = null;
       if (configStore.get("/authStrategy"))
         userId = req.auth.credentials.user[configStore.get("/dbPrimaryKey")];
-      const documents = [req.params.id];
+      const records = [req.params.id];
       const log = {
         method: "PUT",
         action: "Update",
@@ -74,7 +74,7 @@ exports.logUpdateMiddleware = (model) => {
         collectionName: model.name,
         childCollectionName: null,
         associationType: null,
-        documents: documents || null,
+        records: records || null,
         payload: _.isEmpty(req.body) ? null : req.body,
         params: _.isEmpty(req.params) ? null : req.params,
         result: res.data || null,
@@ -103,7 +103,7 @@ exports.logDeleteMiddleware = (model) => {
       let userId = null;
       if (configStore.get("/authStrategy"))
         userId = req.auth.credentials.user[configStore.get("/dbPrimaryKey")];
-      let documents = req.params.id || req.body.data;
+      let records = req.params.id || req.body.data;
 
       const log = {
         method: "DELETE",
@@ -113,7 +113,7 @@ exports.logDeleteMiddleware = (model) => {
         collectionName: model.name,
         childCollectionName: null,
         associationType: null,
-        documents: documents || null,
+        records: records || null,
         payload: _.isEmpty(req.body) ? null : req.body,
         params: _.isEmpty(req.params) ? null : req.params,
         result: res.data || null,
@@ -142,12 +142,12 @@ exports.logAddMiddleware = (ownerModel, childModel, associationType) => {
       let userId = null;
       if (configStore.get("/authStrategy"))
         userId = req.auth.credentials.user[configStore.get("/dbPrimaryKey")];
-      let documents = [req.params.ownerId];
+      let records = [req.params.ownerId];
 
       if (req.params.childId) {
-        documents.push(req.params.childId);
+        records.push(req.params.childId);
       } else {
-        documents = documents.concat(req.body.data);
+        records = records.concat(req.body.data);
       }
 
       let method = "POST";
@@ -164,7 +164,7 @@ exports.logAddMiddleware = (ownerModel, childModel, associationType) => {
         collectionName: ownerModel.name,
         childCollectionName: childModel.name,
         associationType: associationType,
-        documents: documents || null,
+        records: records || null,
         payload: _.isEmpty(req.body) ? null : req.body,
         params: _.isEmpty(req.params) ? null : req.params,
         result: res.data || null,
@@ -193,12 +193,12 @@ exports.logRemoveMiddleware = (ownerModel, childModel, associationType) => {
       let userId = null;
       if (configStore.get("/authStrategy"))
         userId = req.auth.credentials.user[configStore.get("/dbPrimaryKey")];
-      let documents = [req.params.ownerId];
+      let records = [req.params.ownerId];
 
       if (req.params.childId) {
-        documents.push(req.params.childId);
+        records.push(req.params.childId);
       } else {
-        documents = documents.concat(req.body);
+        records = records.concat(req.body);
       }
 
       const log = {
@@ -209,7 +209,7 @@ exports.logRemoveMiddleware = (ownerModel, childModel, associationType) => {
         collectionName: ownerModel.name,
         childCollectionName: childModel.name,
         associationType: associationType,
-        documents: documents || null,
+        records: records || null,
         payload: _.isEmpty(req.body) ? null : req.body,
         params: _.isEmpty(req.params) ? null : req.params,
         result: res.data || null,
@@ -256,7 +256,7 @@ exports.logApiMiddleware = (options = {}) => {
         collectionName: options.name || null,
         childCollectionName: options.child ? options.child.name : null,
         associationType: options.associationType || null,
-        documents: options.documents || null,
+        records: options.records || null,
         payload: _.isEmpty(payload) ? null : payload,
         params: _.isEmpty(req.params) ? null : req.params,
         result: res.data || null,
@@ -282,7 +282,7 @@ exports.saveLogMiddleware = (req, res, next) => {
       } else if (configStore.get("/auditLogStorage") === logStorage.DB) {
         const { auditLog } = require("../models");
         const emptyJSON = [];
-        if (!req.auditLog.documents) req.auditLog.documents = emptyJSON;
+        if (!req.auditLog.records) req.auditLog.records = emptyJSON;
 
         if (!req.auditLog.payload) req.auditLog.payload = emptyJSON;
 

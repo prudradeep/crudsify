@@ -5,6 +5,7 @@ const {
   getPrimaryKey,
   getTimestamps,
   getMetadata,
+  getRecordScopes,
 } = require("../helpers/model");
 const { rankAuth } = require("../policies/role-auth");
 const { permissionAuth } = require("../policies/permission-auth");
@@ -36,6 +37,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.TEXT,
         allowNull: false,
       },
+      ..._.cloneDeep(getRecordScopes(DataTypes)),
       ..._.cloneDeep(getTimestamps(DataTypes)),
       ..._.cloneDeep(getMetadata(DataTypes)),
     },

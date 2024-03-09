@@ -345,7 +345,7 @@ const generateJoiFindQueryModel = (model) => {
 };
 
 /**
- * Generates a Joi object that validates a request payload for creating a document
+ * Generates a Joi object that validates a request payload for creating a record
  * @param model: A model object.
  * @returns {*}: A Joi object
  */
@@ -387,7 +387,7 @@ const generateJoiCreateModel = (model, assoc = false, keys = []) => {
 };
 
 /**
- * Generates a Joi object that validates a query request payload for updating a document
+ * Generates a Joi object that validates a query request payload for updating a record
  * @param model: A model object.
  * @returns {*}: A Joi object
  */

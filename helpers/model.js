@@ -91,6 +91,17 @@ exports.getMetadata = (DataTypes) => {
   return metadata;
 };
 
+exports.getRecordScopes = (DataTypes) => {
+  if (configStore.get("/enableRecordScopes")) {
+    return {
+      [configStore.get("/recordScopeKey")]: {
+        type: DataTypes.JSON
+      }
+    };
+  }
+  return {};
+};
+
 exports.routeScopes = (model) => {
   const modelName = ucfirst(model.name);
 

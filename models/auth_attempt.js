@@ -6,6 +6,7 @@ const {
   getPrimaryKey,
   getTimestamps,
   getMetadata,
+  getRecordScopes,
 } = require("../helpers/model");
 const { ucfirst } = require("../utils");
 module.exports = (sequelize, DataTypes) => {
@@ -21,12 +22,12 @@ module.exports = (sequelize, DataTypes) => {
 
     static async createInstance(ip, id) {
       try {
-        const document = {
+        const record = {
           ip,
           [`user${ucfirst(configStore.get("/dbPrimaryKey").name)}`]: id,
           time: new Date(),
         };
-        return await this.create(document);
+        return await this.create(record);
       } catch (err) {
         throw err;
       }
@@ -83,6 +84,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       ip: DataTypes.STRING,
       time: DataTypes.DATE,
+      ..._.cloneDeep(getRecordScopes(DataTypes)),
       ..._.cloneDeep(getTimestamps(DataTypes)),
       ..._.cloneDeep(getMetadata(DataTypes)),
     },

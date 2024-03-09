@@ -6,6 +6,7 @@ module.exports = {
       getPrimaryKey,
       getTimestamps,
       getMetadata,
+      getRecordScopes,
     } = require("../helpers/model");
     await queryInterface.createTable('groups', {
       ...getPrimaryKey(Sequelize),
@@ -18,6 +19,7 @@ module.exports = {
         type: Sequelize.TEXT,
         allowNull: false,
       },
+      ...getRecordScopes(Sequelize),
       ...getTimestamps(Sequelize),
       ...getMetadata(Sequelize),
     });

@@ -9,6 +9,7 @@ module.exports = {
       getPrimaryKey,
       getTimestamps,
       getMetadata,
+      getRecordScopes,
     } = require("../helpers/model");
     await queryInterface.createTable("users", {
       ...getPrimaryKey(Sequelize),
@@ -51,6 +52,7 @@ module.exports = {
       resetPasswordHash: {
         type: Sequelize.STRING,
       },
+      ...getRecordScopes(Sequelize),
       ...getTimestamps(Sequelize),
       ...getMetadata(Sequelize),
     });

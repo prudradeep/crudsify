@@ -87,10 +87,10 @@ const Config = {
 
   /**
    * Timestamps options:
-   * - timestamps: (default: true) specifying to create timestamps for the document
+   * - timestamps: (default: true) specifying to create timestamps for the record
    * - createdAt: Give a custom name to the createdAt column or false
    * - updatedAt: Give a custom name to the updatedAt column or false
-   * - paranoid: (default: true) specifying a soft-deletion of documents, instead of a hard-deletion
+   * - paranoid: (default: true) specifying a soft-deletion of records, instead of a hard-deletion
    * - deletedAt: Give a custom name to the deletedAt column
    */
   modelOptions: {
@@ -100,9 +100,9 @@ const Config = {
 
   /**
    * MetaData options
-   * - createdBy: dbPrimaryKey of user that created the document.
-   * - updatedBy: dbPrimaryKey of user that last updated the document.
-   * - deletedBy: dbPrimaryKey of user that soft deleted the document.
+   * - createdBy: dbPrimaryKey of user that created the record.
+   * - updatedBy: dbPrimaryKey of user that last updated the record.
+   * - deletedBy: dbPrimaryKey of user that soft deleted the record.
    */
   enableCreatedBy: {
     $filter: "env",
@@ -128,8 +128,22 @@ const Config = {
   authStrategy: {
     $filter: "env",
     production: constants.AUTH_STRATEGIES.REFRESH,
-    $default: false,
+    $default: constants.AUTH_STRATEGIES.REFRESH,
   },
+
+  /**
+   * Enables record level authorization.
+   * default: false
+   * @type {boolean}
+   */
+  enableRecordScopes: true,
+
+  /**
+   * If set, (and enableRecordScopes is not false) then recordScopeKey will be added in the model definition.
+   * default: recordScope
+   * @type {string}
+   */
+  recordScopeKey: "recordScope",
 
   /**
    * If set to true, (and authStrategy is not false) then endpoints will be generated with pre-defined
@@ -137,7 +151,7 @@ const Config = {
    * default: false
    * @type {boolean}
    */
-  generateRouteScopes: false,
+  generateRouteScopes: true,
 
   /**
    * Salt rounds for generating hash
@@ -180,7 +194,7 @@ const Config = {
   logQuery: {
     $filter: "env",
     production: false,
-    $default: false
+    $default: false,
   },
 
   enableAuditLog: {
@@ -199,7 +213,7 @@ const Config = {
     $default: constants.AUDIT_LOG_STORAGE.DB,
   },
   /**
-   * Specifies the TTL (time to live/lifetime/expiration) of auditLog documents. Accepts values in seconds unless specified
+   * Specifies the TTL (time to live/lifetime/expiration) of auditLog records. Accepts values in seconds unless specified
    * (Ex: 60 = 60 seconds, '1m' = 1 minute, or '1d' = 1 day)
    * See: http://nicoll.io/mongottl/
    * default: null (does not expire)

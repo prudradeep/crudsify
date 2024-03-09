@@ -23,6 +23,7 @@ module.exports = {
         type: Sequelize.TEXT,
         allowNull: false,
       },
+      ...getRecordScopes(Sequelize),
       ...getTimestamps(Sequelize),
       ...getMetadata(Sequelize),
     });

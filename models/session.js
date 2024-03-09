@@ -7,6 +7,7 @@ const {
   getPrimaryKey,
   getTimestamps,
   getMetadata,
+  getRecordScopes,
 } = require("../helpers/model");
 const { ucfirst } = require("../utils");
 module.exports = (sequelize, DataTypes) => {
@@ -34,14 +35,14 @@ module.exports = (sequelize, DataTypes) => {
 
     static async createInstance(user) {
       try {
-        const document = {
+        const record = {
           [`user${ucfirst(configStore.get("/dbPrimaryKey").name)}`]:
             user[configStore.get("/dbPrimaryKey").name],
           key: uuidv4(),
           passwordHash: user.password,
         };
 
-        let newSession = await this.create(document);
+        let newSession = await this.create(record);
 
         /**
          * Allow only one login at a time.
@@ -50,7 +51,7 @@ module.exports = (sequelize, DataTypes) => {
           where: {
             [`user${ucfirst(configStore.get("/dbPrimaryKey").name)}`]:
               user[configStore.get("/dbPrimaryKey").name],
-            key: { [Op.ne]: document.key },
+            key: { [Op.ne]: record.key },
           },
         };
         await this.destroy(query);
@@ -83,6 +84,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
+      ..._.cloneDeep(getRecordScopes(DataTypes)),
       ..._.cloneDeep(getTimestamps(DataTypes)),
       ..._.cloneDeep(getMetadata(DataTypes)),
     },
@@ -98,7 +100,7 @@ module.exports = (sequelize, DataTypes) => {
     allowCreate: false,
     allowUpdate: false,
     allowDelete: false,
-    allowDeleteMany: false
+    allowDeleteMany: false,
   };
 
   return session;

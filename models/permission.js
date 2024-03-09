@@ -5,6 +5,7 @@ const {
   getPrimaryKey,
   getTimestamps,
   getMetadata,
+  getRecordScopes,
 } = require("../helpers/model");
 const configStore = require("../config");
 const { rankAuth } = require("../policies/role-auth");
@@ -224,6 +225,7 @@ module.exports = (sequelize, DataTypes) => {
         comment:
           "Specifies the scope required to be able to assign this permission to users.",
       },
+      ..._.cloneDeep(getRecordScopes(DataTypes)),
       ..._.cloneDeep(getTimestamps(DataTypes)),
       ..._.cloneDeep(getMetadata(DataTypes)),
     },
@@ -240,10 +242,6 @@ module.exports = (sequelize, DataTypes) => {
         permissionAuth(sequelize, true),
       ],
     },
-  };
-
-  permission.routeOptions = {
-    alias: "perm",
   };
 
   return permission;

@@ -8,6 +8,7 @@ module.exports = {
       getPrimaryKey,
       getTimestamps,
       getMetadata,
+      getRecordScopes,
     } = require("../helpers/model");
     await queryInterface.createTable("permissions", {
       ...getPrimaryKey(Sequelize),
@@ -29,6 +30,7 @@ module.exports = {
         comment:
           "Specifies the scope required to be able to assign this permission to users.",
       },
+      ...getRecordScopes(Sequelize),
       ...getTimestamps(Sequelize),
       ...getMetadata(Sequelize),
     });

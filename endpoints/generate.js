@@ -12,11 +12,6 @@ const {
 } = require("../middlewares/validate");
 const { getScopeMiddleware } = require("../middlewares/scope");
 const { authMiddleware } = require("../middlewares/auth");
-const {
-  createdByMiddleware,
-  updatedByMiddleware,
-  deletedByMiddleware,
-} = require("../middlewares/add-meta-data");
 const { swaggerHelper } = require("../helpers/swagger");
 const {
   saveLogMiddleware,
@@ -70,23 +65,7 @@ const generateEndpoint = ({
     : [logApiMiddleware(), saveLogMiddleware];
 
   method = method.toLowerCase();
-  if (auth) {
-    switch (method) {
-      case "put":
-        if (configStore.get("/enableUpdatedBy"))
-          middlewares.push(updatedByMiddleware);
-        break;
-      case "delete":
-        if (configStore.get("/enableDeletedBy"))
-          middlewares.push(deletedByMiddleware);
-        break;
-      case "post":
-        if (configStore.get("/enableCreatedBy"))
-          middlewares.push(createdByMiddleware);
-        break;
-    }
-  }
-
+  
   Endpoints[method](path, middlewares, handler, afterMiddlewares);
 
   if (configStore.get("/enableSwagger")) {

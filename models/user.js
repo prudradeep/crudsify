@@ -8,6 +8,7 @@ const {
   getPrimaryKey,
   getTimestamps,
   getMetadata,
+  getRecordScopes,
 } = require("../helpers/model");
 const { ucfirst, generateHash } = require("../utils");
 const { rankAuth, promoteAuth } = require("../policies/role-auth");
@@ -107,6 +108,7 @@ module.exports = (sequelize, DataTypes) => {
       resetPasswordHash: {
         type: DataTypes.STRING,
       },
+      ..._.cloneDeep(getRecordScopes(DataTypes)),
       ..._.cloneDeep(getTimestamps(DataTypes)),
       ..._.cloneDeep(getMetadata(DataTypes)),
     },
