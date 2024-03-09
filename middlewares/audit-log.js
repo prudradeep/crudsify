@@ -4,7 +4,6 @@ const _ = require("lodash");
 const configStore = require("../config");
 const { getIP } = require("../utils");
 const { AuditLogger } = require("../helpers/logger");
-const { auditLog } = require("../models");
 
 /**
  * Middleware to log create actions.
@@ -281,21 +280,23 @@ exports.saveLogMiddleware = (req, res, next) => {
       if (configStore.get("/auditLogStorage") === logStorage.FILE) {
         AuditLogger.log("audit", JSON.stringify(req.auditLog));
       } else if (configStore.get("/auditLogStorage") === logStorage.DB) {
+        const { auditLog } = require("../models");
+        const emptyJSON = JSON.stringify([]);
         if (req.auditLog.documents)
           req.auditLog.documents = JSON.stringify(req.auditLog.documents);
-        else req.auditLog.documents = JSON.stringify([]);
+        else req.auditLog.documents = emptyJSON;
 
         if (req.auditLog.payload)
           req.auditLog.payload = JSON.stringify(req.auditLog.payload);
-        else req.auditLog.payload = JSON.stringify([]);
+        else req.auditLog.payload = emptyJSON;
 
         if (req.auditLog.params)
           req.auditLog.params = JSON.stringify(req.auditLog.params);
-        else req.auditLog.params = JSON.stringify([]);
+        else req.auditLog.params = emptyJSON;
 
         if (req.auditLog.result)
           req.auditLog.result = JSON.stringify(req.auditLog.result);
-        else req.auditLog.result = JSON.stringify([]);
+        else req.auditLog.result = emptyJSON;
 
         auditLog.create(req.auditLog);
       }

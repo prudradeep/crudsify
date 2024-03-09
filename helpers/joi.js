@@ -2,10 +2,10 @@
 
 const _ = require("lodash");
 const Joi = require("joi");
+const Sequelize = require("sequelize");
 const configStore = require("../config");
 const queryHelper = require("./query");
 const { getTimestamps, getMetadata } = require("./model");
-const { Sequelize } = require("../models");
 
 let headersValidation;
 if (configStore.get("/authStrategy")) {

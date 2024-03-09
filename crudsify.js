@@ -20,8 +20,8 @@ const start = async () => {
   try {
     await sequelize.authenticate();
     require("./helpers/plugins")(CrudsifyServer, Crudsify);
-    require("./helpers/route");
     require("./helpers/api");
+    require("./helpers/route");
     const { Endpoints } = require("./endpoints/generate");
     const { swaggerRouter } = require("./helpers/swagger");
     Crudsify.use("/", Endpoints);

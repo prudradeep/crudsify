@@ -1,19 +1,41 @@
 "use strict";
 
-const { createEndpoint, updateEndpoint, associationAddOneEndpoint, associationAddManyEndpoint } = require('../endpoints/create');
-const { listEndpoint, findEndpoint, associationGetAllEndpoint } = require('../endpoints/list');
-const { deleteOneEndpoint, deleteManyEndpoint, associationRemoveOneEndpoint, associationRemoveManyEndpoint } = require('../endpoints/remove');
-const DB = require('../models')
+const {
+  createEndpoint,
+  updateEndpoint,
+  associationAddOneEndpoint,
+  associationAddManyEndpoint,
+} = require("../endpoints/create");
+const {
+  listEndpoint,
+  findEndpoint,
+  associationGetAllEndpoint,
+} = require("../endpoints/list");
+const {
+  deleteOneEndpoint,
+  deleteManyEndpoint,
+  associationRemoveOneEndpoint,
+  associationRemoveManyEndpoint,
+} = require("../endpoints/remove");
+const DB = require("../models");
 
 //Generate model routes
 for (const model in DB.sequelize.models) {
   if (model.indexOf("_") === -1) {
+    //Generate model extra endpoints
+    if (DB[model].extraEndpoints) {
+      DB[model].extraEndpoints.forEach((endpoint) => {
+        endpoint();
+      });
+    }
+    
     listEndpoint(DB, DB[model]);
     findEndpoint(DB, DB[model]);
     createEndpoint(DB, DB[model]);
     updateEndpoint(DB, DB[model]);
     deleteOneEndpoint(DB, DB[model]);
     deleteManyEndpoint(DB, DB[model]);
+
 
     //Association
     for (const assoc of Object.values(DB[model].associations)) {

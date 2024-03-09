@@ -57,13 +57,13 @@ const generateEndpoint = ({
     else Logger.error("Model is not defined");
   }
 
-  if (scope) {
-    if (!_.isArray(scope)) scope = [scope];
-    if (!_.isEmpty(scope)) middlewares.unshift(getScopeMiddleware(scope));
-  }
-
-  if (auth)
+  if (auth) {
+    if (scope) {
+      if (!_.isArray(scope)) scope = [scope];
+      if (!_.isEmpty(scope)) middlewares.unshift(getScopeMiddleware(scope));
+    }
     middlewares = [headerValidationMiddleware, authMiddleware, ...middlewares];
+  }
 
   afterMiddlewares = afterMiddlewares
     ? [...afterMiddlewares, saveLogMiddleware]

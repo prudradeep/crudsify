@@ -128,7 +128,7 @@ const Config = {
   authStrategy: {
     $filter: "env",
     production: constants.AUTH_STRATEGIES.REFRESH,
-    $default: constants.AUTH_STRATEGIES.REFRESH,
+    $default: false,
   },
 
   /**
