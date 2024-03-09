@@ -6,13 +6,16 @@ const Sequelize = require("sequelize");
 const basename = path.basename(__filename);
 const configStore = require("../config");
 const { routeOptions, routeScopes } = require("../helpers/model");
+const { QueryLogger } = require("../helpers/logger");
 const db = {};
 
 let options = {
   host: configStore.get("/database/host"),
   port: configStore.get("/database/port"),
   dialect: configStore.get("/database/dialect"),
-  logging: false,
+  logging: (msg) => {
+    if (configStore.get("/logQuery")) QueryLogger.log("query", msg);
+  },
   pool: {
     max: 5,
     min: 0,

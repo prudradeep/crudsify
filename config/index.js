@@ -177,6 +177,11 @@ const Config = {
     production: false,
     $default: false,
   },
+  logQuery: {
+    $filter: "env",
+    production: false,
+    $default: false
+  },
 
   enableAuditLog: {
     $filter: "env",

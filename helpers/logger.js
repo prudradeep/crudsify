@@ -90,7 +90,7 @@ winstonContainer.add("audit", {
   levels: {
     audit: 0,
   },
-  level: configStore.get("/logLevel"),
+  level: "audit",
   defaultMeta: { service: configStore.get("/service") },
   transports: [
     new transports.DailyRotateFile({
@@ -115,8 +115,38 @@ winstonContainer.add("audit", {
   ],
 });
 
+winstonContainer.add("query", {
+  levels: {
+    query: 0,
+  },
+  level: "query",
+  defaultMeta: { service: configStore.get("/service") },
+  transports: [
+    new transports.DailyRotateFile({
+      level: "query",
+      dirname: `${logDir}/query`,
+      filename: `query-%DATE%.log`,
+      datePattern: "YYYY-MM-DD",
+      zippedArchive: true,
+      maxSize: "20m",
+      maxFiles: configStore.get("/auditLogTTL"),
+      format: combine(
+        label({
+          label: "",
+          message: false,
+        }),
+        timestamp({
+          format: "YY-MM-DD HH:MM:SS",
+        }),
+        myFormat
+      ),
+    }),
+  ],
+});
+
 const Logger = winstonContainer.get("logger");
 const AuditLogger = winstonContainer.get("audit");
+const QueryLogger = winstonContainer.get("query");
 
 const logger_error_old = Logger.error;
 Logger.error = function (err) {
@@ -127,4 +157,4 @@ Logger.error = function (err) {
   }
 };
 
-module.exports = { Logger, AuditLogger };
+module.exports = { Logger, AuditLogger, QueryLogger };
