@@ -31,7 +31,7 @@ exports.createHandler = async function (model, req = {}) {
     }
     if (authStrategy) {
       addMeta("create", req);
-      addRecordScope(model, req);
+      if (configStore.get("/enableRecordScopes")) addRecordScope(model, req);
     }
     let data = [];
     if (_.isArray(req.body)) {

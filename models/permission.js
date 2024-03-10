@@ -10,6 +10,10 @@ const {
 const configStore = require("../config");
 const { rankAuth } = require("../policies/role-auth");
 const { permissionAuth } = require("../policies/permission-auth");
+const { listHandler } = require("../handlers/list");
+const { sendResponse } = require("../helpers/sendResponse");
+const { generateEndpoint } = require("../endpoints/generate");
+const { generateJoiListQueryModel } = require("../helpers/joi");
 const PERMISSION_STATES = configStore.get("/constants/PERMISSION_STATES");
 const USER_ROLES = configStore.get("/constants/USER_ROLES");
 module.exports = (sequelize, DataTypes) => {
@@ -243,6 +247,61 @@ module.exports = (sequelize, DataTypes) => {
       ],
     },
   };
+
+  permission.extraEndpoints = [
+    () => {
+      const authStrategy = configStore.get("/authStrategy");
+      const queryModel = generateJoiListQueryModel(permission);
+      const getAvailablePermissionsHandler = async function (req, res, next) {
+        try {
+          if (req.auth) {
+            const roleName = req.auth.credentials.user.role.name;
+            if (req.query.assignScope) req.query.assignScope.push(roleName);
+            else req.query.assignScope = [roleName];
+
+            const data = await listHandler(DB, DB.permission, req);
+            res.data = data;
+            sendResponse({
+              data,
+              status: 200,
+              res,
+              next,
+            });
+          } else {
+            sendResponse({
+              data: { message: "Authentication disabled!" },
+              status: 200,
+              res,
+              next,
+            });
+          }
+        } catch (err) {
+          next(err);
+        }
+      };
+
+      generateEndpoint({
+        method: "get",
+        path: `/permission/available`,
+        summary:
+          "Get the permissions available for the current user to assign.",
+        tags: ["permission"],
+        validate: {
+          query: queryModel,
+        },
+        scope: [
+          "root",
+          "readAvailablePermissions",
+          "!-readAvailablePermissions",
+        ],
+        isJsonFields: true,
+        model: permission,
+        auth: authStrategy,
+        handler: getAvailablePermissionsHandler,
+        log: `Generating endpoint to get the permissions available for the current user to assign.`,
+      });
+    },
+  ];
 
   return permission;
 };

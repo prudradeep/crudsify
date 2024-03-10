@@ -6,6 +6,7 @@ module.exports = {
       getPrimaryKey,
       getTimestamps,
       getMetadata,
+      getRecordScopes,
     } = require("../helpers/model");
     await queryInterface.createTable("roles", {
       ...getPrimaryKey(Sequelize),
