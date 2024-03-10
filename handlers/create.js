@@ -6,7 +6,10 @@ const { handleError } = require("./error");
 const { ucfirst } = require("../utils");
 const configStore = require("../config");
 const { addMeta } = require("../policies/add-meta-data");
-const { addRecordScope } = require("../policies/add-record-scope");
+const {
+  addRecordScope,
+  addAuthRecordCreatorSope,
+} = require("../policies/add-record-scope");
 const authStrategy = configStore.get("/authStrategy");
 
 exports.createHandler = async function (model, req = {}) {
@@ -31,7 +34,10 @@ exports.createHandler = async function (model, req = {}) {
     }
     if (authStrategy) {
       addMeta("create", req);
-      if (configStore.get("/enableRecordScopes")) addRecordScope(model, req);
+      addRecordScope(model, req);
+      if (configStore.get("/enableRecordScopes")) {
+        addAuthRecordCreatorSope(model, req);
+      }
     }
     let data = [];
     if (_.isArray(req.body)) {
@@ -198,7 +204,9 @@ exports.associationAddManyHandler = async function (
         for (const obj of body) {
           updateOnDuplicate = Object.keys(obj);
           obj[
-            `${ownerModel.name}${ucfirst(configStore.get("/dbPrimaryKey").name)}`
+            `${ownerModel.name}${ucfirst(
+              configStore.get("/dbPrimaryKey").name
+            )}`
           ] = owner[configStore.get("/dbPrimaryKey").name];
         }
         data = await childModel.bulkCreate(body, {

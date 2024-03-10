@@ -5,7 +5,7 @@ const Joi = require("joi");
 const Sequelize = require("sequelize");
 const configStore = require("../config");
 const queryHelper = require("./query");
-const { getTimestamps, getMetadata } = require("./model");
+const { getTimestamps, getMetadata, getRecordScopes } = require("./model");
 
 let headersValidation;
 if (configStore.get("/authStrategy")) {
@@ -26,10 +26,12 @@ if (configStore.get("/authStrategy")) {
 const isValidField = function (fieldName, field, keys = []) {
   const timestamps = Object.keys(getTimestamps(Sequelize.DataTypes));
   const metadata = Object.keys(getMetadata(Sequelize.DataTypes));
+  const recordScope = Object.keys(getRecordScopes(Sequelize.DataTypes));
   const invalidFieldNames = [
     configStore.get("/dbPrimaryKey").name,
     ...timestamps,
-    ...metadata
+    ...metadata,
+    ...recordScope
   ];
 
   if (keys.indexOf(fieldName) !== -1) return false;

@@ -16,7 +16,8 @@ exports.logCreateMiddleware = (model) => {
       const ipAddress = getIP(req);
       let userId = null;
       if (configStore.get("/authStrategy"))
-        userId = req.auth.credentials.user[configStore.get("/dbPrimaryKey").name];
+        userId =
+          req.auth.credentials.user[configStore.get("/dbPrimaryKey").name];
       let records = res.data;
       if (records) {
         if (_.isArray(records)) {
@@ -64,7 +65,8 @@ exports.logUpdateMiddleware = (model) => {
       const ipAddress = getIP(req);
       let userId = null;
       if (configStore.get("/authStrategy"))
-        userId = req.auth.credentials.user[configStore.get("/dbPrimaryKey").name];
+        userId =
+          req.auth.credentials.user[configStore.get("/dbPrimaryKey").name];
       const records = [req.params.id];
       const log = {
         method: "PUT",
@@ -102,7 +104,8 @@ exports.logDeleteMiddleware = (model) => {
       const ipAddress = getIP(req);
       let userId = null;
       if (configStore.get("/authStrategy"))
-        userId = req.auth.credentials.user[configStore.get("/dbPrimaryKey").name];
+        userId =
+          req.auth.credentials.user[configStore.get("/dbPrimaryKey").name];
       let records = req.params.id || req.body.data;
 
       const log = {
@@ -141,7 +144,8 @@ exports.logAddMiddleware = (ownerModel, childModel, associationType) => {
       const ipAddress = getIP(req);
       let userId = null;
       if (configStore.get("/authStrategy"))
-        userId = req.auth.credentials.user[configStore.get("/dbPrimaryKey").name];
+        userId =
+          req.auth.credentials.user[configStore.get("/dbPrimaryKey").name];
       let records = [req.params.ownerId];
 
       if (req.params.childId) {
@@ -192,7 +196,8 @@ exports.logRemoveMiddleware = (ownerModel, childModel, associationType) => {
       const ipAddress = getIP(req);
       let userId = null;
       if (configStore.get("/authStrategy"))
-        userId = req.auth.credentials.user[configStore.get("/dbPrimaryKey").name];
+        userId =
+          req.auth.credentials.user[configStore.get("/dbPrimaryKey").name];
       let records = [req.params.ownerId];
 
       if (req.params.childId) {
@@ -232,65 +237,69 @@ exports.logRemoveMiddleware = (ownerModel, childModel, associationType) => {
  * @returns {anonymous function}
  */
 exports.logApiMiddleware = (options = {}) => {
-  return async (req, res, next) => {
-    try {
-      const ipAddress = getIP(req);
-      let userId = null;
-      if (configStore.get("/authStrategy"))
-        userId = req.auth
-          ? req.auth.credentials.user[configStore.get("/dbPrimaryKey").name]
-          : null;
+  if (configStore.get("/enableAuditLog")) {
+    return async (req, res, next) => {
+      try {
+        const ipAddress = getIP(req);
+        let userId = null;
+        if (configStore.get("/authStrategy"))
+          userId = req.auth
+            ? req.auth.credentials.user[configStore.get("/dbPrimaryKey").name]
+            : null;
 
-      let payload = {};
-      if (options.payloadFilter) {
-        payload = _.pick(req.body, options.payloadFilter);
-      } else {
-        payload = req.body;
+        let payload = {};
+        if (options.payloadFilter) {
+          payload = _.pick(req.body, options.payloadFilter);
+        } else {
+          payload = req.body;
+        }
+
+        const log = {
+          method: req.method.toUpperCase(),
+          action: options.action || null,
+          endpoint: req.path,
+          user: userId || null,
+          collectionName: options.name || null,
+          childCollectionName: options.child ? options.child.name : null,
+          associationType: options.associationType || null,
+          records: options.records || null,
+          payload: _.isEmpty(payload) ? null : payload,
+          params: _.isEmpty(req.params) ? null : req.params,
+          result: res.data || null,
+          isError: _.isError(req.res),
+          statusCode: res.statusCode || null,
+          responseMessage: res.statusMessage || null,
+          ipAddress,
+        };
+        req.auditLog = log;
+        next();
+      } catch (err) {
+        next(err);
       }
-
-      const log = {
-        method: req.method.toUpperCase(),
-        action: options.action || null,
-        endpoint: req.path,
-        user: userId || null,
-        collectionName: options.name || null,
-        childCollectionName: options.child ? options.child.name : null,
-        associationType: options.associationType || null,
-        records: options.records || null,
-        payload: _.isEmpty(payload) ? null : payload,
-        params: _.isEmpty(req.params) ? null : req.params,
-        result: res.data || null,
-        isError: _.isError(req.res),
-        statusCode: res.statusCode || null,
-        responseMessage: res.statusMessage || null,
-        ipAddress,
-      };
-      req.auditLog = log;
-      next();
-    } catch (err) {
-      next(err);
-    }
-  };
+    };
+  }
 };
 
 exports.saveLogMiddleware = (req, res, next) => {
   try {
-    const logStorage = configStore.get("/constants/AUDIT_LOG_STORAGE");
-    if (req.auditLog) {
-      if (configStore.get("/auditLogStorage") === logStorage.FILE) {
-        AuditLogger.log("audit", JSON.stringify(req.auditLog));
-      } else if (configStore.get("/auditLogStorage") === logStorage.DB) {
-        const { auditLog } = require("../models");
-        const emptyJSON = [];
-        if (!req.auditLog.records) req.auditLog.records = emptyJSON;
+    if (configStore.get("/enableAuditLog")) {
+      const logStorage = configStore.get("/constants/AUDIT_LOG_STORAGE");
+      if (req.auditLog) {
+        if (configStore.get("/auditLogStorage") === logStorage.FILE) {
+          AuditLogger.log("audit", JSON.stringify(req.auditLog));
+        } else if (configStore.get("/auditLogStorage") === logStorage.DB) {
+          const { auditLog } = require("../models");
+          const emptyJSON = [];
+          if (!req.auditLog.records) req.auditLog.records = emptyJSON;
 
-        if (!req.auditLog.payload) req.auditLog.payload = emptyJSON;
+          if (!req.auditLog.payload) req.auditLog.payload = emptyJSON;
 
-        if (!req.auditLog.params) req.auditLog.params = emptyJSON;
+          if (!req.auditLog.params) req.auditLog.params = emptyJSON;
 
-        if (!req.auditLog.result) req.auditLog.result = emptyJSON;
+          if (!req.auditLog.result) req.auditLog.result = emptyJSON;
 
-        auditLog.create(req.auditLog);
+          auditLog.create(req.auditLog);
+        }
       }
     }
   } catch (err) {

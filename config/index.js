@@ -114,6 +114,26 @@ const Config = {
   recordScopeKey: "recordScope",
 
   /**
+   * If properties are true, modifies the scope of any record to allow access to the record's creator.
+   * The scope value added is in the form: "user-{dbPrimaryKey}" where "{dbPrimaryKey}" is the primary key of the user.
+   * NOTE:
+   * - This assumes that your authentication credentials (req.auth.credentials) will contain either
+   * a "user" object with a "dbPrimaryKey" property.
+   * - This also assumes that the user creating the record will have "user-{dbPrimaryKey}" within their scope.
+   * - Requires "enableRecordScopes" to be "true".
+   * - This setting can be individually overwritten by setting the "authorizeRecordCreator" property of the model.
+   * default: false
+   * @type {boolean}
+   */
+  authorizeRecordCreator: {
+    root: false,
+    read: false,
+    update: false,
+    delete: false,
+    associate: false
+  },
+
+  /**
    * If set to true, (and authStrategy is not false) then endpoints will be generated with pre-defined
    * scopes based on the model definition.
    * default: false

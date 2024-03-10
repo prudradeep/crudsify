@@ -37,6 +37,7 @@
     "joi-to-swagger": "^6.2.0",
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
+    "md5": "^2.3.0",
     "mysql2": "^3.9.1",
     "password-generator": "^2.3.2",
     "sequelize": "^6.37.1",
