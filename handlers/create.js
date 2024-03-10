@@ -5,12 +5,6 @@ const Boom = require("@hapi/boom");
 const { handleError } = require("./error");
 const { ucfirst } = require("../utils");
 const configStore = require("../config");
-const { addMeta } = require("../policies/add-meta-data");
-const {
-  addRecordScope,
-  addAuthRecordCreatorSope,
-} = require("../policies/add-record-scope");
-const authStrategy = configStore.get("/authStrategy");
 
 exports.createHandler = async function (model, req = {}) {
   try {
@@ -31,13 +25,6 @@ exports.createHandler = async function (model, req = {}) {
         "There was a preprocessing error creating the resource.",
         Boom.badRequest
       );
-    }
-    if (authStrategy) {
-      addMeta("create", req);
-      addRecordScope(model, req);
-      if (configStore.get("/enableRecordScopes")) {
-        addAuthRecordCreatorSope(model, req);
-      }
     }
     let data = [];
     if (_.isArray(req.body)) {
@@ -86,7 +73,6 @@ exports.updateHandler = async function (model, req = { query: {} }) {
         Boom.badRequest
       );
     }
-    if (authStrategy) addMeta("update", req);
     await model.update(req.body, {
       where: { [configStore.get("/dbPrimaryKey").name]: req.params.id },
     });
@@ -138,7 +124,6 @@ exports.associationAddOneHandler = async function (
         Boom.badRequest
       );
     }
-    if (authStrategy) addMeta("update", req);
     const owner = await ownerModel.findByPk(req.params.ownerId);
     return await owner[accessors.add](parseInt(req.params.childId), {
       through: { ...req.body },
@@ -178,7 +163,6 @@ exports.associationAddManyHandler = async function (
     if (!owner) {
       throw Boom.badRequest("Invalid request");
     }
-    if (authStrategy) addMeta("create", req);
     let data = {};
     if (association.through) {
       const { data: body, ...through } = req.body;

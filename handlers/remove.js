@@ -3,8 +3,6 @@
 const Boom = require("@hapi/boom");
 const { handleError } = require("./error");
 const configStore = require("../config");
-const { addMeta } = require("../policies/add-meta-data");
-const authStrategy = configStore.get("/authStrategy");
 
 exports.deleteHandler = async function (model, req = { query: {} }) {
   try {
@@ -28,7 +26,6 @@ exports.deleteHandler = async function (model, req = { query: {} }) {
         Boom.badRequest
       );
     }
-    if (authStrategy) addMeta("delete", req);
     let deleted;
     if (req.params && req.params.id) {
       deleted = await model.findByPk(req.params.id);
@@ -108,7 +105,6 @@ exports.associationRemoveOneHandler = async function (
         Boom.badRequest
       );
     }
-    if (authStrategy) addMeta("delete", req);
     const owner = await ownerModel.findByPk(req.params.ownerId);
     await owner[accessors.remove](parseInt(req.params.childId));
     return true;
@@ -143,7 +139,6 @@ exports.associationRemoveManyHandler = async function (
         Boom.badRequest
       );
     }
-    if (authStrategy) addMeta("delete", req);
     const owner = await ownerModel.findByPk(req.params.ownerId);
     await owner[accessors.removeMultiple](req.body);
     return true;

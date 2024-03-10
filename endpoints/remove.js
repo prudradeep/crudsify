@@ -15,6 +15,7 @@ const {
   logDeleteMiddleware,
   logRemoveMiddleware,
 } = require("../middlewares/audit-log");
+const { addMeta } = require("../middlewares/add-meta-data");
 const authStrategy = configStore.get("/authStrategy");
 
 /**
@@ -29,7 +30,7 @@ exports.deleteOneEndpoint = function (DB, model) {
 
   let middlewares = [];
   let scope = [];
-  if ((!routeOptions || routeOptions.deleteAuth !== false) && authStrategy) {
+  if (routeOptions.deleteAuth !== false && authStrategy) {
     scope = getScopes(model, "delete");
     if (!_.isEmpty(scope)) {
       if (configStore.get("/logScopes")) {
@@ -59,6 +60,9 @@ exports.deleteOneEndpoint = function (DB, model) {
   }
   prePolicies.forEach((val) => middlewares.push(val));
 
+  if (routeOptions.deleteAuth !== false && authStrategy)
+    middlewares.push(addMeta("delete"));
+
   const handler = deleteMiddleware(DB, model);
 
   let postPolicies = [];
@@ -84,7 +88,7 @@ exports.deleteOneEndpoint = function (DB, model) {
       }),
     },
     scope,
-    auth: (!routeOptions || routeOptions.deleteAuth !== false) && authStrategy,
+    auth: routeOptions.deleteAuth !== false && authStrategy,
     middlewares,
     handler,
     afterMiddlewares: [logDeleteMiddleware(model)],
@@ -227,6 +231,13 @@ exports.associationRemoveOneEndpoint = function (DB, ownerModel, association) {
   }
   prePolicies.forEach((val) => middlewares.push(val));
 
+  if (
+    routeOptions[getModelName(target)] &&
+    routeOptions[getModelName(target)].removeAuth !== false &&
+    authStrategy
+  )
+    middlewares.push(addMeta("delete"));
+
   const handler = associationRemoveOneMiddleware(DB, ownerModel, association);
 
   let postPolicies = [];
@@ -236,7 +247,9 @@ exports.associationRemoveOneEndpoint = function (DB, ownerModel, association) {
     configStore.get("/enablePolicies")
   ) {
     postPolicies = ownerModel.policies.post;
-    postPolicies = (postPolicies.root || []).concat(postPolicies.associate || []);
+    postPolicies = (postPolicies.root || []).concat(
+      postPolicies.associate || []
+    );
   }
   postPolicies.forEach((val) => middlewares.push(val));
 
@@ -333,6 +346,13 @@ exports.associationRemoveManyEndpoint = function (DB, ownerModel, association) {
   }
   prePolicies.forEach((val) => middlewares.push(val));
 
+  if (
+    routeOptions[getModelName(target)] &&
+    routeOptions[getModelName(target)].removeAuth !== false &&
+    authStrategy
+  )
+    middlewares.push(addMeta("delete"));
+
   const handler = associationRemoveManyMiddleware(DB, ownerModel, association);
 
   let postPolicies = [];
@@ -342,7 +362,9 @@ exports.associationRemoveManyEndpoint = function (DB, ownerModel, association) {
     configStore.get("/enablePolicies")
   ) {
     postPolicies = ownerModel.policies.post;
-    postPolicies = (postPolicies.root || []).concat(postPolicies.associate || []);
+    postPolicies = (postPolicies.root || []).concat(
+      postPolicies.associate || []
+    );
   }
   postPolicies.forEach((val) => middlewares.push(val));
 

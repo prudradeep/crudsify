@@ -5,9 +5,9 @@ const _ = require("lodash");
 const configStore = require("../config");
 const { Logger } = require("../helpers/logger");
 
-exports.addMeta = (action, req) => {
-  try {
-    if (req.auth) {
+exports.addMeta = (action) => {
+  return (req, res, next) => {
+    try {
       let metaType = "";
       switch (action) {
         case "create":
@@ -39,9 +39,10 @@ exports.addMeta = (action, req) => {
         req.body = req.body || {};
         req.body[metaType] = userId;
       }
+      next();
+    } catch (err) {
+      Logger.error(err);
+      next(Boom.badImplementation(err));
     }
-  } catch (err) {
-    Logger.error(err);
-    throw Boom.badImplementation(err);
-  }
+  };
 };

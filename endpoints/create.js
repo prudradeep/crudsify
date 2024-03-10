@@ -21,6 +21,11 @@ const {
   logUpdateMiddleware,
   logAddMiddleware,
 } = require("../middlewares/audit-log");
+const {
+  addRecordScope,
+  addAuthRecordCreatorSope,
+} = require("../middlewares/add-record-scope");
+const { addMeta } = require("../middlewares/add-meta-data");
 const authStrategy = configStore.get("/authStrategy");
 
 /**
@@ -35,7 +40,7 @@ exports.createEndpoint = function (DB, model) {
 
   let middlewares = [];
   let scope = [];
-  if ((!routeOptions || routeOptions.createAuth !== false) && authStrategy) {
+  if (routeOptions.createAuth !== false && authStrategy) {
     scope = getScopes(model, "create");
     if (!_.isEmpty(scope)) {
       if (configStore.get("/logScopes")) {
@@ -63,11 +68,17 @@ exports.createEndpoint = function (DB, model) {
     configStore.get("/enablePolicies")
   ) {
     prePolicies = model.policies.pre;
-    prePolicies = (prePolicies.root || []).concat(
-      prePolicies.create || []
-    );
+    prePolicies = (prePolicies.root || []).concat(prePolicies.create || []);
   }
   prePolicies.forEach((val) => middlewares.push(val));
+
+  if (routeOptions.createAuth !== false && authStrategy) {
+    middlewares.push(addMeta("create"));
+    middlewares.push(addRecordScope(model));
+    if (configStore.get("/enableRecordScopes")) {
+      middlewares.push(addAuthRecordCreatorSope(model));
+    }
+  }
 
   const handler = createMiddleware(DB, model);
 
@@ -78,9 +89,7 @@ exports.createEndpoint = function (DB, model) {
     configStore.get("/enablePolicies")
   ) {
     postPolicies = model.policies.post;
-    postPolicies = (postPolicies.root || []).concat(
-      postPolicies.create || []
-    );
+    postPolicies = (postPolicies.root || []).concat(postPolicies.create || []);
   }
   postPolicies.forEach((val) => middlewares.push(val));
 
@@ -93,7 +102,7 @@ exports.createEndpoint = function (DB, model) {
       body: createModel,
     },
     scope,
-    auth: (!routeOptions || routeOptions.createAuth !== false) && authStrategy,
+    auth: routeOptions.createAuth !== false && authStrategy,
     middlewares,
     handler,
     afterMiddlewares: [logCreateMiddleware(model)],
@@ -113,7 +122,7 @@ exports.updateEndpoint = function (DB, model) {
 
   let middlewares = [];
   let scope = [];
-  if ((!routeOptions || routeOptions.updateAuth !== false) && authStrategy) {
+  if (routeOptions.updateAuth !== false && authStrategy) {
     scope = getScopes(model, "update");
     if (!_.isEmpty(scope)) {
       if (configStore.get("/logScopes")) {
@@ -134,11 +143,12 @@ exports.updateEndpoint = function (DB, model) {
     configStore.get("/enablePolicies")
   ) {
     prePolicies = model.policies.pre;
-    prePolicies = (prePolicies.root || []).concat(
-      prePolicies.update || []
-    );
+    prePolicies = (prePolicies.root || []).concat(prePolicies.update || []);
   }
   prePolicies.forEach((val) => middlewares.push(val));
+  
+  if (routeOptions.updateAuth !== false && authStrategy)
+    middlewares.push(addMeta("update"));
 
   const handler = updateMiddleware(DB, model);
 
@@ -149,9 +159,7 @@ exports.updateEndpoint = function (DB, model) {
     configStore.get("/enablePolicies")
   ) {
     postPolicies = model.policies.post;
-    postPolicies = (postPolicies.root || []).concat(
-      postPolicies.update || []
-    );
+    postPolicies = (postPolicies.root || []).concat(postPolicies.update || []);
   }
   postPolicies.forEach((val) => middlewares.push(val));
 
@@ -167,7 +175,7 @@ exports.updateEndpoint = function (DB, model) {
       }),
     },
     scope,
-    auth: (!routeOptions || routeOptions.updateAuth !== false) && authStrategy,
+    auth: routeOptions.updateAuth !== false && authStrategy,
     middlewares,
     handler,
     afterMiddlewares: [logUpdateMiddleware(model)],
@@ -271,11 +279,16 @@ exports.associationAddManyEndpoint = function (DB, ownerModel, association) {
     configStore.get("/enablePolicies")
   ) {
     prePolicies = ownerModel.policies.pre;
-    prePolicies = (prePolicies.root || []).concat(
-      prePolicies.associate || []
-    );
+    prePolicies = (prePolicies.root || []).concat(prePolicies.associate || []);
   }
   prePolicies.forEach((val) => middlewares.push(val));
+
+  if (
+    routeOptions[getModelName(target)] &&
+    routeOptions[getModelName(target)].addAuth !== false &&
+    authStrategy
+  )
+    middlewares.push(addMeta("create"));
 
   const handler = associationAddManyMiddleware(DB, ownerModel, association);
 
@@ -389,11 +402,16 @@ exports.associationAddOneEndpoint = function (DB, ownerModel, association) {
     configStore.get("/enablePolicies")
   ) {
     prePolicies = ownerModel.policies.pre;
-    prePolicies = (prePolicies.root || []).concat(
-      prePolicies.associate || []
-    );
+    prePolicies = (prePolicies.root || []).concat(prePolicies.associate || []);
   }
   prePolicies.forEach((val) => middlewares.push(val));
+
+  if (
+    routeOptions[getModelName(target)] &&
+    routeOptions[getModelName(target)].addAuth !== false &&
+    authStrategy
+  )
+    middlewares.push(addMeta("update"));
 
   const handler = associationAddOneMiddleware(DB, ownerModel, association);
 
