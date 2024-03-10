@@ -14,15 +14,9 @@ module.exports = {
     } = require("../helpers/model");
     await queryInterface.createTable("authAttempts", {
       ...getPrimaryKey(Sequelize),
-      [`user${ucfirst(configStore.get("/dbPrimaryKey").name)}`]: {
-        type: Sequelize[configStore.get("/dbPrimaryKey").type],
+      mobileEmail: {
+        type: Sequelize.STRING,
         allowNull: false,
-        references: {
-          model: "users",
-          key: configStore.get("/dbPrimaryKey").name,
-        },
-        onUpdate: "CASCADE",
-        onDelete: "RESTRICT",
       },
       ip: {
         type: Sequelize.STRING,
@@ -34,7 +28,6 @@ module.exports = {
         defaultValue: Sequelize.NOW,
       },
       ...getTimestamps(Sequelize),
-      ...getMetadata(Sequelize),
     });
   },
   async down(queryInterface, Sequelize) {

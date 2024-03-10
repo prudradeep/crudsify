@@ -1,5 +1,5 @@
 "use strict";
-const { Model } = require("sequelize");
+const { Model, Op } = require("sequelize");
 const _ = require("lodash");
 const configStore = require("../config");
 const {
@@ -7,7 +7,6 @@ const {
   getTimestamps,
   getMetadata,
 } = require("../helpers/model");
-const { ucfirst } = require("../utils");
 module.exports = (sequelize, DataTypes) => {
   class authAttempt extends Model {
     /**
@@ -19,11 +18,11 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
     }
 
-    static async createInstance(ip, id) {
+    static async createInstance(ip, mobile_email) {
       try {
         const record = {
           ip,
-          [`user${ucfirst(configStore.get("/dbPrimaryKey").name)}`]: id,
+          mobileEmail: mobile_email,
           time: new Date(),
         };
         return await this.create(record);
@@ -50,7 +49,7 @@ module.exports = (sequelize, DataTypes) => {
         query = {
           where: {
             ip,
-            [`user${ucfirst(configStore.get("/dbPrimaryKey").name)}`]: id,
+            mobileEmail: id,
             time: expirationDate,
           },
         };
@@ -71,24 +70,17 @@ module.exports = (sequelize, DataTypes) => {
   authAttempt.init(
     {
       ..._.cloneDeep(getPrimaryKey(DataTypes)),
-      [`user${ucfirst(configStore.get("/dbPrimaryKey").name)}`]: {
-        type: DataTypes[configStore.get("/dbPrimaryKey").type],
+      mobileEmail: {
+        type: DataTypes.STRING,
         allowNull: false,
-        references: {
-          model: "users",
-          key: configStore.get("/dbPrimaryKey").name,
-        },
-        onUpdate: "CASCADE",
-        onDelete: "RESTRICT",
       },
       ip: DataTypes.STRING,
       time: DataTypes.DATE,
       ..._.cloneDeep(getTimestamps(DataTypes)),
-      ..._.cloneDeep(getMetadata(DataTypes)),
     },
     {
       sequelize,
-      modelName: "auth-attempt",
+      modelName: "authAttempt",
     }
   );
   return authAttempt;
