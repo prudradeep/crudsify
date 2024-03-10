@@ -12,7 +12,7 @@ exports.sessionStrategy = async function (decoded, res, next) {
     }
     if (res) {
       const data = {
-        sessionId: session[configStore.get("/dbPrimaryKey")],
+        sessionId: session[configStore.get("/dbPrimaryKey").name],
         sessionKey: session.key,
         passwordHash: session.passwordHash,
         scope: scope,

@@ -136,7 +136,7 @@ const Config = {
    */
   jwt: {
     secret: process.env.JWT_SECRET,
-    algo: "RS512",
+    algo: "HS256",
   },
 
   /**

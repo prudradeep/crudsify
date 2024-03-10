@@ -35,29 +35,29 @@ exports.deleteHandler = async function (model, req = { query: {} }) {
       if (hardDelete === false) {
         await model.update(
           { deletedBy: req.body.deletedBy },
-          { where: { [configStore.get("/dbPrimaryKey")]: req.params.id } }
+          { where: { [configStore.get("/dbPrimaryKey").name]: req.params.id } }
         );
       }
       await model.destroy({
-        where: { [configStore.get("/dbPrimaryKey")]: req.params.id },
+        where: { [configStore.get("/dbPrimaryKey").name]: req.params.id },
         force: hardDelete,
       });
     } else if (req.body && req.body.data) {
       deleted = await model.findAll({
-        where: { [configStore.get("/dbPrimaryKey")]: req.body.data },
+        where: { [configStore.get("/dbPrimaryKey").name]: req.body.data },
       });
       if (hardDelete === false) {
         await model.update(
           { deletedBy: req.body.deletedBy },
-          { where: { [configStore.get("/dbPrimaryKey")]: req.body.data } }
+          { where: { [configStore.get("/dbPrimaryKey").name]: req.body.data } }
         );
       }
       await model.destroy({
-        where: { [configStore.get("/dbPrimaryKey")]: req.body.data },
+        where: { [configStore.get("/dbPrimaryKey").name]: req.body.data },
         force: hardDelete,
       });
     } else {
-      throw Boom.badRequest("Invalid request");
+      throw Boom.badRequest("Invalid delete request");
     }
     if (deleted) {
       try {

@@ -82,7 +82,7 @@ exports.updateHandler = async function (model, req = { query: {} }) {
     }
     if (authStrategy) addMeta("update", req);
     await model.update(req.body, {
-      where: { [configStore.get("/dbPrimaryKey")]: req.params.id },
+      where: { [configStore.get("/dbPrimaryKey").name]: req.params.id },
     });
     let data = await model.findByPk(req.params.id);
     try {
@@ -182,7 +182,7 @@ exports.associationAddManyHandler = async function (
           updateOnDuplicate = Object.keys(obj);
           obj[
             `${ownerModel.name}${ucfirst(configStore.get("/dbPrimaryKey"))}`
-          ] = owner[configStore.get("/dbPrimaryKey")];
+          ] = owner[configStore.get("/dbPrimaryKey").name];
         }
         data = await association.through.model.bulkCreate(body, {
           validate: true,
@@ -198,8 +198,8 @@ exports.associationAddManyHandler = async function (
         for (const obj of body) {
           updateOnDuplicate = Object.keys(obj);
           obj[
-            `${ownerModel.name}${ucfirst(configStore.get("/dbPrimaryKey"))}`
-          ] = owner[configStore.get("/dbPrimaryKey")];
+            `${ownerModel.name}${ucfirst(configStore.get("/dbPrimaryKey").name)}`
+          ] = owner[configStore.get("/dbPrimaryKey").name];
         }
         data = await childModel.bulkCreate(body, {
           validate: true,
@@ -209,7 +209,7 @@ exports.associationAddManyHandler = async function (
         const body = req.body.map((obj) => ({
           ...obj,
           [association.foreignKeyField]:
-            owner[configStore.get("/dbPrimaryKey")],
+            owner[configStore.get("/dbPrimaryKey").name],
         }));
         data = await childModel.bulkCreate(body, { validate: true });
       }

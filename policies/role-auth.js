@@ -88,9 +88,9 @@ exports.promoteAuth = function (sequelize) {
   return async (req, res, next) => {
     try {
       if (!req.auth) return next();
-      if (req.body[`role${ucfirst(configStore.get("/dbPrimaryKey"))}`]) {
+      if (req.body[`role${ucfirst(configStore.get("/dbPrimaryKey").name)}`]) {
         let role = await sequelize.models.role.findByPk(
-          req.body[`role${ucfirst(configStore.get("/dbPrimaryKey"))}`]
+          req.body[`role${ucfirst(configStore.get("/dbPrimaryKey").name)}`]
         );
         let updatedRank = role.rank;
         let currentRank = req.auth.credentials.user.role.rank;

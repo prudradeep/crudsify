@@ -7,12 +7,12 @@ const { Logger } = require("../helpers/logger");
 
 exports.addRecordScope = (model, req) => {
   try {
-    /* const userId = req.auth.credentials.user[configStore.get("/dbPrimaryKey")];
+    const userId = req.auth.credentials.user[configStore.get("/dbPrimaryKey").name];
     if (!userId) {
       const message =
         'User id not found in auth credentials. Please specify the user id path in "config.dbPrimaryKey"';
       throw Boom.badRequest(message);
-    } */
+    }
     const scope = model.recordScope;
     if (scope) {
       for (const scopeType in scope) {

@@ -1,6 +1,7 @@
 "use strict";
 
 const configStore = require("../config");
+const { Logger } = require("../helpers/logger");
 const { getUserSession, generateToken } = require("../utils");
 
 exports.refreshStrategy = async function (decoded, res) {
@@ -38,7 +39,7 @@ exports.refreshStrategy = async function (decoded, res) {
               name: user.role.name,
               rank: user.role.rank,
             },
-            [Config.get("/dbPrimaryKey")]: user[configStore.get("/dbPrimaryKey")],
+            [configStore.get("/dbPrimaryKey").name]: user[configStore.get("/dbPrimaryKey").name],
           },
           scope: scope,
         };
@@ -50,7 +51,7 @@ exports.refreshStrategy = async function (decoded, res) {
           )
         );
         const sessionData = {
-          sessionId: session[configStore.get("/dbPrimaryKey")],
+          sessionId: session[configStore.get("/dbPrimaryKey").name],
           sessionKey: session.key,
           passwordHash: session.passwordHash,
           scope: decoded.scope,
@@ -58,7 +59,7 @@ exports.refreshStrategy = async function (decoded, res) {
         res.set(
           "X-Refresh-Token",
           generateToken(
-            data,
+            sessionData,
             configStore.get("/constants/EXPIRATION_PERIOD").LONG
           )
         );
@@ -73,6 +74,7 @@ exports.refreshStrategy = async function (decoded, res) {
       };
     }
   } catch (err) {
+    Logger.error(err)
     next(err);
   }
 };

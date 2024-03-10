@@ -56,10 +56,7 @@ module.exports = (sequelize, DataTypes) => {
               },
             ],
           },
-          include: [
-            { model: sequelize.models.role },
-            { model: sequelize.models.city },
-          ],
+          include: [{ model: sequelize.models.role }],
         };
 
         let user = await this.unscoped().findOne(query);
@@ -161,10 +158,10 @@ module.exports = (sequelize, DataTypes) => {
   user.policies = {
     pre: {
       update: [
-        rankAuth(sequelize, configStore.get("/dbPrimaryKey")),
+        rankAuth(sequelize, configStore.get("/dbPrimaryKey").name),
         promoteAuth(sequelize),
       ],
-      delete: [rankAuth(sequelize, configStore.get("/dbPrimaryKey"))],
+      delete: [rankAuth(sequelize, configStore.get("/dbPrimaryKey").name)],
       associate: [
         rankAuth(sequelize, "ownerId"),
         permissionAuth(sequelize, false),
@@ -185,7 +182,7 @@ module.exports = (sequelize, DataTypes) => {
           try {
             await updateHandler(user, {
               params: {
-                id: req.auth.credentials.user[configStore.get("/dbPrimaryKey")],
+                id: req.auth.credentials.user[configStore.get("/dbPrimaryKey").name],
               },
               body: req.body.profile,
             });
@@ -220,7 +217,7 @@ module.exports = (sequelize, DataTypes) => {
           try {
             const user = await findHandler(sequelize, user, {
               params: {
-                id: req.auth.credentials.user[configStore.get("/dbPrimaryKey")],
+                id: req.auth.credentials.user[configStore.get("/dbPrimaryKey").name],
               },
               query: {
                 $embed: ["role"],
@@ -248,7 +245,7 @@ module.exports = (sequelize, DataTypes) => {
           try {
             await deleteHandler(user, {
               params: {
-                id: req.auth.credentials.user[configStore.get("/dbPrimaryKey")],
+                id: req.auth.credentials.user[configStore.get("/dbPrimaryKey").name],
               },
             });
             sendResponse({ status: 204, res, next });
@@ -273,7 +270,7 @@ module.exports = (sequelize, DataTypes) => {
           checkOldPassword: async function (req, res, next) {
             const query = {
               where: {
-                id: req.auth.credentials.user[configStore.get("/dbPrimaryKey")],
+                id: req.auth.credentials.user[configStore.get("/dbPrimaryKey").name],
               },
             };
             const User = await user.unscoped().findOne(query);
@@ -336,7 +333,7 @@ module.exports = (sequelize, DataTypes) => {
           try {
             await updateHandler(User, {
               params: {
-                id: req.auth.credentials.user[configStore.get("/dbPrimaryKey")],
+                id: req.auth.credentials.user[configStore.get("/dbPrimaryKey").name],
               },
               body: {
                 password: req.password.hash,
@@ -446,7 +443,7 @@ module.exports = (sequelize, DataTypes) => {
         try {
           const query = {
             where: {
-              [configStore.get("/dbPrimaryKey")]: req.params.id,
+              [configStore.get("/dbPrimaryKey").name]: req.params.id,
             },
             include: [{ model: sequelize.role }],
           };

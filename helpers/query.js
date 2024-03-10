@@ -262,11 +262,11 @@ module.exports = {
       } else if (val === "$exclude") {
         if (_.isArray(query[val])) {
           where.push({
-            [configStore.get("/dbPrimaryKey")]: { [Op.notIn]: query[val] },
+            [configStore.get("/dbPrimaryKey").name]: { [Op.notIn]: query[val] },
           });
         } else {
           where.push({
-            [configStore.get("/dbPrimaryKey")]: { [Op.ne]: query[val] },
+            [configStore.get("/dbPrimaryKey").name]: { [Op.ne]: query[val] },
           });
         }
       }

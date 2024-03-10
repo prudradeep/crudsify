@@ -16,15 +16,15 @@ exports.logCreateMiddleware = (model) => {
       const ipAddress = getIP(req);
       let userId = null;
       if (configStore.get("/authStrategy"))
-        userId = req.auth.credentials.user[configStore.get("/dbPrimaryKey")];
+        userId = req.auth.credentials.user[configStore.get("/dbPrimaryKey").name];
       let records = res.data;
       if (records) {
         if (_.isArray(records)) {
           records = records.map(function (doc) {
-            return doc[configStore.get("/dbPrimaryKey")];
+            return doc[configStore.get("/dbPrimaryKey").name];
           });
         } else {
-          records = [records[configStore.get("/dbPrimaryKey")]];
+          records = [records[configStore.get("/dbPrimaryKey").name]];
         }
       }
 
@@ -64,7 +64,7 @@ exports.logUpdateMiddleware = (model) => {
       const ipAddress = getIP(req);
       let userId = null;
       if (configStore.get("/authStrategy"))
-        userId = req.auth.credentials.user[configStore.get("/dbPrimaryKey")];
+        userId = req.auth.credentials.user[configStore.get("/dbPrimaryKey").name];
       const records = [req.params.id];
       const log = {
         method: "PUT",
@@ -102,7 +102,7 @@ exports.logDeleteMiddleware = (model) => {
       const ipAddress = getIP(req);
       let userId = null;
       if (configStore.get("/authStrategy"))
-        userId = req.auth.credentials.user[configStore.get("/dbPrimaryKey")];
+        userId = req.auth.credentials.user[configStore.get("/dbPrimaryKey").name];
       let records = req.params.id || req.body.data;
 
       const log = {
@@ -141,7 +141,7 @@ exports.logAddMiddleware = (ownerModel, childModel, associationType) => {
       const ipAddress = getIP(req);
       let userId = null;
       if (configStore.get("/authStrategy"))
-        userId = req.auth.credentials.user[configStore.get("/dbPrimaryKey")];
+        userId = req.auth.credentials.user[configStore.get("/dbPrimaryKey").name];
       let records = [req.params.ownerId];
 
       if (req.params.childId) {
@@ -192,7 +192,7 @@ exports.logRemoveMiddleware = (ownerModel, childModel, associationType) => {
       const ipAddress = getIP(req);
       let userId = null;
       if (configStore.get("/authStrategy"))
-        userId = req.auth.credentials.user[configStore.get("/dbPrimaryKey")];
+        userId = req.auth.credentials.user[configStore.get("/dbPrimaryKey").name];
       let records = [req.params.ownerId];
 
       if (req.params.childId) {
@@ -238,7 +238,7 @@ exports.logApiMiddleware = (options = {}) => {
       let userId = null;
       if (configStore.get("/authStrategy"))
         userId = req.auth
-          ? req.auth.credentials.user[configStore.get("/dbPrimaryKey")]
+          ? req.auth.credentials.user[configStore.get("/dbPrimaryKey").name]
           : null;
 
       let payload = {};

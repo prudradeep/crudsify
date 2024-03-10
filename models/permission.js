@@ -1,6 +1,7 @@
 "use strict";
 const { Model } = require("sequelize");
 const _ = require("lodash");
+const ObjectID = require("bson-objectid");
 const {
   getPrimaryKey,
   getTimestamps,
@@ -130,7 +131,7 @@ module.exports = (sequelize, DataTypes) => {
     static async getSpecificScope(user) {
       try {
         const scope = [];
-        scope.push("user-" + md5(user[configStore.get("/dbPrimaryKey").name]));
+        scope.push("user-" + ObjectID(user[configStore.get("/dbPrimaryKey").name]));
         return scope;
       } catch (err) {
         throw err;

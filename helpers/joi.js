@@ -27,9 +27,7 @@ const isValidField = function (fieldName, field, keys = []) {
   const timestamps = Object.keys(getTimestamps(Sequelize.DataTypes));
   const metadata = Object.keys(getMetadata(Sequelize.DataTypes));
   const invalidFieldNames = [
-    "__t",
-    "__v",
-    configStore.get("/dbPrimaryKey"),
+    configStore.get("/dbPrimaryKey").name,
     ...timestamps,
     ...metadata
   ];

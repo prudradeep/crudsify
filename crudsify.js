@@ -13,6 +13,7 @@ const Crudsify = express();
 Crudsify.plugins = {};
 const CrudsifyServer = http.createServer(Crudsify);
 Crudsify.disable("etag");
+Crudsify.disable('x-powered-by');
 Crudsify.use(cors(configStore.get("/cors")));
 Crudsify.use(express.json());
 

@@ -1,5 +1,5 @@
 "use strict";
-const { Model } = require("sequelize");
+const { Model, Op } = require("sequelize");
 const _ = require("lodash");
 const { v4: uuidv4 } = require("uuid");
 const configStore = require("../config");
