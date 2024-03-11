@@ -3,7 +3,6 @@
 const Boom = require("@hapi/boom");
 const _ = require("lodash");
 const configStore = require("../config");
-const { Logger } = require("../helpers/logger");
 
 exports.addMeta = (action) => {
   return (req, res, next) => {
@@ -41,8 +40,7 @@ exports.addMeta = (action) => {
       }
       next();
     } catch (err) {
-      Logger.error(err);
-      next(Boom.badImplementation(err));
+      next(err);
     }
   };
 };

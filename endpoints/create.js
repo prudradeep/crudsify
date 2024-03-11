@@ -26,13 +26,14 @@ const {
   addAuthRecordCreatorSope,
 } = require("../middlewares/add-record-scope");
 const { addMeta } = require("../middlewares/add-meta-data");
+const { getRecordScopeMiddleware } = require("../middlewares/scope");
 const authStrategy = configStore.get("/authStrategy");
 
 /**
  * Creates an endpoint for POST /RESOURCE
  * @param model: A model.
  */
-exports.createEndpoint = function (DB, model) {
+exports.createEndpoint = function (model) {
   const routeOptions = model.routeOptions;
   if (routeOptions.allowCreate === false) return;
 
@@ -80,7 +81,7 @@ exports.createEndpoint = function (DB, model) {
     }
   }
 
-  const handler = createMiddleware(DB, model);
+  const handler = createMiddleware(model);
 
   let postPolicies = [];
   if (
@@ -114,7 +115,7 @@ exports.createEndpoint = function (DB, model) {
  * Creates an endpoint for PUT /RESOURCE/{_id}
  * @param model: A model.
  */
-exports.updateEndpoint = function (DB, model) {
+exports.updateEndpoint = function (model) {
   const routeOptions = model.routeOptions;
   if (routeOptions.allowUpdate === false) return;
 
@@ -146,11 +147,15 @@ exports.updateEndpoint = function (DB, model) {
     prePolicies = (prePolicies.root || []).concat(prePolicies.update || []);
   }
   prePolicies.forEach((val) => middlewares.push(val));
+
+  if(routeOptions.updateAuth !== false && authStrategy && configStore.get("/enableRecordScopes")){
+    middlewares.push(getRecordScopeMiddleware('update', model))
+  }
   
   if (routeOptions.updateAuth !== false && authStrategy)
     middlewares.push(addMeta("update"));
 
-  const handler = updateMiddleware(DB, model);
+  const handler = updateMiddleware(model);
 
   let postPolicies = [];
   if (
@@ -188,7 +193,7 @@ exports.updateEndpoint = function (DB, model) {
  * @param ownerModel: A model.
  * @param association: An object containing the association data/child model.
  */
-exports.associationAddManyEndpoint = function (DB, ownerModel, association) {
+exports.associationAddManyEndpoint = function (ownerModel, association) {
   const routeOptions = ownerModel.routeOptions;
   const { target, associationType } = association;
   if (
@@ -286,11 +291,20 @@ exports.associationAddManyEndpoint = function (DB, ownerModel, association) {
   if (
     routeOptions[getModelName(target)] &&
     routeOptions[getModelName(target)].addAuth !== false &&
+    authStrategy &&
+    configStore.get("/enableRecordScopes")
+  ) {
+    middlewares.push(getRecordScopeMiddleware("associate", ownerModel));
+  }
+  
+  if (
+    routeOptions[getModelName(target)] &&
+    routeOptions[getModelName(target)].addAuth !== false &&
     authStrategy
   )
     middlewares.push(addMeta("create"));
 
-  const handler = associationAddManyMiddleware(DB, ownerModel, association);
+  const handler = associationAddManyMiddleware(ownerModel, association);
 
   let postPolicies = [];
   if (
@@ -337,7 +351,7 @@ exports.associationAddManyEndpoint = function (DB, ownerModel, association) {
  * @param ownerModel: A model.
  * @param association: An object containing the association data/child model.
  */
-exports.associationAddOneEndpoint = function (DB, ownerModel, association) {
+exports.associationAddOneEndpoint = function (ownerModel, association) {
   const routeOptions = ownerModel.routeOptions;
   const { target, associationType } = association;
   if (
@@ -409,11 +423,20 @@ exports.associationAddOneEndpoint = function (DB, ownerModel, association) {
   if (
     routeOptions[getModelName(target)] &&
     routeOptions[getModelName(target)].addAuth !== false &&
+    authStrategy &&
+    configStore.get("/enableRecordScopes")
+  ) {
+    middlewares.push(getRecordScopeMiddleware("associate", ownerModel));
+  }
+
+  if (
+    routeOptions[getModelName(target)] &&
+    routeOptions[getModelName(target)].addAuth !== false &&
     authStrategy
   )
     middlewares.push(addMeta("update"));
 
-  const handler = associationAddOneMiddleware(DB, ownerModel, association);
+  const handler = associationAddOneMiddleware(ownerModel, association);
 
   let postPolicies = [];
   if (

@@ -15,6 +15,7 @@ const {
   associationGetAllMiddleware,
 } = require("../middlewares/handler");
 const { generateEndpoint } = require("./generate");
+const { getRecordScopeMiddleware } = require("../middlewares/scope");
 const authStrategy = configStore.get("/authStrategy");
 
 /**
@@ -51,6 +52,14 @@ exports.listEndpoint = function (DB, model) {
   }
   prePolicies.forEach((val) => middlewares.push(val));
 
+  if (
+    routeOptions.readAuth !== false &&
+    authStrategy &&
+    configStore.get("/enableRecordScopes")
+  ) {
+    middlewares.push(getRecordScopeMiddleware("read", model));
+  }
+
   const handler = listMiddleware(DB, model);
 
   let postPolicies = [];
@@ -75,7 +84,7 @@ exports.listEndpoint = function (DB, model) {
     scope,
     isJsonFields: true,
     model,
-    auth: (!routeOptions || routeOptions.readAuth !== false) && authStrategy,
+    auth: routeOptions.readAuth !== false && authStrategy,
     middlewares,
     handler,
     log: "Generating List endpoint for " + getModelName(model),
@@ -115,6 +124,14 @@ exports.findEndpoint = function (DB, model) {
   }
   prePolicies.forEach((val) => middlewares.push(val));
 
+  if (
+    routeOptions.readAuth !== false &&
+    authStrategy &&
+    configStore.get("/enableRecordScopes")
+  ) {
+    middlewares.push(getRecordScopeMiddleware("read", model));
+  }
+
   const handler = findMiddleware(DB, model);
 
   let postPolicies = [];
@@ -140,7 +157,7 @@ exports.findEndpoint = function (DB, model) {
       }),
     },
     scope,
-    auth: (!routeOptions || routeOptions.readAuth !== false) && authStrategy,
+    auth: routeOptions.readAuth !== false && authStrategy,
     middlewares,
     handler,
     log: "Generating Find endpoint for " + getModelName(model),
@@ -203,6 +220,15 @@ exports.associationGetAllEndpoint = function (DB, ownerModel, association) {
     prePolicies = (prePolicies.root || []).concat(prePolicies.read || []);
   }
   prePolicies.forEach((val) => middlewares.push(val));
+
+  if (
+    routeOptions[getModelName(target)] &&
+    routeOptions[getModelName(target)].readAuth !== false &&
+    authStrategy &&
+    configStore.get("/enableRecordScopes")
+  ) {
+    middlewares.push(getRecordScopeMiddleware("associate", ownerModel));
+  }
 
   const handler = associationGetAllMiddleware(DB, ownerModel, association);
 

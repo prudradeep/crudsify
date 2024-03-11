@@ -16,13 +16,14 @@ const {
   logRemoveMiddleware,
 } = require("../middlewares/audit-log");
 const { addMeta } = require("../middlewares/add-meta-data");
+const { getRecordScopeMiddleware } = require("../middlewares/scope");
 const authStrategy = configStore.get("/authStrategy");
 
 /**
  * Creates an endpoint for DELETE /RESOURCE/{_id}
  * @param model: A model.
  */
-exports.deleteOneEndpoint = function (DB, model) {
+exports.deleteOneEndpoint = function (model) {
   const routeOptions = model.routeOptions;
   if (routeOptions.allowDelete === false) return;
 
@@ -60,10 +61,18 @@ exports.deleteOneEndpoint = function (DB, model) {
   }
   prePolicies.forEach((val) => middlewares.push(val));
 
+  if (
+    routeOptions.deleteAuth !== false &&
+    authStrategy &&
+    configStore.get("/enableRecordScopes")
+  ) {
+    middlewares.push(getRecordScopeMiddleware("delete", model));
+  }
+
   if (routeOptions.deleteAuth !== false && authStrategy)
     middlewares.push(addMeta("delete"));
 
-  const handler = deleteMiddleware(DB, model);
+  const handler = deleteMiddleware(model);
 
   let postPolicies = [];
   if (
@@ -100,7 +109,7 @@ exports.deleteOneEndpoint = function (DB, model) {
  * Creates an endpoint for DELETE /RESOURCE/
  * @param model: A model.
  */
-exports.deleteManyEndpoint = function (DB, model) {
+exports.deleteManyEndpoint = function (model) {
   const routeOptions = model.routeOptions;
   if (routeOptions.allowDeleteMany === false) return;
 
@@ -144,7 +153,15 @@ exports.deleteManyEndpoint = function (DB, model) {
   }
   prePolicies.forEach((val) => middlewares.push(val));
 
-  const handler = deleteMiddleware(DB, model);
+  if (
+    routeOptions.deleteAuth !== false &&
+    authStrategy &&
+    configStore.get("/enableRecordScopes")
+  ) {
+    middlewares.push(getRecordScopeMiddleware("delete", model));
+  }
+
+  const handler = deleteMiddleware(model);
 
   let postPolicies = [];
   if (
@@ -166,7 +183,7 @@ exports.deleteManyEndpoint = function (DB, model) {
       body: payloadModel,
     },
     scope,
-    auth: (!routeOptions || routeOptions.deleteAuth !== false) && authStrategy,
+    auth: routeOptions.deleteAuth !== false && authStrategy,
     middlewares,
     handler,
     afterMiddlewares: [logDeleteMiddleware(model)],
@@ -179,7 +196,7 @@ exports.deleteManyEndpoint = function (DB, model) {
  * @param ownerModel: A model.
  * @param association: An object containing the association data/child model.
  */
-exports.associationRemoveOneEndpoint = function (DB, ownerModel, association) {
+exports.associationRemoveOneEndpoint = function (ownerModel, association) {
   const routeOptions = ownerModel.routeOptions;
   const { target, associationType } = association;
   if (
@@ -234,11 +251,20 @@ exports.associationRemoveOneEndpoint = function (DB, ownerModel, association) {
   if (
     routeOptions[getModelName(target)] &&
     routeOptions[getModelName(target)].removeAuth !== false &&
+    authStrategy &&
+    configStore.get("/enableRecordScopes")
+  ) {
+    middlewares.push(getRecordScopeMiddleware("associate", ownerModel));
+  }
+
+  if (
+    routeOptions[getModelName(target)] &&
+    routeOptions[getModelName(target)].removeAuth !== false &&
     authStrategy
   )
     middlewares.push(addMeta("delete"));
 
-  const handler = associationRemoveOneMiddleware(DB, ownerModel, association);
+  const handler = associationRemoveOneMiddleware(ownerModel, association);
 
   let postPolicies = [];
   if (
@@ -287,7 +313,7 @@ exports.associationRemoveOneEndpoint = function (DB, ownerModel, association) {
  * @param ownerModel: A model.
  * @param association: An object containing the association data/child model.
  */
-exports.associationRemoveManyEndpoint = function (DB, ownerModel, association) {
+exports.associationRemoveManyEndpoint = function (ownerModel, association) {
   const routeOptions = ownerModel.routeOptions;
   const { target, associationType } = association;
   if (
@@ -349,11 +375,20 @@ exports.associationRemoveManyEndpoint = function (DB, ownerModel, association) {
   if (
     routeOptions[getModelName(target)] &&
     routeOptions[getModelName(target)].removeAuth !== false &&
+    authStrategy &&
+    configStore.get("/enableRecordScopes")
+  ) {
+    middlewares.push(getRecordScopeMiddleware("associate", ownerModel));
+  }
+
+  if (
+    routeOptions[getModelName(target)] &&
+    routeOptions[getModelName(target)].removeAuth !== false &&
     authStrategy
   )
     middlewares.push(addMeta("delete"));
 
-  const handler = associationRemoveManyMiddleware(DB, ownerModel, association);
+  const handler = associationRemoveManyMiddleware(ownerModel, association);
 
   let postPolicies = [];
   if (

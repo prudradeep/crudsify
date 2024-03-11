@@ -4,7 +4,6 @@ const Boom = require("@hapi/boom");
 const _ = require("lodash");
 const md5 = require("md5");
 const configStore = require("../config");
-const { Logger } = require("../helpers/logger");
 
 exports.addAuthRecordCreatorSope = (model) => {
   return (req, res, next) => {
@@ -41,8 +40,7 @@ exports.addAuthRecordCreatorSope = (model) => {
       });
       next();
     } catch (err) {
-      Logger.error(err);
-      next(Boom.badImplementation(err));
+      next(err)
     }
   };
 };
@@ -72,8 +70,7 @@ exports.addRecordScope = (model) => {
       }
       next();
     } catch (err) {
-      Logger.error(err);
-      next(Boom.badImplementation(err));
+      next(err)
     }
   };
 };

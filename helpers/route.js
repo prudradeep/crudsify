@@ -31,10 +31,10 @@ for (const model in DB.sequelize.models) {
     
     listEndpoint(DB, DB[model]);
     findEndpoint(DB, DB[model]);
-    createEndpoint(DB, DB[model]);
-    updateEndpoint(DB, DB[model]);
-    deleteOneEndpoint(DB, DB[model]);
-    deleteManyEndpoint(DB, DB[model]);
+    createEndpoint(DB[model]);
+    updateEndpoint(DB[model]);
+    deleteOneEndpoint(DB[model]);
+    deleteManyEndpoint(DB[model]);
 
 
     //Association
@@ -45,10 +45,10 @@ for (const model in DB.sequelize.models) {
         associationType === "BelongsToMany"
       ) {
         associationGetAllEndpoint(DB, DB[model], assoc);
-        associationAddOneEndpoint(DB, DB[model], assoc);
-        associationAddManyEndpoint(DB, DB[model], assoc);
-        associationRemoveOneEndpoint(DB, DB[model], assoc);
-        associationRemoveManyEndpoint(DB, DB[model], assoc);
+        associationAddOneEndpoint(DB[model], assoc);
+        associationAddManyEndpoint(DB[model], assoc);
+        associationRemoveOneEndpoint(DB[model], assoc);
+        associationRemoveManyEndpoint(DB[model], assoc);
       }
     }
   }

@@ -52,7 +52,7 @@ exports.findMiddleware = function (DB, model) {
   };
 };
 
-exports.createMiddleware = function (DB, model) {
+exports.createMiddleware = function (model) {
   return async function (req, res, next) {
     try {
       const data = await createHandler(model, req);
@@ -70,7 +70,7 @@ exports.createMiddleware = function (DB, model) {
   };
 };
 
-exports.deleteMiddleware = function (DB, model) {
+exports.deleteMiddleware = function (model) {
   return async function (req, res, next) {
     try {
       await deleteHandler(model, req);
@@ -86,7 +86,7 @@ exports.deleteMiddleware = function (DB, model) {
   };
 };
 
-exports.updateMiddleware = function (DB, model) {
+exports.updateMiddleware = function (model) {
   return async function (req, res, next) {
     try {
       const data = await updateHandler(model, req);
@@ -126,7 +126,7 @@ exports.associationGetAllMiddleware = function (DB, ownerModel, association) {
   };
 };
 
-exports.associationAddOneMiddleware = function (DB, ownerModel, association) {
+exports.associationAddOneMiddleware = function (ownerModel, association) {
   return async function (req, res, next) {
     try {
       const data = await associationAddOneHandler(ownerModel, association, req);
@@ -144,7 +144,7 @@ exports.associationAddOneMiddleware = function (DB, ownerModel, association) {
   };
 };
 
-exports.associationAddManyMiddleware = function (DB, ownerModel, association) {
+exports.associationAddManyMiddleware = function (ownerModel, association) {
   return async function (req, res, next) {
     try {
       const data = await associationAddManyHandler(
@@ -166,7 +166,7 @@ exports.associationAddManyMiddleware = function (DB, ownerModel, association) {
   };
 };
 
-exports.associationRemoveOneMiddleware = function (DB, ownerModel, association) {
+exports.associationRemoveOneMiddleware = function (ownerModel, association) {
   return async function (req, res, next) {
     try {
       await associationRemoveOneHandler(ownerModel, association, req);
@@ -182,7 +182,7 @@ exports.associationRemoveOneMiddleware = function (DB, ownerModel, association) 
   };
 };
 
-exports.associationRemoveManyMiddleware = function (DB, ownerModel, association) {
+exports.associationRemoveManyMiddleware = function (ownerModel, association) {
   return async function (req, res, next) {
     try {
       await associationRemoveManyHandler(ownerModel, association, req);

@@ -1,6 +1,7 @@
 "use strict";
 
 const Boom = require("@hapi/boom");
+const { Op } = require("sequelize");
 const { paginateList, paginateAssocList } = require("./paginate");
 const { createWhereCondition, getEmbeds } = require("../helpers/query");
 const { handleError } = require("./error");
@@ -19,6 +20,11 @@ exports.listHandler = async function (DB, model, req = { query: {} }) {
       handleError(err, "There was a preprocessing error.", Boom.badRequest);
     }
     const conditions = createWhereCondition(req.query, model);
+    //Fetch only authorized records
+    if (req.recordReadAuth) {
+      conditions.where[Op.and].push(req.recordReadAuth);
+    }
+
     if (req.query && req.query.$count) {
       const count = await model.count(conditions);
       return { count };
