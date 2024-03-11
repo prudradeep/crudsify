@@ -2,10 +2,10 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    const _ = require('lodash');
+    const _ = require("lodash");
     const configStore = require("../config");
-    const PERMISSION_STATES = configStore.get("/constants/PERMISSION_STATES");
-    const { ucfirst } = require('../utils');
+    const { PERMISSION_STATES } = require("../config/constants");
+    const { ucfirst } = require("../utils");
     const { getTimestamps, getMetadata } = require("../helpers/model");
     await queryInterface.createTable("roles_permissions", {
       [`role${ucfirst(configStore.get("/dbPrimaryKey").name)}`]: {

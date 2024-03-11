@@ -3,8 +3,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    const configStore = require("../config");
-    const USER_ROLES = configStore.get("/constants/USER_ROLES");
+    const { USER_ROLES } = require("../config/constants");
     const roles = [
       {
         name: USER_ROLES.SUPER_ADMIN,

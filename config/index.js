@@ -89,6 +89,15 @@ const Config = {
   },
 
   /**
+   * Default limit to fetch records
+   */
+  limit: {
+    $filter: "env",
+    production: 20,
+    $default: 20,
+  },
+
+  /**
    * Authentication strategy to be used for all generated endpoints.
    * Set to false for no authentication.
    * @type {boolean/string}
@@ -130,7 +139,7 @@ const Config = {
     read: false,
     update: false,
     delete: false,
-    associate: false
+    associate: false,
   },
 
   /**

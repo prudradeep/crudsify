@@ -6,6 +6,7 @@ const configStore = require("../config");
 const { tokenStrategy } = require("../strategies/token");
 const { sessionStrategy } = require("../strategies/session");
 const { refreshStrategy } = require("../strategies/refresh");
+const { AUTH_STRATEGIES } = require("../config/constants");
 
 exports.basicAuthMiddleware = (req, res, next) => {
   const authheader = req.headers.authorization;
@@ -32,7 +33,6 @@ exports.authMiddleware = async (req, res, next) => {
       configStore.get("/jwt").secret
     );
     const authStrategy = configStore.get("/authStrategy");
-    const AUTH_STRATEGIES = configStore.get("/constants/AUTH_STRATEGIES");
     switch (authStrategy) {
       case AUTH_STRATEGIES.TOKEN:
         validate = await tokenStrategy(decoded, next);

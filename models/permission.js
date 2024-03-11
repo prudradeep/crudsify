@@ -15,8 +15,8 @@ const { listHandler } = require("../handlers/list");
 const { sendResponse } = require("../helpers/sendResponse");
 const { generateEndpoint } = require("../endpoints/generate");
 const { generateJoiListQueryModel } = require("../helpers/joi");
-const PERMISSION_STATES = configStore.get("/constants/PERMISSION_STATES");
-const USER_ROLES = configStore.get("/constants/USER_ROLES");
+const { USER_ROLES, PERMISSION_STATES } = require("../config/constants");
+
 module.exports = (sequelize, DataTypes) => {
   class permission extends Model {
     /**

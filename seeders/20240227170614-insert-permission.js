@@ -3,9 +3,8 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    const configStore = require("../config");
     const superAdminAssignScope = require("../config/super-admin-assign-scopes");
-    const USER_ROLES = configStore.get("/constants/USER_ROLES");
+    const { USER_ROLES } = require("../config/constants");
     const DB = require("../models");
 
     let permissions = [

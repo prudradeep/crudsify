@@ -4,6 +4,7 @@ const _ = require("lodash");
 const configStore = require("../config");
 const { getIP } = require("../utils");
 const { AuditLogger } = require("../helpers/logger");
+const { AUDIT_LOG_STORAGE } = require("../config/constants");
 
 /**
  * Middleware to log create actions.
@@ -283,11 +284,12 @@ exports.logApiMiddleware = (options = {}) => {
 exports.saveLogMiddleware = (req, res, next) => {
   try {
     if (configStore.get("/enableAuditLog")) {
-      const logStorage = configStore.get("/constants/AUDIT_LOG_STORAGE");
       if (req.auditLog) {
-        if (configStore.get("/auditLogStorage") === logStorage.FILE) {
+        if (configStore.get("/auditLogStorage") === AUDIT_LOG_STORAGE.FILE) {
           AuditLogger.log("audit", JSON.stringify(req.auditLog));
-        } else if (configStore.get("/auditLogStorage") === logStorage.DB) {
+        } else if (
+          configStore.get("/auditLogStorage") === AUDIT_LOG_STORAGE.DB
+        ) {
           const { auditLog } = require("../models");
           const emptyJSON = [];
           if (!req.auditLog.records) req.auditLog.records = emptyJSON;

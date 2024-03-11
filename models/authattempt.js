@@ -1,12 +1,8 @@
 "use strict";
 const { Model, Op } = require("sequelize");
 const _ = require("lodash");
-const configStore = require("../config");
-const {
-  getPrimaryKey,
-  getTimestamps,
-  getMetadata,
-} = require("../helpers/model");
+const { getPrimaryKey, getTimestamps } = require("../helpers/model");
+const { LOCKOUT_PERIOD, AUTH_ATTEMPTS } = require("../config/constants");
 module.exports = (sequelize, DataTypes) => {
   class authAttempt extends Model {
     /**
@@ -33,7 +29,6 @@ module.exports = (sequelize, DataTypes) => {
 
     static async abuseDetected(ip, id) {
       try {
-        const LOCKOUT_PERIOD = configStore.get("/constants/LOCKOUT_PERIOD");
         const expirationDate = LOCKOUT_PERIOD
           ? { [Op.gt]: Date.now() - LOCKOUT_PERIOD * 60000 }
           : { [Op.lt]: Date.now() };
@@ -56,7 +51,6 @@ module.exports = (sequelize, DataTypes) => {
 
         const abusiveIpUserCount = await this.count(query);
 
-        const AUTH_ATTEMPTS = configStore.get("/constants/AUTH_ATTEMPTS");
         const ipLimitReached = abusiveIpCount >= AUTH_ATTEMPTS.FOR_IP;
         const ipUserLimitReached =
           abusiveIpUserCount >= AUTH_ATTEMPTS.FOR_IP_AND_USER;

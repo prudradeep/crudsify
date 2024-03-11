@@ -2,8 +2,7 @@
 const { Model } = require("sequelize");
 const _ = require("lodash");
 const { getTimestamps, getMetadata } = require("../helpers/model");
-const configStore = require("../config");
-const PERMISSION_STATES = configStore.get("/constants/PERMISSION_STATES");
+const { PERMISSION_STATES } = require("../config/constants");
 module.exports = (sequelize, DataTypes) => {
   class roles_permissions extends Model {
     /**

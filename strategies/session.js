@@ -1,6 +1,7 @@
 "use strict";
 
 const configStore = require("../config");
+const { EXPIRATION_PERIOD } = require("../config/constants");
 const { generateToken, getUserSession } = require("../utils");
 
 exports.sessionStrategy = async function (decoded, res, next) {
@@ -21,7 +22,7 @@ exports.sessionStrategy = async function (decoded, res, next) {
         "X-Access-Token",
         generateToken(
           data,
-          configStore.get("/constants/EXPIRATION_PERIOD").LONG
+          EXPIRATION_PERIOD.LONG
         )
       );
     }
