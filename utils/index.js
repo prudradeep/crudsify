@@ -6,12 +6,10 @@ const { v4: uuidv4 } = require("uuid");
 const Jwt = require("jsonwebtoken");
 const configStore = require("../config");
 
-const ucfirst = function (string) {
-  return string.charAt(0).toUpperCase() + string.substring(1).toLowerCase();
-};
-
 module.exports = {
-  ucfirst: ucfirst,
+  ucfirst: (string) => {
+    return string.charAt(0).toUpperCase() + string.substring(1).toLowerCase();
+  },
   sortObjectByKeys: (o) => {
     return Object.keys(o)
       .sort()
@@ -35,23 +33,6 @@ module.exports = {
       req.connection.remoteAddress ||
       req.ip
     );
-  },
-  getUserSession: async (sessionId, sessionKey) => {
-    try {
-      const that = this;
-      const { user: User, session: Session, role } = require("../models");
-      const session = await Session.findByCredentials(sessionId, sessionKey);
-      if (!session) {
-        return { user: null, session };
-      }
-      const user = await User.unscoped().findByPk(
-        session[`user${ucfirst(configStore.get("/dbPrimaryKey").name)}`],
-        { include: { model: role } }
-      );
-      return { user, session };
-    } catch (err) {
-      throw err;
-    }
   },
   generateToken: (data, expirationPeriod) => {
     try {
