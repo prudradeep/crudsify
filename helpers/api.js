@@ -8,14 +8,14 @@ const { Logger } = require("../helpers/logger");
 //Generate api routes
 const directories = [];
 if (configStore.get("/enableCrudsifyModelsApis") === true) {
-  const crudsifyApiPath = path.join(__dirname, "..", "apis");
+  const crudsifyApiPath = path.join(__dirname, "/../", "apis");
   directories.push(crudsifyApiPath);
 }
 
 let apiPath = "";
 if (configStore.get("/absoluteApiPath") === true)
   apiPath = configStore.get("/apiPath");
-else apiPath = path.join(__dirname, "../../..", configStore.get("/apiPath"));
+else apiPath = path.join(__dirname, "/../../../", configStore.get("/apiPath"));
 directories.push(apiPath);
 
 try {

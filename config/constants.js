@@ -1,13 +1,14 @@
+const fs = require("fs");
+const path = require("path");
+let userConstants = {};
+const constPath = path.join(__dirname, "/../../../", "config", "constants.js");
+if (fs.existsSync(constPath)) userConstants = require(constPath);
+
 module.exports = {
-  WEB_TITLE: process.env.TITLE,
   AUTH_STRATEGIES: {
     TOKEN: "standard-jwt",
     SESSION: "jwt-with-session",
     REFRESH: "jwt-with-session-and-refresh-token",
-  },
-  AUDIT_LOG_STORAGE: {
-    FILE: "file",
-    DB: "database",
   },
   PERMISSION_STATES: {
     INCLUDED: "Included",
@@ -33,5 +34,10 @@ module.exports = {
   AUTH_ATTEMPTS: {
     FOR_IP: 50,
     FOR_IP_AND_USER: 5,
+  },
+  ...userConstants,
+  AUDIT_LOG_STORAGE: {
+    FILE: "file",
+    DB: "database",
   },
 };

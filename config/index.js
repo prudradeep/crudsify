@@ -3,8 +3,14 @@
 require("dotenv").config();
 
 const Confidence = require("confidence");
+const fs = require("fs");
+const path = require("path");
 const dbConfig = require("./config");
 const constants = require("./constants");
+
+let userConfig = {};
+const userConfigPath = path.join(__dirname, "/../../../", "config", "index.js");
+if (fs.existsSync(userConfigPath)) userConfig = require(userConfigPath);
 
 /* The criteria to filter Config values by (NODE_ENV). Typically includes:
  * - development
@@ -14,9 +20,7 @@ const constants = require("./constants");
  */
 const Config = {
   service: "APIs",
-  port: process.env.SERVER_PORT,
   logDir: "./logs/",
-  constants: constants,
   cors: {
     $filter: "env",
     production: {
@@ -27,17 +31,6 @@ const Config = {
       origin: "*",
       exposedHeaders: ["X-Access-Token", "X-Refresh-Token"],
     },
-  },
-  basicAuth: {
-    username: process.env.BASIC_AUTH_USERNAME,
-    password: process.env.BASIC_AUTH_PASSWORD,
-  },
-  database: {
-    $meta: "Database configuration",
-    $filter: "env",
-    uat: dbConfig.uat,
-    production: dbConfig.production,
-    $default: dbConfig.development,
   },
   dbPrimaryKey: {
     $filter: "env",
@@ -314,6 +307,19 @@ const Config = {
    * @type {string}
    */
   pluginPath: "plugins",
+
+  ...userConfig,
+  basicAuth: {
+    username: process.env.BASIC_AUTH_USERNAME,
+    password: process.env.BASIC_AUTH_PASSWORD,
+  },
+  database: {
+    $meta: "Database configuration",
+    $filter: "env",
+    uat: dbConfig.uat,
+    production: dbConfig.production,
+    $default: dbConfig.development,
+  },
 };
 
 const configStore = new Confidence.Store(Config);

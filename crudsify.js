@@ -7,7 +7,6 @@ const { Logger } = require("./helpers/logger");
 const { sequelize } = require("./models");
 const configStore = require("./config");
 const { errorResponder, handleNotFoundError } = require("./middlewares/error");
-const PORT = configStore.get("/port");
 
 const Crudsify = express();
 Crudsify.plugins = {};
@@ -29,8 +28,8 @@ const start = async () => {
     if (configStore.get("/enableSwagger")) Crudsify.use("/", swaggerRouter);
     Crudsify.use(errorResponder);
     Crudsify.use(handleNotFoundError);
-    CrudsifyServer.listen(PORT, () => {
-      Logger.info(`Crudsify Server listening on port ${PORT}`);
+    CrudsifyServer.listen(process.env.SERVER_PORT, () => {
+      Logger.info(`Crudsify Server listening on port ${process.env.SERVER_PORT}`);
     });
   } catch (err) {
     Logger.error(err);
