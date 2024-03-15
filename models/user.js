@@ -23,7 +23,7 @@ const { findHandler } = require("../handlers/list");
 const { deleteHandler } = require("../handlers/remove");
 const USER_ROLES = require("../config/constants").USER_ROLES;
 const { REQUIRED_PASSWORD_STRENGTH } = require("../config/constants");
-const authStrategy = configStore.get("/authStrategy");
+const authentication = configStore.get("/authentication");
 const param = Joi.object({
   id: Joi.number().required(),
 });
@@ -170,7 +170,7 @@ module.exports = (sequelize, DataTypes) => {
   };
 
   user.extraEndpoints = [];
-  if (authStrategy) {
+  if (authentication) {
     user.extraEndpoints = [
       () => {
         const updateCurrentUserProfileHandler = async function (
@@ -208,7 +208,7 @@ module.exports = (sequelize, DataTypes) => {
             }),
           },
           scope: _.values(USER_ROLES),
-          auth: authStrategy,
+          auth: authentication,
           handler: updateCurrentUserProfileHandler,
           log: `Generating Update Current User Profile endpoint for user.`,
         });
@@ -238,7 +238,7 @@ module.exports = (sequelize, DataTypes) => {
           summary: "Get current user account.",
           tags: ["user"],
           scope: _.values(USER_ROLES),
-          auth: authStrategy,
+          auth: authentication,
           handler: getCurrentUserHandler,
           log: `Generating Get Current User endpoint for user.`,
         });
@@ -265,7 +265,7 @@ module.exports = (sequelize, DataTypes) => {
           summary: "Delete current user account.",
           tags: ["user"],
           scope: _.values(USER_ROLES),
-          auth: authStrategy,
+          auth: authentication,
           handler: deleteCurrentUserHandler,
           log: `Generating Delete Current User endpoint for user.`,
         });
@@ -381,7 +381,7 @@ module.exports = (sequelize, DataTypes) => {
             }),
           },
           scope: _.values(USER_ROLES),
-          auth: authStrategy,
+          auth: authentication,
           middlewares: Object.values(updateCurrentUserPasswordMiddleware),
           handler: updateCurrentUserPasswordHandler,
           log: `Generating Update Current User Password endpoint for user.`,
@@ -413,7 +413,7 @@ module.exports = (sequelize, DataTypes) => {
           param,
         },
         scope: ["root", "activateUser", "!-activateUser"],
-        auth: authStrategy,
+        auth: authentication,
         middlewares: [rankAuth(sequelize, "id")],
         handler: activateAccountHandler,
         log: `Generating Activate Account endpoint for user.`,
@@ -441,7 +441,7 @@ module.exports = (sequelize, DataTypes) => {
           param,
         },
         scope: ["root", "deactivateUser", "!-deactivateUser"],
-        auth: authStrategy,
+        auth: authentication,
         middlewares: [rankAuth(sequelize, "id")],
         handler: deactivateAccountHandler,
         log: `Generating deactivate Account endpoint for user.`,
@@ -475,7 +475,7 @@ module.exports = (sequelize, DataTypes) => {
           param,
         },
         scope: ["root", "readUserScope", "!-readUserScope"],
-        auth: authStrategy,
+        auth: authentication,
         handler: getUserScopeHandler,
         log: `Generating Get User effective permissions endpoint.`,
       });

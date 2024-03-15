@@ -69,12 +69,12 @@ exports.getTimestamps = (DataTypes) => {
 exports.getMetadata = (DataTypes) => {
   let metadata = {};
 
-  if (configStore.get("/enableCreatedBy") && configStore.get("/authStrategy")) {
+  if (configStore.get("/enableCreatedBy") && configStore.get("/authentication")) {
     metadata.createdBy = {
       type: DataTypes[configStore.get("/dbPrimaryKey").type],
     };
   }
-  if (configStore.get("/enableUpdatedBy") && configStore.get("/authStrategy")) {
+  if (configStore.get("/enableUpdatedBy") && configStore.get("/authentication")) {
     metadata.updatedBy = {
       type: DataTypes[configStore.get("/dbPrimaryKey").type],
     };
@@ -82,7 +82,7 @@ exports.getMetadata = (DataTypes) => {
   if (
     configStore.get("/enableDeletedBy") &&
     configStore.get("/modelOptions").paranoid &&
-    configStore.get("/authStrategy")
+    configStore.get("/authentication")
   ) {
     metadata.deletedBy = {
       type: DataTypes[configStore.get("/dbPrimaryKey").type],

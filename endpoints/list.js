@@ -16,7 +16,7 @@ const {
 } = require("../middlewares/handler");
 const { generateEndpoint } = require("./generate");
 const { getRecordScopeMiddleware } = require("../middlewares/scope");
-const authStrategy = configStore.get("/authStrategy");
+const authentication = configStore.get("/authentication");
 
 /**
  * Creates an endpoint for GET /RESOURCE.
@@ -30,7 +30,7 @@ exports.listEndpoint = function (DB, model) {
 
   let middlewares = [];
   let scope = [];
-  if ((!routeOptions || routeOptions.readAuth !== false) && authStrategy) {
+  if ((!routeOptions || routeOptions.readAuth !== false) && authentication) {
     scope = getScopes(model, "read");
     if (!_.isEmpty(scope)) {
       if (configStore.get("/logScopes")) {
@@ -54,7 +54,7 @@ exports.listEndpoint = function (DB, model) {
 
   if (
     routeOptions.readAuth !== false &&
-    authStrategy &&
+    authentication &&
     configStore.get("/enableRecordScopes")
   ) {
     middlewares.push(getRecordScopeMiddleware("read", model));
@@ -84,7 +84,7 @@ exports.listEndpoint = function (DB, model) {
     scope,
     isJsonFields: true,
     model,
-    auth: routeOptions.readAuth !== false && authStrategy,
+    auth: routeOptions.readAuth !== false && authentication,
     middlewares,
     handler,
     log: "Generating List endpoint for " + getModelName(model),
@@ -103,7 +103,7 @@ exports.findEndpoint = function (DB, model) {
 
   let middlewares = [];
   let scope = [];
-  if ((!routeOptions || routeOptions.readAuth !== false) && authStrategy) {
+  if ((!routeOptions || routeOptions.readAuth !== false) && authentication) {
     scope = getScopes(model, "read");
     if (!_.isEmpty(scope)) {
       if (configStore.get("/logScopes")) {
@@ -126,7 +126,7 @@ exports.findEndpoint = function (DB, model) {
 
   if (
     routeOptions.readAuth !== false &&
-    authStrategy &&
+    authentication &&
     configStore.get("/enableRecordScopes")
   ) {
     middlewares.push(getRecordScopeMiddleware("read", model));
@@ -157,7 +157,7 @@ exports.findEndpoint = function (DB, model) {
       }),
     },
     scope,
-    auth: routeOptions.readAuth !== false && authStrategy,
+    auth: routeOptions.readAuth !== false && authentication,
     middlewares,
     handler,
     log: "Generating Find endpoint for " + getModelName(model),
@@ -189,7 +189,7 @@ exports.associationGetAllEndpoint = function (DB, ownerModel, association) {
   if (
     routeOptions[getModelName(target)] &&
     routeOptions[getModelName(target)].readAuth !== false &&
-    authStrategy
+    authentication
   ) {
     scope = getScopes(ownerModel, "associate");
     const getScope =
@@ -224,7 +224,7 @@ exports.associationGetAllEndpoint = function (DB, ownerModel, association) {
   if (
     routeOptions[getModelName(target)] &&
     routeOptions[getModelName(target)].readAuth !== false &&
-    authStrategy &&
+    authentication &&
     configStore.get("/enableRecordScopes")
   ) {
     middlewares.push(getRecordScopeMiddleware("associate", ownerModel));
@@ -260,7 +260,7 @@ exports.associationGetAllEndpoint = function (DB, ownerModel, association) {
     auth:
       routeOptions[getModelName(target)] &&
       routeOptions[getModelName(target)].readAuth !== false &&
-      authStrategy,
+      authentication,
     middlewares,
     handler,
     log:

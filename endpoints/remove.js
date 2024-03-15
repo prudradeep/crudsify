@@ -17,7 +17,7 @@ const {
 } = require("../middlewares/audit-log");
 const { addMeta } = require("../middlewares/add-meta-data");
 const { getRecordScopeMiddleware } = require("../middlewares/scope");
-const authStrategy = configStore.get("/authStrategy");
+const authentication = configStore.get("/authentication");
 
 /**
  * Creates an endpoint for DELETE /RESOURCE/{_id}
@@ -31,7 +31,7 @@ exports.deleteOneEndpoint = function (model) {
 
   let middlewares = [];
   let scope = [];
-  if (routeOptions.deleteAuth !== false && authStrategy) {
+  if (routeOptions.deleteAuth !== false && authentication) {
     scope = getScopes(model, "delete");
     if (!_.isEmpty(scope)) {
       if (configStore.get("/logScopes")) {
@@ -63,13 +63,13 @@ exports.deleteOneEndpoint = function (model) {
 
   if (
     routeOptions.deleteAuth !== false &&
-    authStrategy &&
+    authentication &&
     configStore.get("/enableRecordScopes")
   ) {
     middlewares.push(getRecordScopeMiddleware("delete", model));
   }
 
-  if (routeOptions.deleteAuth !== false && authStrategy)
+  if (routeOptions.deleteAuth !== false && authentication)
     middlewares.push(addMeta("delete"));
 
   const handler = deleteMiddleware(model);
@@ -97,7 +97,7 @@ exports.deleteOneEndpoint = function (model) {
       }),
     },
     scope,
-    auth: routeOptions.deleteAuth !== false && authStrategy,
+    auth: routeOptions.deleteAuth !== false && authentication,
     middlewares,
     handler,
     afterMiddlewares: [logDeleteMiddleware(model)],
@@ -117,7 +117,7 @@ exports.deleteManyEndpoint = function (model) {
 
   let middlewares = [];
   let scope = [];
-  if ((!routeOptions || routeOptions.deleteAuth !== false) && authStrategy) {
+  if ((!routeOptions || routeOptions.deleteAuth !== false) && authentication) {
     scope = getScopes(model, "delete");
     if (!_.isEmpty(scope)) {
       if (configStore.get("/logScopes")) {
@@ -155,7 +155,7 @@ exports.deleteManyEndpoint = function (model) {
 
   if (
     routeOptions.deleteAuth !== false &&
-    authStrategy &&
+    authentication &&
     configStore.get("/enableRecordScopes")
   ) {
     middlewares.push(getRecordScopeMiddleware("delete", model));
@@ -183,7 +183,7 @@ exports.deleteManyEndpoint = function (model) {
       body: payloadModel,
     },
     scope,
-    auth: routeOptions.deleteAuth !== false && authStrategy,
+    auth: routeOptions.deleteAuth !== false && authentication,
     middlewares,
     handler,
     afterMiddlewares: [logDeleteMiddleware(model)],
@@ -216,7 +216,7 @@ exports.associationRemoveOneEndpoint = function (ownerModel, association) {
   if (
     routeOptions[getModelName(target)] &&
     routeOptions[getModelName(target)].removeAuth !== false &&
-    authStrategy
+    authentication
   ) {
     scope = getScopes(ownerModel, "associate");
     const removeScope =
@@ -251,7 +251,7 @@ exports.associationRemoveOneEndpoint = function (ownerModel, association) {
   if (
     routeOptions[getModelName(target)] &&
     routeOptions[getModelName(target)].removeAuth !== false &&
-    authStrategy &&
+    authentication &&
     configStore.get("/enableRecordScopes")
   ) {
     middlewares.push(getRecordScopeMiddleware("associate", ownerModel));
@@ -260,7 +260,7 @@ exports.associationRemoveOneEndpoint = function (ownerModel, association) {
   if (
     routeOptions[getModelName(target)] &&
     routeOptions[getModelName(target)].removeAuth !== false &&
-    authStrategy
+    authentication
   )
     middlewares.push(addMeta("delete"));
 
@@ -294,7 +294,7 @@ exports.associationRemoveOneEndpoint = function (ownerModel, association) {
     auth:
       routeOptions[getModelName(target)] &&
       routeOptions[getModelName(target)].removeAuth !== false &&
-      authStrategy,
+      authentication,
     middlewares,
     handler,
     afterMiddlewares: [
@@ -333,7 +333,7 @@ exports.associationRemoveManyEndpoint = function (ownerModel, association) {
   if (
     routeOptions[getModelName(target)] &&
     routeOptions[getModelName(target)].removeAuth !== false &&
-    authStrategy
+    authentication
   ) {
     scope = getScopes(ownerModel, "associate");
     const removeScope =
@@ -375,7 +375,7 @@ exports.associationRemoveManyEndpoint = function (ownerModel, association) {
   if (
     routeOptions[getModelName(target)] &&
     routeOptions[getModelName(target)].removeAuth !== false &&
-    authStrategy &&
+    authentication &&
     configStore.get("/enableRecordScopes")
   ) {
     middlewares.push(getRecordScopeMiddleware("associate", ownerModel));
@@ -384,7 +384,7 @@ exports.associationRemoveManyEndpoint = function (ownerModel, association) {
   if (
     routeOptions[getModelName(target)] &&
     routeOptions[getModelName(target)].removeAuth !== false &&
-    authStrategy
+    authentication
   )
     middlewares.push(addMeta("delete"));
 
@@ -418,7 +418,7 @@ exports.associationRemoveManyEndpoint = function (ownerModel, association) {
     auth:
       routeOptions[getModelName(target)] &&
       routeOptions[getModelName(target)].removeAuth !== false &&
-      authStrategy,
+      authentication,
     middlewares,
     handler,
     afterMiddlewares: [

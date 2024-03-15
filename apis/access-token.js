@@ -4,9 +4,9 @@ const Boom = require("@hapi/boom");
 const { generateEndpoint } = require("../endpoints/generate");
 const { sendResponse } = require("../helpers/sendResponse");
 const configStore = require("../config");
-const authStrategy = configStore.get("/authStrategy");
+const authentication = configStore.get("/authentication");
 
-if (authStrategy) {
+if (authentication) {
   generateEndpoint({
     method: "get",
     path: `/access-token`,

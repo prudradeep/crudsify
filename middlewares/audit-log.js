@@ -16,7 +16,7 @@ exports.logCreateMiddleware = (model) => {
     try {
       const ipAddress = getIP(req);
       let userId = null;
-      if (configStore.get("/authStrategy"))
+      if (configStore.get("/authentication"))
         userId =
           req.auth.credentials.user[configStore.get("/dbPrimaryKey").name];
       let records = res.data;
@@ -65,7 +65,7 @@ exports.logUpdateMiddleware = (model) => {
     try {
       const ipAddress = getIP(req);
       let userId = null;
-      if (configStore.get("/authStrategy"))
+      if (configStore.get("/authentication"))
         userId =
           req.auth.credentials.user[configStore.get("/dbPrimaryKey").name];
       const records = [req.params.id];
@@ -104,7 +104,7 @@ exports.logDeleteMiddleware = (model) => {
     try {
       const ipAddress = getIP(req);
       let userId = null;
-      if (configStore.get("/authStrategy"))
+      if (configStore.get("/authentication"))
         userId =
           req.auth.credentials.user[configStore.get("/dbPrimaryKey").name];
       let records = req.params.id || req.body.data;
@@ -144,7 +144,7 @@ exports.logAddMiddleware = (ownerModel, childModel, associationType) => {
     try {
       const ipAddress = getIP(req);
       let userId = null;
-      if (configStore.get("/authStrategy"))
+      if (configStore.get("/authentication"))
         userId =
           req.auth.credentials.user[configStore.get("/dbPrimaryKey").name];
       let records = [req.params.ownerId];
@@ -196,7 +196,7 @@ exports.logRemoveMiddleware = (ownerModel, childModel, associationType) => {
     try {
       const ipAddress = getIP(req);
       let userId = null;
-      if (configStore.get("/authStrategy"))
+      if (configStore.get("/authentication"))
         userId =
           req.auth.credentials.user[configStore.get("/dbPrimaryKey").name];
       let records = [req.params.ownerId];
@@ -243,7 +243,7 @@ exports.logApiMiddleware = (options = {}) => {
       try {
         const ipAddress = getIP(req);
         let userId = null;
-        if (configStore.get("/authStrategy"))
+        if (configStore.get("/authentication"))
           userId = req.auth
             ? req.auth.credentials.user[configStore.get("/dbPrimaryKey").name]
             : null;

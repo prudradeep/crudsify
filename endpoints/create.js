@@ -27,7 +27,7 @@ const {
 } = require("../middlewares/add-record-scope");
 const { addMeta } = require("../middlewares/add-meta-data");
 const { getRecordScopeMiddleware } = require("../middlewares/scope");
-const authStrategy = configStore.get("/authStrategy");
+const authentication = configStore.get("/authentication");
 
 /**
  * Creates an endpoint for POST /RESOURCE
@@ -41,7 +41,7 @@ exports.createEndpoint = function (model) {
 
   let middlewares = [];
   let scope = [];
-  if (routeOptions.createAuth !== false && authStrategy) {
+  if (routeOptions.createAuth !== false && authentication) {
     scope = getScopes(model, "create");
     if (!_.isEmpty(scope)) {
       if (configStore.get("/logScopes")) {
@@ -73,7 +73,7 @@ exports.createEndpoint = function (model) {
   }
   prePolicies.forEach((val) => middlewares.push(val));
 
-  if (routeOptions.createAuth !== false && authStrategy) {
+  if (routeOptions.createAuth !== false && authentication) {
     middlewares.push(addMeta("create"));
     middlewares.push(addRecordScope(model));
     if (configStore.get("/enableRecordScopes")) {
@@ -103,7 +103,7 @@ exports.createEndpoint = function (model) {
       body: createModel,
     },
     scope,
-    auth: routeOptions.createAuth !== false && authStrategy,
+    auth: routeOptions.createAuth !== false && authentication,
     middlewares,
     handler,
     afterMiddlewares: [logCreateMiddleware(model)],
@@ -123,7 +123,7 @@ exports.updateEndpoint = function (model) {
 
   let middlewares = [];
   let scope = [];
-  if (routeOptions.updateAuth !== false && authStrategy) {
+  if (routeOptions.updateAuth !== false && authentication) {
     scope = getScopes(model, "update");
     if (!_.isEmpty(scope)) {
       if (configStore.get("/logScopes")) {
@@ -148,11 +148,11 @@ exports.updateEndpoint = function (model) {
   }
   prePolicies.forEach((val) => middlewares.push(val));
 
-  if(routeOptions.updateAuth !== false && authStrategy && configStore.get("/enableRecordScopes")){
+  if(routeOptions.updateAuth !== false && authentication && configStore.get("/enableRecordScopes")){
     middlewares.push(getRecordScopeMiddleware('update', model))
   }
   
-  if (routeOptions.updateAuth !== false && authStrategy)
+  if (routeOptions.updateAuth !== false && authentication)
     middlewares.push(addMeta("update"));
 
   const handler = updateMiddleware(model);
@@ -180,7 +180,7 @@ exports.updateEndpoint = function (model) {
       }),
     },
     scope,
-    auth: routeOptions.updateAuth !== false && authStrategy,
+    auth: routeOptions.updateAuth !== false && authentication,
     middlewares,
     handler,
     afterMiddlewares: [logUpdateMiddleware(model)],
@@ -213,7 +213,7 @@ exports.associationAddManyEndpoint = function (ownerModel, association) {
   if (
     routeOptions[getModelName(target)] &&
     routeOptions[getModelName(target)].addAuth !== false &&
-    authStrategy
+    authentication
   ) {
     scope = getScopes(ownerModel, "associate");
     const addScope =
@@ -291,7 +291,7 @@ exports.associationAddManyEndpoint = function (ownerModel, association) {
   if (
     routeOptions[getModelName(target)] &&
     routeOptions[getModelName(target)].addAuth !== false &&
-    authStrategy &&
+    authentication &&
     configStore.get("/enableRecordScopes")
   ) {
     middlewares.push(getRecordScopeMiddleware("associate", ownerModel));
@@ -300,7 +300,7 @@ exports.associationAddManyEndpoint = function (ownerModel, association) {
   if (
     routeOptions[getModelName(target)] &&
     routeOptions[getModelName(target)].addAuth !== false &&
-    authStrategy
+    authentication
   )
     middlewares.push(addMeta("create"));
 
@@ -334,7 +334,7 @@ exports.associationAddManyEndpoint = function (ownerModel, association) {
     auth:
       routeOptions[getModelName(target)] &&
       routeOptions[getModelName(target)].addAuth !== false &&
-      authStrategy,
+      authentication,
     middlewares,
     handler,
     afterMiddlewares: [logAddMiddleware(ownerModel, target, associationType)],
@@ -371,7 +371,7 @@ exports.associationAddOneEndpoint = function (ownerModel, association) {
   if (
     routeOptions[getModelName(target)] &&
     routeOptions[getModelName(target)].addAuth !== false &&
-    authStrategy
+    authentication
   ) {
     scope = getScopes(ownerModel, "associate");
     const addScope =
@@ -423,7 +423,7 @@ exports.associationAddOneEndpoint = function (ownerModel, association) {
   if (
     routeOptions[getModelName(target)] &&
     routeOptions[getModelName(target)].addAuth !== false &&
-    authStrategy &&
+    authentication &&
     configStore.get("/enableRecordScopes")
   ) {
     middlewares.push(getRecordScopeMiddleware("associate", ownerModel));
@@ -432,7 +432,7 @@ exports.associationAddOneEndpoint = function (ownerModel, association) {
   if (
     routeOptions[getModelName(target)] &&
     routeOptions[getModelName(target)].addAuth !== false &&
-    authStrategy
+    authentication
   )
     middlewares.push(addMeta("update"));
 
@@ -467,7 +467,7 @@ exports.associationAddOneEndpoint = function (ownerModel, association) {
     auth:
       routeOptions[getModelName(target)] &&
       routeOptions[getModelName(target)].addAuth !== false &&
-      authStrategy,
+      authentication,
     middlewares,
     handler,
     afterMiddlewares: [logAddMiddleware(ownerModel, target, associationType)],

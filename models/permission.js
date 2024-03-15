@@ -251,7 +251,7 @@ module.exports = (sequelize, DataTypes) => {
 
   permission.extraEndpoints = [
     () => {
-      const authStrategy = configStore.get("/authStrategy");
+      const authentication = configStore.get("/authentication");
       const queryModel = generateJoiListQueryModel(permission);
       const getAvailablePermissionsHandler = async function (req, res, next) {
         try {
@@ -297,7 +297,7 @@ module.exports = (sequelize, DataTypes) => {
         ],
         isJsonFields: true,
         model: permission,
-        auth: authStrategy,
+        auth: authentication,
         handler: getAvailablePermissionsHandler,
         log: `Generating endpoint to get the permissions available for the current user to assign.`,
       });

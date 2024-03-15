@@ -112,6 +112,13 @@ const Config = {
   },
 
   /**
+   * Authentication to be used for all generated endpoints.
+   * Set to false for no authentication.
+   * @type {boolean}
+   */
+  authentication: true,
+
+  /**
    * Authentication strategy to be used for all generated endpoints.
    * Set to false for no authentication.
    * @type {boolean/string}
@@ -157,7 +164,7 @@ const Config = {
   },
 
   /**
-   * If set to true, (and authStrategy is not false) then endpoints will be generated with pre-defined
+   * If set to true, (and authentication is not false) then endpoints will be generated with pre-defined
    * scopes based on the model definition.
    * default: false
    * @type {boolean}

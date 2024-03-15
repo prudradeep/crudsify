@@ -8,9 +8,11 @@ const queryHelper = require("./query");
 const { getTimestamps, getMetadata, getRecordScopes } = require("./model");
 
 let headersValidation;
-if (configStore.get("/authStrategy")) {
+if (configStore.get("/authentication")) {
   headersValidation = Joi.object({
-    authorization: Joi.string().required(),
+    authorization: Joi.string().required().messages({
+      "any.required": "Authorization is required",
+    }),
   }).options({ allowUnknown: true });
 } else {
   headersValidation = Joi.object().options({ allowUnknown: true });
@@ -31,7 +33,7 @@ const isValidField = function (fieldName, field, keys = []) {
     configStore.get("/dbPrimaryKey").name,
     ...timestamps,
     ...metadata,
-    ...recordScope
+    ...recordScope,
   ];
 
   if (keys.indexOf(fieldName) !== -1) return false;
