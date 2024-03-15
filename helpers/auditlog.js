@@ -6,7 +6,7 @@ const {
   getPrimaryKey,
   getTimestamps,
   getMetadata,
-} = require("../helpers/model");
+} = require("./model");
 module.exports = (sequelize, DataTypes) => {
   class auditLog extends Model {
     /**

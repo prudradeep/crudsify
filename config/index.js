@@ -54,6 +54,27 @@ const Config = {
   },
 
   /**
+   * Flag signifying whether the absolute path to the models directory is provided
+   * default: false
+   * @type {boolean}
+   */
+  absoluteModelPath: false,
+
+  /**
+   * Path to the models directory
+   * default: 'models'
+   * @type {string}
+   */
+  modelPath: "models",
+
+  /**
+   * Use existing models & apis of crudsify
+   * default: true
+   * @type {boolean}
+   */
+  enableCrudsifyModelsApis: true,
+
+  /**
    * Timestamps options:
    * - timestamps: (default: true) specifying to create timestamps for the record
    * - createdAt: Give a custom name to the createdAt column or false
