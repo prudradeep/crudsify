@@ -1,9 +1,9 @@
 const swagger = {
     openapi: '3.0.0',
     info: {
-      title: 'Crudsify API',
+      title: process.env.TITLE,
       version: '1.0.0',
-      description: 'The REST API Service'
+      description: process.env.DESCRIPTION
     },
     servers: [
       {

@@ -255,14 +255,14 @@ const Config = {
       swaggerOptions: {
         docExpansion: "none",
       },
-      customSiteTitle: constants.WEB_TITLE,
+      customSiteTitle: process.env.TITLE,
     },
     $default: {
       explorer: true,
       swaggerOptions: {
         docExpansion: "none",
       },
-      customSiteTitle: constants.WEB_TITLE,
+      customSiteTitle: process.env.TITLE,
     },
   },
 

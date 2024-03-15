@@ -1,5 +1,5 @@
 module.exports = {
-  WEB_TITLE: "Crudsify API",
+  WEB_TITLE: process.env.TITLE,
   AUTH_STRATEGIES: {
     TOKEN: "standard-jwt",
     SESSION: "jwt-with-session",
