@@ -119,17 +119,6 @@ const Config = {
   authentication: true,
 
   /**
-   * Authentication strategy to be used for all generated endpoints.
-   * Set to false for no authentication.
-   * @type {boolean/string}
-   */
-  authStrategy: {
-    $filter: "env",
-    production: constants.AUTH_STRATEGIES.REFRESH,
-    $default: constants.AUTH_STRATEGIES.REFRESH,
-  },
-
-  /**
    * Enables record level authorization.
    * default: false
    * @type {boolean}
@@ -186,7 +175,7 @@ const Config = {
    */
   jwt: {
     secret: process.env.JWT_SECRET,
-    algo: "HS256",
+    algo: process.env.JWT_ALGO,
   },
 
   /**

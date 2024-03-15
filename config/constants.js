@@ -5,11 +5,6 @@ const constPath = path.join(__dirname, "/../../../", "config", "constants.js");
 if (fs.existsSync(constPath)) userConstants = require(constPath);
 
 module.exports = {
-  AUTH_STRATEGIES: {
-    TOKEN: "standard-jwt",
-    SESSION: "jwt-with-session",
-    REFRESH: "jwt-with-session-and-refresh-token",
-  },
   PERMISSION_STATES: {
     INCLUDED: "Included",
     EXCLUDED: "Excluded",
