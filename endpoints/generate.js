@@ -3,6 +3,7 @@
 const express = require("express");
 const Endpoints = express.Router();
 const _ = require("lodash");
+const Jwt = require("jsonwebtoken");
 const { Logger } = require("../helpers/logger");
 const configStore = require("../config");
 const {
@@ -11,12 +12,28 @@ const {
   headerValidationMiddleware,
 } = require("../middlewares/validate");
 const { getScopeMiddleware } = require("../middlewares/scope");
-const { authMiddleware } = require("../middlewares/auth");
 const { swaggerHelper } = require("../helpers/swagger");
 const {
   saveLogMiddleware,
   logApiMiddleware,
 } = require("../middlewares/audit-log");
+
+let authMiddleware = async (req, res, next) => {
+  const decoded = await Jwt.verify(
+    req.headers.authorization.replace("Bearer ", ""),
+    configStore.get("/jwt").secret
+  );
+  const { user, scope } = decoded;
+  req.auth = {
+    isValid: true,
+    credentials: { user, scope },
+  };
+  next();
+};
+
+const setAuthMiddleware = (middleware) => {
+  authMiddleware = middleware;
+};
 
 const generateEndpoint = ({
   method,
@@ -65,7 +82,7 @@ const generateEndpoint = ({
     : [logApiMiddleware(), saveLogMiddleware];
 
   method = method.toLowerCase();
-  
+
   Endpoints[method](path, middlewares, handler, afterMiddlewares);
 
   if (configStore.get("/enableSwagger")) {
@@ -76,4 +93,4 @@ const generateEndpoint = ({
   }
 };
 
-module.exports = { generateEndpoint, Endpoints };
+module.exports = { generateEndpoint, Endpoints, setAuthMiddleware };

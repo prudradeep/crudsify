@@ -23,12 +23,11 @@ const { logApiMiddleware } = require("../middlewares/audit-log");
 const { Op } = require("sequelize");
 const { deleteHandler } = require("../handlers/remove");
 const { createHandler, updateHandler } = require("../handlers/create");
-const USER_ROLES = require("../config/constants").USER_ROLES;
-const REQUIRED_PASSWORD_STRENGTH =
-  require("../config/constants").REQUIRED_PASSWORD_STRENGTH;
-const AUTH_STRATEGIES = require("../config/constants").AUTH_STRATEGIES;
-const EXPIRATION_PERIOD = require("../config/constants").EXPIRATION_PERIOD;
-const authStrategy = configStore.get("/authStrategy");
+const {
+  USER_ROLES,
+  REQUIRED_PASSWORD_STRENGTH,
+  EXPIRATION_PERIOD,
+} = require("../config/constants");
 
 const checkUserHandler = async function (req, res, next) {
   try {
@@ -738,12 +737,8 @@ const loginMiddleware = {
   },
   session: async function (req, res, next) {
     try {
-      if (authStrategy === AUTH_STRATEGIES.TOKEN) {
-        next();
-      } else {
-        req.session = await Session.createInstance(req.user);
-        next();
-      }
+      req.session = await Session.createInstance(req.user);
+      next();
     } catch (err) {
       next(err);
     }
@@ -772,20 +767,13 @@ const loginMiddleware = {
         },
         scope: req.scope,
       };
-      switch (authStrategy) {
-        case AUTH_STRATEGIES.TOKEN:
-          req.standardToken = generateToken(userData, EXPIRATION_PERIOD.LONG);
-          break;
-        case AUTH_STRATEGIES.REFRESH:
-          req.standardToken = generateToken(userData, EXPIRATION_PERIOD.SHORT);
-          break;
-      }
+      req.standardToken = generateToken(userData, EXPIRATION_PERIOD.SHORT);
       next();
     } catch (err) {
       next(err);
     }
   },
-  sessionToken: async function (req, res, next) {
+  sessionRefreshToken: async function (req, res, next) {
     try {
       const sessionData = {
         sessionId: req.session[configStore.get("/dbPrimaryKey").name],
@@ -793,29 +781,7 @@ const loginMiddleware = {
         passwordHash: req.session.passwordHash,
         scope: req.scope,
       };
-      switch (authStrategy) {
-        case AUTH_STRATEGIES.SESSION:
-          req.sessionToken = generateToken(sessionData, EXPIRATION_PERIOD.LONG);
-          break;
-      }
-      next();
-    } catch (err) {
-      next(err);
-    }
-  },
-  refreshToken: async function (req, res, next) {
-    try {
-      const sessionData = {
-        sessionId: req.session[configStore.get("/dbPrimaryKey").name],
-        sessionKey: req.session.key,
-        passwordHash: req.session.passwordHash,
-        scope: req.scope,
-      };
-      switch (authStrategy) {
-        case AUTH_STRATEGIES.REFRESH:
-          req.refreshToken = generateToken(sessionData, EXPIRATION_PERIOD.LONG);
-          break;
-      }
+      req.refreshToken = generateToken(sessionData, EXPIRATION_PERIOD.LONG);
       next();
     } catch (err) {
       next(err);
@@ -824,42 +790,15 @@ const loginMiddleware = {
 };
 
 const loginHandler = async function (req, res, next) {
-  let response = {};
-
   delete req.user.password;
 
-  switch (authStrategy) {
-    case AUTH_STRATEGIES.TOKEN:
-      response = {
-        user: req.user,
-        accessToken: req.standardToken,
-        scope: req.scope,
-      };
-      break;
-    case AUTH_STRATEGIES.SESSION:
-      response = {
-        user: req.user,
-        accessToken: req.sessionToken,
-        scope: req.scope,
-      };
-      break;
-    case AUTH_STRATEGIES.REFRESH:
-      response = {
-        user: req.user,
-        refreshToken: req.refreshToken,
-        accessToken: req.standardToken,
-        scope: req.scope,
-      };
-      break;
-    default:
-      response = {
-        user: req.user,
-        scope: req.scope,
-      };
-      break;
-  }
   sendResponse({
-    data: response,
+    data: {
+      user: req.user,
+      refreshToken: req.refreshToken,
+      accessToken: req.standardToken,
+      scope: req.scope,
+    },
     status: 200,
     res,
     next,
