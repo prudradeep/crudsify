@@ -10,6 +10,7 @@ const constants = require("./constants");
 
 let userConfig = {};
 const userConfigPath = path.join(__dirname, "/../../../", "config", "index.js");
+// Checks if the user configuration file exists
 if (fs.existsSync(userConfigPath)) userConfig = require(userConfigPath);
 
 /* The criteria to filter Config values by (NODE_ENV). Typically includes:
@@ -22,28 +23,18 @@ const Config = {
   service: "APIs",
   logDir: "./logs/",
   cors: {
-    $filter: "env",
-    production: {
-      origin: "*",
-      exposedHeaders: ["X-Access-Token", "X-Refresh-Token"],
-    },
-    $default: {
-      origin: "*",
-      exposedHeaders: ["X-Access-Token", "X-Refresh-Token"],
-    },
+    origin: "*",
+    exposedHeaders: ["X-Access-Token", "X-Refresh-Token"],
   },
+
+  /**
+   * This is the primary key attribute for your tables.
+   * default {name: "id", type: "BIGINT", autoIncrement: true}
+   */
   dbPrimaryKey: {
-    $filter: "env",
-    production: {
-      name: "id",
-      type: "BIGINT",
-      autoIncrement: true,
-    },
-    $default: {
-      name: "idKey",
-      type: "BIGINT",
-      autoIncrement: true,
-    },
+    name: "id",
+    type: "BIGINT",
+    autoIncrement: true,
   },
 
   /**
@@ -78,45 +69,33 @@ const Config = {
    * - createdBy: dbPrimaryKey of user that created the record.
    * - updatedBy: dbPrimaryKey of user that last updated the record.
    * - deletedBy: dbPrimaryKey of user that soft deleted the record.
+   * default: true
+   * @type {boolean}
    */
-  enableCreatedBy: {
-    $filter: "env",
-    production: true,
-    $default: true,
-  },
-  enableUpdatedBy: {
-    $filter: "env",
-    production: true,
-    $default: true,
-  },
-  enableDeletedBy: {
-    $filter: "env",
-    production: true,
-    $default: true,
-  },
+  enableCreatedBy: true,
+  enableUpdatedBy: true,
+  enableDeletedBy: true,
 
   /**
    * Default limit to fetch records
+   * default: 20
+   * @type {number}
    */
-  limit: {
-    $filter: "env",
-    production: 20,
-    $default: 20,
-  },
+  limit: 20,
 
   /**
    * Authentication to be used for all generated endpoints.
-   * Set to false for no authentication.
+   * default: false
    * @type {boolean}
    */
-  authentication: true,
+  authentication: false,
 
   /**
    * Enables record level authorization.
    * default: false
    * @type {boolean}
    */
-  enableRecordScopes: true,
+  enableRecordScopes: false,
 
   /**
    * If set, (and enableRecordScopes is not false) then recordScopeKey will be added in the model definition.
@@ -155,16 +134,14 @@ const Config = {
 
   /**
    * Salt rounds for generating hash
+   * default: 10
+   * @type {number}
    */
-  saltRounds: {
-    $filter: "env",
-    production: 15,
-    uat: 12,
-    $default: 10,
-  },
+  saltRounds: 10,
 
   /**
-   * Secret for JWT token creation and algo
+   * Secret for JWT token creation and algo.
+   * Getting from the env file
    */
   jwt: {
     secret: process.env.JWT_SECRET,
@@ -172,7 +149,17 @@ const Config = {
   },
 
   /**
-   * Logging configuration
+   * Log level options:
+   * - error
+   * - warn
+   * - info
+   * - http
+   * - verbose
+   * - debug
+   * - silly
+   * default: silly for development
+   * default: verbose for uat
+   * default: error for production
    */
   logLevel: {
     $filter: "env",
@@ -181,37 +168,41 @@ const Config = {
     $default: "silly",
   },
 
-  logRoutes: {
-    $filter: "env",
-    production: false,
-    $default: true,
-  },
-  logScopes: {
-    $filter: "env",
-    production: false,
-    $default: false,
-  },
-  logQuery: {
-    $filter: "env",
-    production: false,
-    $default: true,
-  },
+  /**
+   * If set to true, each route will be logged as it is generated.
+   * default: false
+   * @type {boolean}
+   */
+  logRoutes: true,
 
-  enableAuditLog: {
-    $filter: "env",
-    production: true,
-    $default: true,
-  },
+  /**
+   * If set to true, the scope for each endpoint will be logged when then endpoint is generated.
+   * default: false
+   * @type {boolean}
+   */
+  logScopes: false,
+
+  /**
+   * If set to true, the queries will be logged.
+   * default: false
+   * @type {boolean}
+   */
+  logQuery: false,
+
+  /**
+   * When enabled, all create, update, associate, and delete events are recorded.
+   * default: true
+   * @type {boolean}
+   */
+  enableAuditLog: true,
+
   /**
    * Specifies audit log storage
-   * default: database
+   * default: file
    * available: database | file
    */
-  auditLogStorage: {
-    $filter: "env",
-    production: constants.AUDIT_LOG_STORAGE.DB,
-    $default: constants.AUDIT_LOG_STORAGE.DB,
-  },
+  auditLogStorage: constants.AUDIT_LOG_STORAGE.FILE,
+
   /**
    * Specifies the TTL (time to live/lifetime/expiration) of auditLog records. Accepts values in seconds unless specified
    * (Ex: 60 = 60 seconds, '1m' = 1 minute, or '1d' = 1 day)
@@ -225,48 +216,43 @@ const Config = {
     $default: "20d",
   },
 
-  enablePolicies: {
-    $filter: "env",
-    production: true,
-    $default: true,
-  },
-  enablePayloadValidation: {
-    $filter: "env",
-    production: true,
-    $default: true,
-  },
-  enableQueryValidation: {
-    $filter: "env",
-    production: true,
-    $default: true,
-  },
+  /**
+   * Enables policies
+   * default: false
+   * @type {boolean}
+   */
+  enablePolicies: false,
 
+  /**
+   * Validation options:
+   * default: true
+   * @type {boolean}
+   */
+  enablePayloadValidation: true,
+  enableQueryValidation: true,
+
+  /**
+   * When enabled, swagger ui will be generated for the apis.
+   * default: true for development & uat
+   * default: false for production
+   */
   enableSwagger: {
     $filter: "env",
     production: false,
     $default: true,
   },
+
   /**
    * Set swagger options as per https://github.com/swagger-api/swagger-ui/blob/master/docs/usage/configuration.md
    * Options set here will override swagger config options below
    * @type {Object}
    */
   swaggerOptions: {
-    $filter: "env",
-    production: {
-      explorer: true,
-      swaggerOptions: {
-        docExpansion: "none",
-      },
-      customSiteTitle: process.env.TITLE,
+    explorer: true,
+    swaggerOptions: {
+      docExpansion: "none",
     },
-    $default: {
-      explorer: true,
-      swaggerOptions: {
-        docExpansion: "none",
-      },
-      customSiteTitle: process.env.TITLE,
-    },
+    customSiteTitle: process.env.TITLE,
   },
 
   /**
@@ -298,10 +284,19 @@ const Config = {
   pluginPath: "plugins",
 
   ...userConfig,
+
+  /**
+   * Basic auth credentials for swagger documentation.
+   * Getting from env file.
+   */
   basicAuth: {
     username: process.env.BASIC_AUTH_USERNAME,
     password: process.env.BASIC_AUTH_PASSWORD,
   },
+
+  /**
+   * DB settings
+   */
   database: {
     $meta: "Database configuration",
     $filter: "env",
