@@ -6,6 +6,9 @@
   "scripts": {
     "start": "nodemon"
   },
+  "bin": {
+    "crudsify-cli": "./bin/index.js"
+  },
   "keywords": [
     "api",
     "restful api",
