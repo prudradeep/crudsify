@@ -61,13 +61,6 @@ const Config = {
   modelPath: "models",
 
   /**
-   * Use existing models & apis of crudsify
-   * default: true
-   * @type {boolean}
-   */
-  enableCrudsifyModelsApis: true,
-
-  /**
    * Timestamps options:
    * - timestamps: (default: true) specifying to create timestamps for the record
    * - createdAt: Give a custom name to the createdAt column or false

@@ -25,9 +25,6 @@ const getUserSession = async (sessionId, sessionKey) => {
 
 exports.sessionStrategy = async function (req, res, next) {
   try {
-    if(!configStore.get("/enableCrudsifyModelsApis")){
-      throw Boom.badImplementation("To use this strategy you should enable 'enableCrudsifyModelsApis' in config.");
-    }
     const decoded = await Jwt.verify(
       req.headers.authorization.replace("Bearer ", ""),
       configStore.get("/jwt").secret

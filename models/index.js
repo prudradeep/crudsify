@@ -36,11 +36,6 @@ const sequelize = new Sequelize(
 );
 
 const directories = [];
-if (configStore.get("/enableCrudsifyModelsApis") === true) {
-  const crudsifyModelPath = path.join(__dirname, "/../", "models");
-  directories.push(crudsifyModelPath);
-}
-
 let modelPath = "";
 if (configStore.get("/absoluteModelPath") === true)
   modelPath = configStore.get("/modelPath");
