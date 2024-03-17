@@ -12,9 +12,14 @@ switch (command) {
     const sourceDir = path.join(__dirname, "/../", "crudsify");
     const destinationDir = path.join(__dirname, "/../../../");
 
-    const migFiles = fs.readdirSync(sourceDir);
-    for (const file of migFiles) {
-      fs.renameSync(sourceDir + "/" + file, destinationDir + "/" + file);
+    const srcDirs = fs.readdirSync(sourceDir);
+    for(const dir of srcDirs){
+      if(!fs.existsSync(path.join(destinationDir, dir)))
+        fs.mkdirSync(path.join(destinationDir, dir))
+      const srcFiles = fs.readdirSync(path.join(sourceDir, dir));
+      for (const file of srcFiles) {
+        fs.copyFileSync(path.join(sourceDir, dir, file), path.join(destinationDir, dir, file))
+      }
     }
     break;
 }
