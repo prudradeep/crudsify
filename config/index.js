@@ -20,8 +20,23 @@ if (fs.existsSync(userConfigPath)) userConfig = require(userConfigPath);
  * - $default
  */
 const Config = {
+  /**
+   * Your service name goes here
+   * @type {string}
+   */
   service: "APIs",
+
+  /**
+   * Path to the logs directory
+   * default: './logs/'
+   * @type {string}
+   */
   logDir: "./logs/",
+
+  /**
+   * Cors settings for generated endpoints. Can be set to false to disable.
+   * @type {{headers: string[], exposedHeaders: string[]}}
+   */
   cors: {
     origin: "*",
     exposedHeaders: ["X-Access-Token", "X-Refresh-Token"],
