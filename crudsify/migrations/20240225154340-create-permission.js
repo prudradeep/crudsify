@@ -2,8 +2,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    const configStore = require('crudsify/config')
-    const USER_ROLES = configStore.get('/constants/USER_ROLES')
+    const { USER_ROLES } = require("crudsify/config/constants");
     const {
       getPrimaryKey,
       getTimestamps,
