@@ -7,9 +7,9 @@ const {
   getMetadata,
   getRecordScopes,
 } = require("crudsify/helpers/model");
-const { rankAuth } = require("crudsify/policies/role-auth");
-const { permissionAuth } = require("crudsify/policies/permission-auth");
-const { groupAuth } = require("crudsify/policies/group-auth");
+const { rankAuth } = require("../policies/role-auth");
+const { permissionAuth } = require("../policies/permission-auth");
+const { groupAuth } = require("../policies/group-auth");
 module.exports = (sequelize, DataTypes) => {
   class group extends Model {
     /**

@@ -13,9 +13,9 @@ const {
   getRecordScopes,
 } = require("crudsify/helpers/model");
 const { ucfirst, generateHash } = require("crudsify/utils");
-const { rankAuth, promoteAuth } = require("crudsify/policies/role-auth");
-const { permissionAuth } = require("crudsify/policies/permission-auth");
-const { groupAuth } = require("crudsify/policies/group-auth");
+const { rankAuth, promoteAuth } = require("../policies/role-auth");
+const { permissionAuth } = require("../policies/permission-auth");
+const { groupAuth } = require("../policies/group-auth");
 const { updateHandler } = require("crudsify/handlers/create");
 const { sendResponse } = require("crudsify/helpers/sendResponse");
 const { generateEndpoint } = require("crudsify/endpoints/generate");

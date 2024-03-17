@@ -9,8 +9,8 @@ const {
   getRecordScopes,
 } = require("crudsify/helpers/model");
 const configStore = require("crudsify/config");
-const { rankAuth } = require("crudsify/policies/role-auth");
-const { permissionAuth } = require("crudsify/policies/permission-auth");
+const { rankAuth } = require("../policies/role-auth");
+const { permissionAuth } = require("../policies/permission-auth");
 const { listHandler } = require("crudsify/handlers/list");
 const { sendResponse } = require("crudsify/helpers/sendResponse");
 const { generateEndpoint } = require("crudsify/endpoints/generate");
