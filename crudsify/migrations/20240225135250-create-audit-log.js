@@ -7,7 +7,6 @@ module.exports = {
     const {
       getPrimaryKey,
       getTimestamps,
-      getMetadata,
     } = require("crudsify/helpers/model");
     await queryInterface.createTable("auditLogs", {
       ...getPrimaryKey(Sequelize),
@@ -27,10 +26,10 @@ module.exports = {
       user: {
         type: Sequelize.BIGINT,
       },
-      collectionName: {
+      tableName: {
         type: Sequelize.STRING,
       },
-      childCollectionName: {
+      childTableName: {
         type: Sequelize.STRING,
       },
       associationType: {
@@ -66,7 +65,6 @@ module.exports = {
         type: Sequelize.STRING,
       },
       ...getTimestamps(Sequelize),
-      ...getMetadata(Sequelize),
     });
   },
   async down(queryInterface, Sequelize) {

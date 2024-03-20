@@ -111,6 +111,7 @@ exports.deleteOneEndpoint = function (model) {
  */
 exports.deleteManyEndpoint = function (model) {
   const routeOptions = model.routeOptions;
+  if (routeOptions.allowDelete === false) return;
   if (routeOptions.allowDeleteMany === false) return;
 
   const routePath = getPathName(model);
@@ -316,6 +317,11 @@ exports.associationRemoveOneEndpoint = function (ownerModel, association) {
 exports.associationRemoveManyEndpoint = function (ownerModel, association) {
   const routeOptions = ownerModel.routeOptions;
   const { target, associationType } = association;
+  if (
+    routeOptions[getModelName(target)] &&
+    routeOptions[getModelName(target)].allowRemove === false
+  )
+    return;
   if (
     routeOptions[getModelName(target)] &&
     routeOptions[getModelName(target)].allowRemoveMany === false

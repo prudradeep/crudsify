@@ -5,7 +5,6 @@ const configStore = require("../config");
 const {
   getPrimaryKey,
   getTimestamps,
-  getMetadata,
 } = require("./model");
 module.exports = (sequelize, DataTypes) => {
   class auditLog extends Model {
@@ -30,8 +29,8 @@ module.exports = (sequelize, DataTypes) => {
       action: DataTypes.STRING,
       endpoint: DataTypes.STRING,
       user: DataTypes.BIGINT,
-      collectionName: DataTypes.STRING,
-      childCollectionName: DataTypes.STRING,
+      tableName: DataTypes.STRING,
+      childTableName: DataTypes.STRING,
       associationType: DataTypes.STRING,
       records: DataTypes.JSON,
       payload: DataTypes.JSON,
@@ -43,7 +42,6 @@ module.exports = (sequelize, DataTypes) => {
       ipAddress: DataTypes.STRING,
       notes: DataTypes.STRING,
       ..._.cloneDeep(getTimestamps(DataTypes)),
-      ..._.cloneDeep(getMetadata(DataTypes)),
     },
     {
       sequelize,

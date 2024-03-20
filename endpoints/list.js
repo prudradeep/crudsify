@@ -24,6 +24,7 @@ const authentication = configStore.get("/authentication");
  */
 exports.listEndpoint = function (DB, model) {
   const routeOptions = model.routeOptions;
+  if(routeOptions.allowRead === false) return;
   if (routeOptions.allowList === false) return;
 
   const routePath = getPathName(model);
