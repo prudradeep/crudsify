@@ -34,6 +34,65 @@ const Config = {
   logDir: "./logs/",
 
   /**
+   * Log level options:
+   * - error
+   * - warn
+   * - info
+   * - http
+   * - verbose
+   * - debug
+   * - silly
+   * default: silly for development
+   * default: verbose for uat
+   * default: error for production
+   */
+  logLevel: {
+    $filter: "env",
+    uat: "verbose",
+    production: "error",
+    $default: "silly",
+  },
+
+  /**
+   * If set to true, each route will be logged as it is generated.
+   * default: false
+   * @type {boolean}
+   */
+  logRoutes: false,
+
+  /**
+   * If set to true, the scope for each endpoint will be logged when then endpoint is generated.
+   * default: false
+   * @type {boolean}
+   */
+  logScopes: false,
+
+  /**
+   * If set to true, the queries will be logged.
+   * default: false
+   * @type {boolean}
+   */
+  logQuery: false,
+
+  /**
+   * Maximum number of logs to keep. 
+   * This can be a number of files or number of days. 
+   * If using days, add 'd' as the suffix.
+   * default: "20d"
+   * @type {string}
+   */
+  logTTL: "20d",
+
+  /**
+   * Maximum size of the log file after which it will rotate.
+   * This can be a number of bytes, or units of kb, mb, and gb. 
+   * If using the units, add 'k', 'm', or 'g' as the suffix.
+   * default: "20m"
+   * @type {string}
+   */
+  logFileMaxSize: "20m",
+
+  /**
    * Cors settings for generated endpoints. Can be set to false to disable.
    * @type {{headers: string[], exposedHeaders: string[]}}
    */
@@ -164,47 +223,6 @@ const Config = {
   },
 
   /**
-   * Log level options:
-   * - error
-   * - warn
-   * - info
-   * - http
-   * - verbose
-   * - debug
-   * - silly
-   * default: silly for development
-   * default: verbose for uat
-   * default: error for production
-   */
-  logLevel: {
-    $filter: "env",
-    uat: "verbose",
-    production: "error",
-    $default: "silly",
-  },
-
-  /**
-   * If set to true, each route will be logged as it is generated.
-   * default: false
-   * @type {boolean}
-   */
-  logRoutes: true,
-
-  /**
-   * If set to true, the scope for each endpoint will be logged when then endpoint is generated.
-   * default: false
-   * @type {boolean}
-   */
-  logScopes: false,
-
-  /**
-   * If set to true, the queries will be logged.
-   * default: false
-   * @type {boolean}
-   */
-  logQuery: false,
-
-  /**
    * When enabled, all create, update, associate, and delete events are recorded.
    * default: true
    * @type {boolean}
@@ -219,10 +237,11 @@ const Config = {
   auditLogStorage: constants.AUDIT_LOG_STORAGE.FILE,
 
   /**
-   * Specifies the TTL (time to live/lifetime/expiration) of auditLog records. Accepts values in seconds unless specified
-   * (Ex: 60 = 60 seconds, '1m' = 1 minute, or '1d' = 1 day)
-   * See: http://nicoll.io/mongottl/
-   * default: null (does not expire)
+   * Maximum number of logs to keep. 
+   * This can be a number of files or number of days. 
+   * If using days, add 'd' as the suffix.
+   * default: 20d for development & uat
+   * default: 60d for production
    * @type {string}
    */
   auditLogTTL: {

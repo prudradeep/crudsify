@@ -22,8 +22,8 @@ const getTransports = (label_ = "") => {
       filename: `combined-%DATE%.log`,
       datePattern: "YYYY-MM-DD",
       zippedArchive: true,
-      maxSize: "20m",
-      maxFiles: "15d",
+      maxSize: configStore.get("/logFileMaxSize"),
+      maxFiles: configStore.get("/logTTL"),
       format: combine(
         label({
           label: label_,
@@ -41,8 +41,8 @@ const getTransports = (label_ = "") => {
       filename: `error-%DATE%.log`,
       datePattern: "YYYY-MM-DD",
       zippedArchive: true,
-      maxSize: "20m",
-      maxFiles: "15d",
+      maxSize: configStore.get("/logFileMaxSize"),
+      maxFiles: configStore.get("/logTTL"),
       format: combine(
         label({
           label: label_,
@@ -99,7 +99,7 @@ winstonContainer.add("audit", {
       filename: `audit-%DATE%.log`,
       datePattern: "YYYY-MM-DD",
       zippedArchive: true,
-      maxSize: "20m",
+      maxSize: configStore.get("/logFileMaxSize"),
       maxFiles: configStore.get("/auditLogTTL"),
       format: combine(
         label({
@@ -128,8 +128,8 @@ winstonContainer.add("query", {
       filename: `query-%DATE%.log`,
       datePattern: "YYYY-MM-DD",
       zippedArchive: true,
-      maxSize: "20m",
-      maxFiles: configStore.get("/auditLogTTL"),
+      maxSize: configStore.get("/logFileMaxSize"),
+      maxFiles: configStore.get("/logTTL"),
       format: combine(
         label({
           label: "",
