@@ -93,7 +93,7 @@ exports.updateMiddleware = function (model) {
       res.data = data;
       sendResponse({
         data,
-        status: 204,
+        status: 201,
         res,
         next,
       });

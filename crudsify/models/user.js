@@ -85,14 +85,16 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
       },
       mobile: {
-        allowNull: false,
+        allowNull: true,
         unique: true,
         type: DataTypes.BIGINT,
+        allowOnUpdate: false,
       },
       email: {
         type: DataTypes.STRING,
         unique: true,
-        allowNull: false,
+        allowNull: true,
+        allowOnUpdate: false,
       },
       [`role${ucfirst(configStore.get("/dbPrimaryKey").name)}`]: {
         type: DataTypes[configStore.get("/dbPrimaryKey").type],
@@ -107,17 +109,24 @@ module.exports = (sequelize, DataTypes) => {
       isActive: {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
+        allowOnCreate: false,
+        allowOnUpdate: false,
       },
       password: {
         type: DataTypes.STRING,
         allowNull: false,
+        allowOnCreate: false,
+        allowOnUpdate: false
       },
       passwordUpdateRequired: {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
+        allowOnCreate: false,
       },
       resetPasswordHash: {
         type: DataTypes.STRING,
+        allowOnCreate: false,
+        allowOnUpdate: false
       },
       ..._.cloneDeep(getRecordScopes(DataTypes)),
       ..._.cloneDeep(getTimestamps(DataTypes)),
@@ -153,6 +162,10 @@ module.exports = (sequelize, DataTypes) => {
       }
     });
   });
+
+  user.routeOptions = {
+    allowCreate: false,
+  }
 
   user.policies = {
     pre: {

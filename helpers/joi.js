@@ -22,10 +22,10 @@ if (configStore.get("/authentication")) {
  * Checks to see if a field is a valid model property
  * @param fieldName: The name of the field
  * @param field: The field being checked
- * @param model: A model object
+ * @param keys: An array of key fields
  * @returns {boolean}
  */
-const isValidField = function (fieldName, field, keys = []) {
+const isValidField = (fieldName, field, keys = []) => {
   const timestamps = Object.keys(getTimestamps(Sequelize.DataTypes));
   const metadata = Object.keys(getMetadata(Sequelize.DataTypes));
   const recordScope = Object.keys(getRecordScopes(Sequelize.DataTypes));
@@ -349,6 +349,8 @@ const generateJoiFindQueryModel = (model) => {
 /**
  * Generates a Joi object that validates a request payload for creating a record
  * @param model: A model object.
+ * @param assoc: An association create
+ * @param keys: An array of key fields
  * @returns {*}: A Joi object
  */
 const generateJoiCreateModel = (model, assoc = false, keys = []) => {
@@ -391,6 +393,7 @@ const generateJoiCreateModel = (model, assoc = false, keys = []) => {
 /**
  * Generates a Joi object that validates a query request payload for updating a record
  * @param model: A model object.
+ * @param keys: An array of key fields
  * @returns {*}: A Joi object
  */
 const generateJoiUpdateModel = (model, keys = []) => {
@@ -429,4 +432,5 @@ module.exports = {
   generateJoiCreateModel,
   generateJoiUpdateModel,
   headersValidation,
+  isValidField,
 };

@@ -115,7 +115,7 @@ module.exports = {
     const fields = model.rawAttributes;
     for (const fieldName in fields) {
       const field = fields[fieldName];
-      if (!field.exclude && fieldName !== "__v") {
+      if (!field.exclude) {
         readableFields.push(fieldName);
       }
     }
@@ -152,7 +152,7 @@ module.exports = {
     const fieldNames = Object.keys(fields);
     for (let i = 0; i < fieldNames.length; i++) {
       const fieldName = fieldNames[i];
-      if (fields[fieldName] && fieldName !== "__v" && fieldName !== "__t") {
+      if (fields[fieldName]) {
         const field = fields[fieldName];
         if (field.queryable !== false && !field.exclude) {
           queryableFields.push(fieldName);

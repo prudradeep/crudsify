@@ -143,12 +143,12 @@ const Config = {
    * - createdBy: dbPrimaryKey of user that created the record.
    * - updatedBy: dbPrimaryKey of user that last updated the record.
    * - deletedBy: dbPrimaryKey of user that soft deleted the record.
-   * default: true
+   * default: false
    * @type {boolean}
    */
-  enableCreatedBy: true,
-  enableUpdatedBy: true,
-  enableDeletedBy: true,
+  enableCreatedBy: false,
+  enableUpdatedBy: false,
+  enableDeletedBy: false,
 
   /**
    * Default limit to fetch records

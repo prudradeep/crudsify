@@ -1,37 +1,37 @@
-'use strict'
+"use strict";
 /**
  * This file contains a list of permissions that only a Super Admin can assign.
  */
 
 module.exports = [
   // User permissions
-  'createUser',
-  'deleteUser',
+  "createUser",
+  "deleteUser",
   // Role permissions
-  'addRolePermissions',
-  'addRoleUsers',
-  'createRole',
-  'deleteRole',
-  'removeRolePermissions',
-  'removeRoleUsers',
-  'updateRole',
+  "addRolePermissions",
+  "addRoleUsers",
+  "createRole",
+  "deleteRole",
+  "removeRolePermissions",
+  "removeRoleUsers",
+  "updateRole",
   // Group permissions
-  'deleteGroup',
+  "deleteGroup",
   // Permission permissions
-  'addPermissionRoles',
-  'createPermission',
-  'deletePermission',
-  'removePermissionRoles',
-  'updatePermission',
+  "addPermissionRoles",
+  "createPermission",
+  "deletePermission",
+  "removePermissionRoles",
+  "updatePermission",
   // AuthAttempt permissions
-  'associateAuthAttempt',
-  'createAuthAttempt',
-  'deleteAuthAttempt',
-  'readAuthAttempt',
-  'updateAuthAttempt',
+  "associateAuthAttempt",
+  "createAuthAttempt",
+  "deleteAuthAttempt",
+  "readAuthAttempt",
+  "updateAuthAttempt",
   // Session permissions
-  'createSession',
-  'deleteSession',
-  'readSession',
-  'updateSession'
-]
+  "createSession",
+  "deleteSession",
+  "readSession",
+  "updateSession",
+];
