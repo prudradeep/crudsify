@@ -260,7 +260,7 @@ module.exports = (sequelize, DataTypes) => {
             if (req.query.assignScope) req.query.assignScope.push(roleName);
             else req.query.assignScope = [roleName];
 
-            const data = await listHandler(DB, DB.permission, req);
+            const data = await listHandler(sequelize, permission, req);
             res.data = data;
             sendResponse({
               data,
