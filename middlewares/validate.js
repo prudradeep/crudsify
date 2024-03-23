@@ -28,7 +28,6 @@ exports.validationMiddleware = (joiObject, validate) => {
           validate_ = req.query;
           break;
         case "params":
-        case "param":
           validate_ = req.params;
           break;
         case "body":

@@ -10,11 +10,11 @@ exports.listHandler = async function (DB, model, req = { query: {} }) {
   try {
     try {
       if (
-        model.middlewares &&
-        model.middlewares.list &&
-        model.middlewares.list.pre
+        model.hooks &&
+        model.hooks.list &&
+        model.hooks.list.pre
       ) {
-        req = await model.middlewares.list.pre(req);
+        req = await model.hooks.list.pre(req);
       }
     } catch (err) {
       handleError(err, "There was a preprocessing error.", Boom.badRequest);
@@ -32,11 +32,11 @@ exports.listHandler = async function (DB, model, req = { query: {} }) {
     let data = await paginateList(DB, model, req, conditions);
     try {
       if (
-        model.middlewares &&
-        model.middlewares.list &&
-        model.middlewares.list.post
+        model.hooks &&
+        model.hooks.list &&
+        model.hooks.list.post
       ) {
-        data.docs = await model.middlewares.list.post(req, data.docs);
+        data.docs = await model.hooks.list.post(req, data.docs);
       }
     } catch (err) {
       handleError(err, "There was a postprocessing error.", Boom.badRequest);
@@ -54,11 +54,11 @@ exports.findHandler = async function (DB, model, req = { query: {} }) {
     }
     try {
       if (
-        model.middlewares &&
-        model.middlewares.find &&
-        model.middlewares.find.pre
+        model.hooks &&
+        model.hooks.find &&
+        model.hooks.find.pre
       ) {
-        req = await model.middlewares.find.pre(req);
+        req = await model.hooks.find.pre(req);
       }
     } catch (err) {
       handleError(err, "There was a preprocessing error.", Boom.badRequest);
@@ -79,11 +79,11 @@ exports.findHandler = async function (DB, model, req = { query: {} }) {
     });
     try {
       if (
-        model.middlewares &&
-        model.middlewares.find &&
-        model.middlewares.find.post
+        model.hooks &&
+        model.hooks.find &&
+        model.hooks.find.post
       ) {
-        data = await model.middlewares.find.post(req, data);
+        data = await model.hooks.find.post(req, data);
       }
     } catch (err) {
       handleError(err, "There was a postprocessing error.", Boom.badRequest);
@@ -104,12 +104,12 @@ exports.associationGetAllHandler = async function (
     const { target: childModel, accessors } = association;
     try {
       if (
-        ownerModel.middlewares &&
-        ownerModel.middlewares.getAll &&
-        ownerModel.middlewares.getAll[childModel.name] &&
-        ownerModel.middlewares.getAll[childModel.name].pre
+        ownerModel.hooks &&
+        ownerModel.hooks.getAll &&
+        ownerModel.hooks.getAll[childModel.name] &&
+        ownerModel.hooks.getAll[childModel.name].pre
       ) {
-        req = await ownerModel.middlewares.getAll[childModel.name].pre(req);
+        req = await ownerModel.hooks.getAll[childModel.name].pre(req);
       }
     } catch (err) {
       handleError(
@@ -137,12 +137,12 @@ exports.associationGetAllHandler = async function (
     );
     try {
       if (
-        ownerModel.middlewares &&
-        ownerModel.middlewares.getAll &&
-        ownerModel.middlewares.getAll[childModel.name] &&
-        ownerModel.middlewares.getAll[childModel.name].post
+        ownerModel.hooks &&
+        ownerModel.hooks.getAll &&
+        ownerModel.hooks.getAll[childModel.name] &&
+        ownerModel.hooks.getAll[childModel.name].post
       ) {
-        data.docs = await ownerModel.middlewares.getAll[childModel.name].post(
+        data.docs = await ownerModel.hooks.getAll[childModel.name].post(
           req,
           data.docs
         );

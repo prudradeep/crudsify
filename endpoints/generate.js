@@ -35,6 +35,23 @@ const setAuthMiddleware = (middleware) => {
   authMiddleware = middleware;
 };
 
+/**
+ *
+ * @param {string} method: Method can be post, put, get, delete
+ * @param {string} path: Api endpoint 
+ * @param {boolean} auth: Enable authentication for the endpoint
+ * @param {string} swaggerPath: Api endpoint for swagger UI
+ * @param {string} summary: A summary for the endpoint
+ * @param {string[]} tags: Endpoint tags for swagger UI
+ * @param {body: Joi.object, params: Joi.object, query: Joi.object} validate: Joi validation object for the endpoint of body, query and parameters
+ * @param {string[]} scope: A scope for the authorization.
+ * @param {boolean} isJsonFields: Set true if model has json type field, Model is required.
+ * @param {Sequelize model} model: A sequelize model
+ * @param {(req, res, next)[]} middlewares: A list of middlewares.
+ * @param {(req, res, next)} handler: Handler method
+ * @param {(req, res, next)[]} afterMiddlewares: A list of after middlewares.
+ * @param {string} log: A loging message
+ */
 const generateEndpoint = ({
   method,
   path,

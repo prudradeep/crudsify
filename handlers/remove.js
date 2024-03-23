@@ -13,11 +13,11 @@ exports.deleteHandler = async function (model, req = { query: {} }) {
       : false;
     try {
       if (
-        model.middlewares &&
-        model.middlewares.delete &&
-        model.middlewares.delete.pre
+        model.hooks &&
+        model.hooks.delete &&
+        model.hooks.delete.pre
       ) {
-        await model.middlewares.delete.pre(req, hardDelete);
+        await model.hooks.delete.pre(req, hardDelete);
       }
     } catch (err) {
       handleError(
@@ -56,22 +56,20 @@ exports.deleteHandler = async function (model, req = { query: {} }) {
     } else {
       throw Boom.badRequest("Invalid delete request");
     }
-    if (deleted) {
-      try {
-        if (
-          model.middlewares &&
-          model.middlewares.delete &&
-          model.middlewares.delete.post
-        ) {
-          await model.middlewares.delete.post(req, hardDelete, deleted);
-        }
-      } catch (err) {
-        handleError(
-          err,
-          "There was a postprocessing error deleting the resource.",
-          Boom.badRequest
-        );
+    try {
+      if (
+        model.hooks &&
+        model.hooks.delete &&
+        model.hooks.delete.post
+      ) {
+        await model.hooks.delete.post(req, hardDelete, deleted);
       }
+    } catch (err) {
+      handleError(
+        err,
+        "There was a postprocessing error deleting the resource.",
+        Boom.badRequest
+      );
     }
     return true;
   } catch (err) {
@@ -91,12 +89,12 @@ exports.associationRemoveOneHandler = async function (
     const { target: childModel, accessors } = association;
     try {
       if (
-        ownerModel.middlewares &&
-        ownerModel.middlewares.remove &&
-        ownerModel.middlewares.remove[childModel.name] &&
-        ownerModel.middlewares.remove[childModel.name].pre
+        ownerModel.hooks &&
+        ownerModel.hooks.remove &&
+        ownerModel.hooks.remove[childModel.name] &&
+        ownerModel.hooks.remove[childModel.name].pre
       ) {
-        req = await ownerModel.middlewares.remove[childModel.name].pre(req);
+        await ownerModel.hooks.remove[childModel.name].pre(req);
       }
     } catch (err) {
       handleError(
@@ -107,6 +105,18 @@ exports.associationRemoveOneHandler = async function (
     }
     const owner = await ownerModel.findByPk(req.params.ownerId);
     await owner[accessors.remove](parseInt(req.params.childId));
+    try {
+      if (
+        ownerModel.hooks &&
+        ownerModel.hooks.remove &&
+        ownerModel.hooks.remove[childModel.name] &&
+        ownerModel.hooks.remove[childModel.name].post
+      ) {
+        await ownerModel.hooks.remove[childModel.name].post(req);
+      }
+    } catch (err) {
+      handleError(err, "There was a postprocessing error.", Boom.badRequest);
+    }
     return true;
   } catch (err) {
     throw err;
@@ -125,12 +135,12 @@ exports.associationRemoveManyHandler = async function (
     const { target: childModel, accessors } = association;
     try {
       if (
-        ownerModel.middlewares &&
-        ownerModel.middlewares.remove &&
-        ownerModel.middlewares.remove[childModel.name] &&
-        ownerModel.middlewares.remove[childModel.name].pre
+        ownerModel.hooks &&
+        ownerModel.hooks.remove &&
+        ownerModel.hooks.remove[childModel.name] &&
+        ownerModel.hooks.remove[childModel.name].pre
       ) {
-        req = await ownerModel.middlewares.remove[childModel.name].pre(req);
+        req = await ownerModel.hooks.remove[childModel.name].pre(req);
       }
     } catch (err) {
       handleError(
@@ -141,6 +151,18 @@ exports.associationRemoveManyHandler = async function (
     }
     const owner = await ownerModel.findByPk(req.params.ownerId);
     await owner[accessors.removeMultiple](req.body);
+    try {
+      if (
+        ownerModel.hooks &&
+        ownerModel.hooks.remove &&
+        ownerModel.hooks.remove[childModel.name] &&
+        ownerModel.hooks.remove[childModel.name].post
+      ) {
+        data = await ownerModel.hooks.remove[childModel.name].post(req);
+      }
+    } catch (err) {
+      handleError(err, "There was a postprocessing error.", Boom.badRequest);
+    }
     return true;
   } catch (err) {
     throw err;

@@ -12,12 +12,8 @@ exports.createHandler = async function (model, req = {}) {
       throw Boom.badRequest("Invalid request");
     }
     try {
-      if (
-        model.middlewares &&
-        model.middlewares.create &&
-        model.middlewares.create.pre
-      ) {
-        req = await model.middlewares.create.pre(req);
+      if (model.hooks && model.hooks.create && model.hooks.create.pre) {
+        req = await model.hooks.create.pre(req);
       }
     } catch (err) {
       handleError(
@@ -33,12 +29,8 @@ exports.createHandler = async function (model, req = {}) {
       data = await model.create(req.body);
     }
     try {
-      if (
-        model.middlewares &&
-        model.middlewares.create &&
-        model.middlewares.create.post
-      ) {
-        data = await model.middlewares.create.post(req, data);
+      if (model.hooks && model.hooks.create && model.hooks.create.post) {
+        data = await model.hooks.create.post(req, data);
       }
     } catch (err) {
       handleError(
@@ -59,12 +51,8 @@ exports.updateHandler = async function (model, req = { query: {} }) {
       throw Boom.badRequest("Invalid request");
     }
     try {
-      if (
-        model.middlewares &&
-        model.middlewares.update &&
-        model.middlewares.update.pre
-      ) {
-        req = await model.middlewares.update.pre(req);
+      if (model.hooks && model.hooks.update && model.hooks.update.pre) {
+        req = await model.hooks.update.pre(req);
       }
     } catch (err) {
       handleError(
@@ -78,12 +66,8 @@ exports.updateHandler = async function (model, req = { query: {} }) {
     });
     let data = await model.findByPk(req.params.id);
     try {
-      if (
-        model.middlewares &&
-        model.middlewares.update &&
-        model.middlewares.update.post
-      ) {
-        data = await model.middlewares.update.post(req, data);
+      if (model.hooks && model.hooks.update && model.hooks.update.post) {
+        data = await model.hooks.update.post(req, data);
       }
     } catch (err) {
       handleError(
@@ -110,12 +94,12 @@ exports.associationAddOneHandler = async function (
     const { target: childModel, accessors } = association;
     try {
       if (
-        ownerModel.middlewares &&
-        ownerModel.middlewares.add &&
-        ownerModel.middlewares.add[childModel.name] &&
-        ownerModel.middlewares.add[childModel.name].pre
+        ownerModel.hooks &&
+        ownerModel.hooks.add &&
+        ownerModel.hooks.add[childModel.name] &&
+        ownerModel.hooks.add[childModel.name].pre
       ) {
-        req = await ownerModel.middlewares.add[childModel.name].pre(req);
+        req = await ownerModel.hooks.add[childModel.name].pre(req);
       }
     } catch (err) {
       handleError(
@@ -125,9 +109,21 @@ exports.associationAddOneHandler = async function (
       );
     }
     const owner = await ownerModel.findByPk(req.params.ownerId);
-    return await owner[accessors.add](parseInt(req.params.childId), {
+    let data = await owner[accessors.add](parseInt(req.params.childId), {
       through: { ...req.body },
     });
+    try {
+      if (
+        ownerModel.hooks &&
+        ownerModel.hooks.add &&
+        ownerModel.hooks.add[childModel.name] &&
+        ownerModel.hooks.add[childModel.name].post
+      ) {
+        data = await ownerModel.hooks.add[childModel.name].post(req, data);
+      }
+    } catch (err) {
+      handleError(err, "There was a postprocessing error.", Boom.badRequest);
+    }
   } catch (err) {
     throw err;
   }
@@ -145,12 +141,12 @@ exports.associationAddManyHandler = async function (
     const { target: childModel, accessors, throughModel } = association;
     try {
       if (
-        ownerModel.middlewares &&
-        ownerModel.middlewares.add &&
-        ownerModel.middlewares.add[childModel.name] &&
-        ownerModel.middlewares.add[childModel.name].pre
+        ownerModel.hooks &&
+        ownerModel.hooks.add &&
+        ownerModel.hooks.add[childModel.name] &&
+        ownerModel.hooks.add[childModel.name].pre
       ) {
-        req = await ownerModel.middlewares.add[childModel.name].pre(req);
+        req = await ownerModel.hooks.add[childModel.name].pre(req);
       }
     } catch (err) {
       handleError(
@@ -205,6 +201,18 @@ exports.associationAddManyHandler = async function (
         }));
         data = await childModel.bulkCreate(body, { validate: true });
       }
+    }
+    try {
+      if (
+        ownerModel.hooks &&
+        ownerModel.hooks.add &&
+        ownerModel.hooks.add[childModel.name] &&
+        ownerModel.hooks.add[childModel.name].post
+      ) {
+        data = await ownerModel.hooks.add[childModel.name].post(req, data);
+      }
+    } catch (err) {
+      handleError(err, "There was a postprocessing error.", Boom.badRequest);
     }
     return data;
   } catch (err) {

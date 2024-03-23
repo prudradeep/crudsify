@@ -218,7 +218,7 @@ exports.associationGetAllEndpoint = function (DB, ownerModel, association) {
     configStore.get("/enablePolicies")
   ) {
     prePolicies = ownerModel.policies.pre;
-    prePolicies = (prePolicies.root || []).concat(prePolicies.read || []);
+    prePolicies = (prePolicies.root || []).concat(prePolicies.associate || []);
   }
   prePolicies.forEach((val) => middlewares.push(val));
 
@@ -240,7 +240,7 @@ exports.associationGetAllEndpoint = function (DB, ownerModel, association) {
     configStore.get("/enablePolicies")
   ) {
     postPolicies = ownerModel.policies.post;
-    postPolicies = (postPolicies.root || []).concat(postPolicies.read || []);
+    postPolicies = (postPolicies.root || []).concat(postPolicies.associate || []);
   }
   postPolicies.forEach((val) => middlewares.push(val));
 

@@ -24,7 +24,7 @@ const { deleteHandler } = require("crudsify/handlers/remove");
 const USER_ROLES = require("crudsify/config/constants").USER_ROLES;
 const { REQUIRED_PASSWORD_STRENGTH } = require("crudsify/config/constants");
 const authentication = configStore.get("/authentication");
-const param = Joi.object({
+const params = Joi.object({
   id: Joi.number().required(),
 });
 
@@ -423,7 +423,7 @@ module.exports = (sequelize, DataTypes) => {
         summary: "Activate user account.",
         tags: ["user"],
         validate: {
-          param,
+          params,
         },
         scope: ["root", "activateUser", "!-activateUser"],
         auth: authentication,
@@ -451,7 +451,7 @@ module.exports = (sequelize, DataTypes) => {
         summary: "Deactivate user account.",
         tags: ["user"],
         validate: {
-          param,
+          params,
         },
         scope: ["root", "deactivateUser", "!-deactivateUser"],
         auth: authentication,
@@ -485,7 +485,7 @@ module.exports = (sequelize, DataTypes) => {
         summary: "Get user effective permissions.",
         tags: ["user"],
         validate: {
-          param,
+          params,
         },
         scope: ["root", "readUserScope", "!-readUserScope"],
         auth: authentication,
