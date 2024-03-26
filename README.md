@@ -47,10 +47,6 @@ Overall, Crudsify empowers developers to build robust and scalable Node.js appli
 
 ---
 
-## Documentation
-
-Check out the docs on the [official site](https://crudsify.com)!
-
 ## Requirements
 
 You need Node JS >= 18 installed.
@@ -63,6 +59,10 @@ In project root directory, run following command:
 ```bash
 npm install https://github.com/prudradeep/crudsify.git
 ```
+
+## Documentation
+
+Check out the docs on the [official site](https://crudsify.com)!
 
 ## Contributing
 
