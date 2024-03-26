@@ -102,6 +102,14 @@ const Config = {
   },
 
   /**
+   * SSL certificate and key absolute path to enable ssl.
+   */
+  ssl: {
+    key: false,
+    cert: false,
+  },
+
+  /**
    * This is the primary key attribute for your tables.
    * default {name: "id", type: "BIGINT", autoIncrement: true}
    */

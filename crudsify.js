@@ -2,15 +2,28 @@
 
 const express = require("express");
 const http = require("http");
+const https = require("https");
+const fs = require("fs");
 const cors = require("cors");
 const { Logger } = require("./helpers/logger");
 const { sequelize } = require("./models");
 const configStore = require("./config");
+const sslOptions = configStore.get("/ssl");
 const { errorResponder, handleNotFoundError } = require("./middlewares/error");
 
 const Crudsify = express();
 Crudsify.plugins = {};
-const CrudsifyServer = http.createServer(Crudsify);
+let CrudsifyServer;
+if (sslOptions.cert && sslOptions.key) {
+  const options = {
+    key: fs.readFileSync(sslOptions.key),
+    cert: fs.readFileSync(sslOptions.cert),
+  };
+  CrudsifyServer = https.createServer(options, Crudsify);
+} else {
+  CrudsifyServer = http.createServer(Crudsify);
+}
+
 Crudsify.disable("etag");
 Crudsify.disable("x-powered-by");
 Crudsify.use(cors(configStore.get("/cors")));
