@@ -64,14 +64,6 @@ In project root directory, run following command:
 npm install https://github.com/prudradeep/crudsify.git
 ```
 
-## Setup
-
-Create a new file named **index.js** in the project root directory and add the following code to set-up an API server with Crudsify.
-
-```js filename="index.js" showLineNumbers
-const server = require("crudsify");
-server();
-```
 ## Contributing
 
 We welcome contributions to Crudsify! These are the many ways you can help:
