@@ -10,11 +10,12 @@ module.exports = {
     const { role, user } = require("crudsify/models");
     const roles = await role.findAll();
     const password = "Cruds!fy";
+    const domain = "crudsify.com";
     const users = [
       {
         name: faker.person.fullName(),
         mobile: faker.number.int({ min: 6000000000, max: 9999999999 }),
-        email: "user@crudsify.com",
+        email: `user@${domain}`,
         profileImageUrl:
           "https://www.gravatar.com/avatar/" +
           ObjectID().toString() +
@@ -27,7 +28,7 @@ module.exports = {
       {
         name: faker.person.fullName(),
         mobile: faker.number.int({ min: 6000000000, max: 9999999999 }),
-        email: "readonlyuser@crudsify.com",
+        email: `readonlyuser@${domain}`,
         profileImageUrl:
           "https://www.gravatar.com/avatar/" +
           ObjectID().toString() +
@@ -40,7 +41,7 @@ module.exports = {
       {
         name: faker.person.fullName(),
         mobile: faker.number.int({ min: 6000000000, max: 9999999999 }),
-        email: "admin@crudsify.com",
+        email: `admin@${domain}`,
         profileImageUrl:
           "https://www.gravatar.com/avatar/" +
           ObjectID().toString() +
@@ -53,7 +54,7 @@ module.exports = {
       {
         name: faker.person.fullName(),
         mobile: faker.number.int({ min: 6000000000, max: 9999999999 }),
-        email: "readonlyadmin@crudsify.com",
+        email: `readonlyadmin@${domain}`,
         profileImageUrl:
           "https://www.gravatar.com/avatar/" +
           ObjectID().toString() +
@@ -66,7 +67,7 @@ module.exports = {
       {
         name: faker.person.fullName(),
         mobile: faker.number.int({ min: 6000000000, max: 9999999999 }),
-        email: "editoradmin@crudsify.com",
+        email: `editoradmin@${domain}`,
         profileImageUrl:
           "https://www.gravatar.com/avatar/" +
           ObjectID().toString() +
@@ -79,7 +80,7 @@ module.exports = {
       {
         name: faker.person.fullName(),
         mobile: faker.number.int({ min: 6000000000, max: 9999999999 }),
-        email: "superuseradmin@crudsify.com",
+        email: `superuseradmin@${domain}`,
         profileImageUrl:
           "https://www.gravatar.com/avatar/" +
           ObjectID().toString() +
@@ -92,7 +93,7 @@ module.exports = {
       {
         name: faker.person.fullName(),
         mobile: faker.number.int({ min: 6000000000, max: 9999999999 }),
-        email: "superadmin@crudsify.com",
+        email: `superadmin@${domain}`,
         profileImageUrl:
           "https://www.gravatar.com/avatar/" +
           ObjectID().toString() +
