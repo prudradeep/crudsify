@@ -104,7 +104,7 @@ module.exports = {
       },
     ];
     await user.bulkCreate(users);
-    console.table(users, ['name', 'mobile', 'emaili', 'password']);
+    console.table(users, ['name', 'mobile', 'email', 'password']);
   },
 
   async down(queryInterface, Sequelize) {
