@@ -3,7 +3,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    const superAdminAssignScope = require("crudsify/config/super-admin-assign-scopes");
+    const superAdminAssignScope = require("../config/super-admin-assign-scopes");
     const { USER_ROLES } = require("crudsify/config/constants");
     const DB = require("crudsify/models");
 
