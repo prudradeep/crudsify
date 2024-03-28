@@ -22,6 +22,7 @@ module.exports = {
       },
     ];
     await queryInterface.bulkInsert("roles", roles);
+    console.table(roles);
   },
 
   async down(queryInterface, Sequelize) {

@@ -20,6 +20,7 @@ module.exports = {
       },
     ];
     await queryInterface.bulkInsert("groups", groups);
+    console.table(groups);
   },
 
   async down(queryInterface, Sequelize) {
