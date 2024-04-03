@@ -24,15 +24,23 @@ switch (command) {
     break;
 }
 
-const srcDirs = fs.readdirSync(sourceDir);
-for (const dir of srcDirs) {
-  if (!fs.existsSync(path.join(destinationDir, dir)))
-    fs.mkdirSync(path.join(destinationDir, dir));
-  const srcFiles = fs.readdirSync(path.join(sourceDir, dir));
-  for (const file of srcFiles) {
-    fs.copyFileSync(
-      path.join(sourceDir, dir, file),
-      path.join(destinationDir, dir, file)
-    );
+const copyDirectory = (source, destination) => {
+  if (!fs.existsSync(destination)) {
+      fs.mkdirSync(destination);
   }
+
+  const files = fs.readdirSync(source);
+
+  files.forEach(file => {
+      const sourcePath = path.join(source, file);
+      const destPath = path.join(destination, file);
+
+      if (fs.statSync(sourcePath).isDirectory()) {
+          copyDirectory(sourcePath, destPath);
+      } else {
+          fs.copyFileSync(sourcePath, destPath);
+      }
+  });
 }
+
+copyDirectory(sourceDir, destinationDir);
