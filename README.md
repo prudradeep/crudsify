@@ -5,7 +5,7 @@
 <br />
 
 ## Introduction
- 
+
 Welcom to Crudsify! the npm package that revolutionizes CRUD operations in web development! With Crudsify, you can effortlessly handle Create, Read, Update, and Delete operations in your Node.js applications.
 
 Gone are the days of manual endpoint creation and repetitive coding. Crudsify leverages the power of Express.js and Sequelize.js to generate REST API endpoints with just a few simple commands. Whether you're building a small-scale application or a large-scale project, Crudsify scales with you, providing a seamless experience throughout.
@@ -34,16 +34,16 @@ Overall, Crudsify empowers developers to build robust and scalable Node.js appli
 
 ## Features
 
-* Automatic generation of [CRUD](https://crudsify.com/usage/endpoints/) endpoints support
-* [joi](https://github.com/hapijs/joi) [validation](https://crudsify.com/usage/validation/)
-* Route-level and document-level [authorization](https://crudsify.com/usage/authorization/)
-* [Swagger docs](https://crudsify.com/quick/swagger/) for all generated endpoints
-* [Query parameter](https://crudsify.com/usage/querying/) support for searching, sorting, filtering, pagination, and embedding of associated models
-* Endpoint activity history through [Audit Logs](https://crudsify.com/usage/auditlogs/)
-* Support for ["soft" delete](https://crudsify.com/usage/softdelete/)
-* Optional [metadata](https://crudsify.com/usage/metadata/) for records
-* [Handlers](https://crudsify.com/usage/handlers/)
-* ...and more!
+- Automatic generation of [CRUD](https://crudsify.com/usage/endpoints/) endpoints support
+- [joi](https://github.com/hapijs/joi) [validation](https://crudsify.com/usage/validation/)
+- Route-level and document-level [authorization](https://crudsify.com/usage/authorization/)
+- [Swagger docs](https://crudsify.com/quick/swagger/) for all generated endpoints
+- [Query parameter](https://crudsify.com/usage/querying/) support for searching, sorting, filtering, pagination, and embedding of associated models
+- Endpoint activity history through [Audit Logs](https://crudsify.com/usage/auditlogs/)
+- Support for ["soft" delete](https://crudsify.com/usage/softdelete/)
+- Optional [metadata](https://crudsify.com/usage/metadata/) for records
+- [Handlers](https://crudsify.com/usage/handlers/)
+- ...and more!
 
 ---
 
@@ -60,9 +60,37 @@ In project root directory, run following command:
 npm install https://github.com/prudradeep/crudsify.git
 ```
 
+## Initiate
+
+To initiate a Crudsify run following command:
+
+### For windows
+
+```bash copy
+node_modules/.bin/crudsify-cli.cmd init
+```
+
+### For others
+
+```bash copy
+node_modules/.bin/crudsify-cli init
+```
+
+Rename **.env.sample** to **.env** and update environment variables.
+
+> **NOTE**: If you are using other than **mysql** dialect please install that driver as required by **Sequelize**. Check [Sequelize documentation](https://sequelize.org/docs/v6/getting-started/)
+
+## Run API server
+
+You can then run
+
+```bash copy
+node index.js
+```
+
 ## Documentation
 
-Check out the docs on the [official site](https://crudsify.com)!
+Check out the docs on the [Official site](https://crudsify.com)!
 
 ## Contributing
 
@@ -77,10 +105,13 @@ that this project is released with a
 and follow it.
 
 ## Questions?
-If you have any questions/issues/feature requests, please feel free to open an [issue](https://github.com/prudradeep/crudsify/issues/new).  We'd love to hear from you!
+
+If you have any questions/issues/feature requests, please feel free to open an [issue](https://github.com/prudradeep/crudsify/issues/new). We'd love to hear from you!
 
 ## Support
-Like this project? Please star it! 
+
+Like this project? Please star it!
 
 ## License
+
 Crudsify is licensed under a [MIT License](LICENSE).
