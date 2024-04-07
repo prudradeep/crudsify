@@ -171,6 +171,12 @@ function getCurrentYYYYMMDDHHmms() {
 }
 
 module.exports = {
+  /**
+   * Copy directories/files to destination folder
+   * @param source {string}: Source of the directory/folder
+   * @param destination {string}: Destination of the directory
+   * @returns {void}  
+   */
   copyDirectory: (source, destination) => {
     if (!fs.existsSync(destination)) {
       fs.mkdirSync(destination);
@@ -189,6 +195,11 @@ module.exports = {
       }
     });
   },
+  /**
+   * Generate migration file
+   * @param args {object}: Arguments object
+   * @returns {void}  
+   */
   generateMigration: (args) => {
     const destination = path.join(__dirname, "/../../../");
     if (!fs.existsSync(path.join(destination, "migrations"))) {
@@ -210,6 +221,11 @@ module.exports = {
       ].join("-") + ".js";
     writeFile(path.join(destination, "migrations", migrationName), migration);
   },
+    /**
+   * Generate model file
+   * @param args {object}: Arguments object
+   * @returns {void}  
+   */
   generateModel: (args) => {
     let destination = "";
     if (configStore.get("/absoluteModelPath") === true)
