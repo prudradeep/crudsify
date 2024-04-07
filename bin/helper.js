@@ -170,6 +170,31 @@ function getCurrentYYYYMMDDHHmms() {
   ].join("");
 }
 
+/**
+   * Copy directories/files to destination folder
+   * @param source {string}: Source of the directory/folder
+   * @param destination {string}: Destination of the directory
+   * @returns {void}  
+   */
+function copyDirectory (source, destination) {
+  if (!fs.existsSync(destination)) {
+    fs.mkdirSync(destination);
+  }
+
+  const files = fs.readdirSync(source);
+
+  files.forEach((file) => {
+    const sourcePath = path.join(source, file);
+    const destPath = path.join(destination, file);
+
+    if (fs.statSync(sourcePath).isDirectory()) {
+      copyDirectory(sourcePath, destPath);
+    } else {
+      fs.copyFileSync(sourcePath, destPath);
+    }
+  });
+}
+
 module.exports = {
   /**
    * Copy directories/files to destination folder
@@ -177,24 +202,7 @@ module.exports = {
    * @param destination {string}: Destination of the directory
    * @returns {void}  
    */
-  copyDirectory: (source, destination) => {
-    if (!fs.existsSync(destination)) {
-      fs.mkdirSync(destination);
-    }
-
-    const files = fs.readdirSync(source);
-
-    files.forEach((file) => {
-      const sourcePath = path.join(source, file);
-      const destPath = path.join(destination, file);
-
-      if (fs.statSync(sourcePath).isDirectory()) {
-        copyDirectory(sourcePath, destPath);
-      } else {
-        fs.copyFileSync(sourcePath, destPath);
-      }
-    });
-  },
+  copyDirectory,
   /**
    * Generate migration file
    * @param args {object}: Arguments object
