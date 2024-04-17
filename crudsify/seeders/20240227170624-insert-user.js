@@ -9,7 +9,7 @@ module.exports = {
     const configStore = require("crudsify/config");
     const { role, user } = require("crudsify/models");
     const roles = await role.findAll();
-    const password = "Cruds!fy";
+    const password = process.env.USER_DEFAULT_PASSWORD;
     const domain = "crudsify.com";
     const users = [
       {
