@@ -25,7 +25,7 @@ if (sslOptions.cert && sslOptions.key) {
   CrudsifyServer = http.createServer(Crudsify);
 }
 
-app.use(helmet())
+Crudsify.use(helmet())
 Crudsify.disable("etag");
 Crudsify.disable("x-powered-by");
 Crudsify.use(cors(configStore.get("/cors")));
