@@ -10,7 +10,7 @@ module.exports = {
     const { role, user } = require("crudsify/models");
     const roles = await role.findAll();
     const password = process.env.USER_DEFAULT_PASSWORD;
-    const domain = "crudsify.com";
+    const domain = process.env.USER_EMAIL_DOMAIN;
     const users = [
       {
         name: faker.person.fullName(),
