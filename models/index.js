@@ -17,11 +17,7 @@ let options = {
   logging: (msg) => {
     if (configStore.get("/logQuery")) QueryLogger.log("query", msg);
   },
-  pool: {
-    max: 5,
-    min: 0,
-    idle: 10000,
-  },
+  pool: configStore.get("/dbConnectionPool"),
   define: {
     ...configStore.modelOptions,
     hooks: {},
