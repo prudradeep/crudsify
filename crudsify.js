@@ -6,6 +6,7 @@ const https = require("https");
 const fs = require("fs");
 const cors = require("cors");
 const helmet = require("helmet");
+const compression = require('compression');
 const { Logger } = require("./helpers/logger");
 const { sequelize } = require("./models");
 const configStore = require("./config");
@@ -25,6 +26,7 @@ if (sslOptions.cert && sslOptions.key) {
   CrudsifyServer = http.createServer(Crudsify);
 }
 
+Crudsify.use(compression())
 Crudsify.use(helmet());
 Crudsify.disable("etag");
 Crudsify.disable("x-powered-by");
