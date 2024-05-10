@@ -200,7 +200,11 @@ const registerMiddleware = {
       if (results.score < requiredPasswordStrength) {
         const err = Boom.badRequest("Stronger password required.");
         err.output.payload.data = results.feedback.suggestions;
-        res.status(err.output.payload.statusCode).send(err.output.payload);
+        sendResponse({
+          data: err.output.payload,
+          status: err.output.payload.statusCode,
+          res
+        })
       } else next();
     } catch (err) {
       next(err);
@@ -600,7 +604,11 @@ const resetPasswordMiddleware = {
       if (results.score < requiredPasswordStrength) {
         const err = Boom.badRequest("Stronger password required.");
         err.output.payload.data = results.feedback.suggestions;
-        res.status(err.output.payload.statusCode).send(err.output.payload);
+        sendResponse({
+          data: err.output.payload,
+          status: err.output.payload.statusCode,
+          res
+        });
       } else next();
     } catch (err) {
       next(err);

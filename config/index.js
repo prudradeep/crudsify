@@ -75,8 +75,8 @@ const Config = {
   logQuery: false,
 
   /**
-   * Maximum number of logs to keep. 
-   * This can be a number of files or number of days. 
+   * Maximum number of logs to keep.
+   * This can be a number of files or number of days.
    * If using days, add 'd' as the suffix.
    * default: "20d"
    * @type {string}
@@ -85,7 +85,7 @@ const Config = {
 
   /**
    * Maximum size of the log file after which it will rotate.
-   * This can be a number of bytes, or units of kb, mb, and gb. 
+   * This can be a number of bytes, or units of kb, mb, and gb.
    * If using the units, add 'k', 'm', or 'g' as the suffix.
    * default: "20m"
    * @type {string}
@@ -245,8 +245,8 @@ const Config = {
   auditLogStorage: constants.AUDIT_LOG_STORAGE.FILE,
 
   /**
-   * Maximum number of logs to keep. 
-   * This can be a number of files or number of days. 
+   * Maximum number of logs to keep.
+   * This can be a number of files or number of days.
    * If using days, add 'd' as the suffix.
    * default: 20d for development & uat
    * default: 60d for production
@@ -325,6 +325,16 @@ const Config = {
    */
   pluginPath: "plugins",
 
+  /**
+   * DB connection pool settings
+   */
+  dbConnectionPool: {
+    max: 5,
+    min: 0,
+    acquire: 30000,
+    idle: 10000,
+  },
+  
   ...userConfig,
 
   /**

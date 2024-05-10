@@ -32,6 +32,7 @@
     "@hapi/hoek": "^11.0.4",
     "bcryptjs": "^2.4.3",
     "bson-objectid": "^2.0.4",
+    "compression": "^1.7.4",
     "confidence": "^5.0.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
