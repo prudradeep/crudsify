@@ -334,6 +334,16 @@ const Config = {
     acquire: 30000,
     idle: 10000,
   },
+
+  /**
+   * Compression options
+   */
+  compression: {},
+
+  /**
+   * Helmet options
+   */
+  helmet: {},
   
   ...userConfig,
 

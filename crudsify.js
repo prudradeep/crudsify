@@ -26,14 +26,13 @@ if (sslOptions.cert && sslOptions.key) {
   CrudsifyServer = http.createServer(Crudsify);
 }
 
-Crudsify.use(compression())
-Crudsify.use(helmet());
+Crudsify.use(compression(configStore.get("/compression")))
+Crudsify.use(helmet(configStore.get("/helmet")));
 Crudsify.disable("etag");
-Crudsify.disable("x-powered-by");
 Crudsify.use(cors(configStore.get("/cors")));
 Crudsify.use(express.json());
 
-module.exports = async (authStrategy = false) => {
+module.exports = async (authStrategy = false, globalMiddleware=[]) => {
   try {
     await sequelize.authenticate();
     const { Endpoints, setAuthMiddleware } = require("./endpoints/generate");
@@ -43,6 +42,9 @@ module.exports = async (authStrategy = false) => {
         throw "Authentication is enabled, Auth strategy required!";
       }
     }
+
+    globalMiddleware.forEach(middleware => Crudsify.use(middleware));
+
     require("./helpers/plugins")(CrudsifyServer, Crudsify);
     require("./helpers/api");
     require("./helpers/route");
