@@ -336,6 +336,11 @@ const Config = {
   },
 
   /**
+   * DB replications
+   */
+  replications: false,
+
+  /**
    * Compression options
    */
   compression: {},

@@ -24,6 +24,8 @@ let options = {
   },
 };
 
+if(configStore.get('/replications')) options.replication = configStore.get('/replications');
+
 const sequelize = new Sequelize(
   configStore.get("/database/database"),
   configStore.get("/database/username"),
