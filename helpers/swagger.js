@@ -59,8 +59,8 @@ const swaggerHelper = async ({
       },
     };
   }
-  if (validate.param) {
-    const { swagger, component } = j2s(validate.param);
+  if (validate.params) {
+    const { swagger, component } = j2s(validate.params);
     Object.keys(swagger.properties).forEach((val) => {
       parameters.push({
         name: val,
