@@ -92,7 +92,7 @@ exports.deleteOneEndpoint = function (model) {
     tags: [routePath],
     validate: {
       body: payloadModel,
-      param: Joi.object({
+      params: Joi.object({
         id: Joi.number().required(),
       }),
     },
@@ -286,7 +286,7 @@ exports.associationRemoveOneEndpoint = function (ownerModel, association) {
     summary: `Remove a single ${childAlias} from a ${ownerAlias}'s list of ${childAlias}`,
     tags: [ownerAlias],
     validate: {
-      param: Joi.object({
+      params: Joi.object({
         ownerId: Joi.number().required(),
         childId: Joi.number().required(),
       }),
@@ -416,7 +416,7 @@ exports.associationRemoveManyEndpoint = function (ownerModel, association) {
     tags: [ownerAlias],
     validate: {
       body: payloadValidation,
-      param: Joi.object({
+      params: Joi.object({
         ownerId: Joi.number().required(),
       }),
     },

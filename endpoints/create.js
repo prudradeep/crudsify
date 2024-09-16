@@ -175,7 +175,7 @@ exports.updateEndpoint = function (model) {
     tags: [routePath],
     validate: {
       body: updateModel,
-      param: Joi.object({
+      params: Joi.object({
         id: Joi.number().required(),
       }),
     },
@@ -326,7 +326,7 @@ exports.associationAddManyEndpoint = function (ownerModel, association) {
     tags: [ownerAlias],
     validate: {
       body: payloadValidation,
-      param: Joi.object({
+      params: Joi.object({
         ownerId: Joi.number().required(),
       }),
     },
@@ -458,7 +458,7 @@ exports.associationAddOneEndpoint = function (ownerModel, association) {
     tags: [ownerAlias],
     validate: {
       body: payloadValidation,
-      param: Joi.object({
+      params: Joi.object({
         ownerId: Joi.number().required(),
         childId: Joi.number().required(),
       }),
