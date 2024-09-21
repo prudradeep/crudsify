@@ -11,6 +11,7 @@ const sendResponse = (err, res) => {
 };
 
 const errorResponder = (err, req, res, next) => {
+  Logger.error(err);
   if (err.isBoom) {
     return sendResponse(err, res);
   } else if (isSequelizeError(err)) {
@@ -51,10 +52,8 @@ const errorResponder = (err, req, res, next) => {
     message = [...new Set(message)];
     return sendResponse(Boom.preconditionRequired(message), res);
   } else if (err instanceof Error) {
-    Logger.error(err);
     return sendResponse(Boom.boomify(err, { statusCode: 400 }), res);
   } else {
-    Logger.error(err);
     return sendResponse(Boom.badImplementation(err.message), res);
   }
 };

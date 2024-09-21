@@ -105,7 +105,6 @@ const generateEndpoint = ({
   if (configStore.get("/enableSwagger")) {
     path = swaggerPath ? swaggerPath : path;
     path = path.replace(/(:[a-zA-Z]+)/gm, `{$1}`).replace(/:/g, "");
-    method = method === "use" ? "get" : method;
     swaggerHelper({ method, path, summary, tags, validate, auth });
   }
 };

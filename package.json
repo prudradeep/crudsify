@@ -28,6 +28,7 @@
   },
   "homepage": "https://github.com/prudradeep/crudsify#readme",
   "dependencies": {
+    "@elastic/ecs-winston-format": "^1.5.3",
     "@hapi/boom": "^10.0.1",
     "@hapi/hoek": "^11.0.4",
     "bcryptjs": "^2.4.3",

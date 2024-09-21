@@ -27,6 +27,12 @@ const Config = {
   service: "APIs",
 
   /**
+   * Your service version goes here
+   * @type {string}
+   */
+  version: "1.0.0",
+
+  /**
    * Path to the logs directory
    * default: './logs/'
    * @type {string}
@@ -349,7 +355,7 @@ const Config = {
    * Helmet options
    */
   helmet: {},
-  
+
   ...userConfig,
 
   /**

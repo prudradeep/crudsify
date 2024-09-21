@@ -1,21 +1,15 @@
 "use strict";
 
-const { createLogger, format, transports, Container } = require("winston");
+const { format, transports, Container } = require("winston");
 require("winston-daily-rotate-file");
-const { combine, timestamp, label, colorize, printf, prettyPrint } = format;
+const { ecsFormat } = require('@elastic/ecs-winston-format');
+const { combine, timestamp, colorize } = format;
 const configStore = require("../config");
 const logDir = configStore.get("/logDir");
-
+const defaultMeta = { service: {name: configStore.get("/service"), version: configStore.get("/version"), environment: process.env.NODE_ENV }};
 const winstonContainer = new Container();
 
-const myFormat =
-  process.env.NODE_ENV !== "production"
-    ? printf(({ level, message, label, timestamp, service }) => {
-        return `[${timestamp}] ${service} | ${level}: ${message}`;
-      })
-    : prettyPrint();
-
-const getTransports = (label_ = "") => {
+const getTransports = () => {
   let Transports = [
     new transports.DailyRotateFile({
       dirname: `${logDir}/combined`,
@@ -25,14 +19,10 @@ const getTransports = (label_ = "") => {
       maxSize: configStore.get("/logFileMaxSize"),
       maxFiles: configStore.get("/logTTL"),
       format: combine(
-        label({
-          label: label_,
-          message: false,
-        }),
         timestamp({
-          format: "YY-MM-DD HH:MM:SS",
+          format: "YYYY-MM-DDTHH:MM:SS",
         }),
-        myFormat
+        ecsFormat()
       ),
     }),
     new transports.DailyRotateFile({
@@ -44,14 +34,10 @@ const getTransports = (label_ = "") => {
       maxSize: configStore.get("/logFileMaxSize"),
       maxFiles: configStore.get("/logTTL"),
       format: combine(
-        label({
-          label: label_,
-          message: false,
-        }),
         timestamp({
-          format: "YY-MM-DD HH:MM:SS",
+          format: "YYYY-MM-DDTHH:MM:SS",
         }),
-        myFormat
+        ecsFormat()
       ),
     }),
   ];
@@ -64,25 +50,19 @@ const getTransports = (label_ = "") => {
           colorize({
             all: true,
           }),
-          label({
-            label: label_,
-            message: false,
-          }),
           timestamp({
-            format: "YY-MM-DD HH:MM:SS",
+            format: "YYYY-MM-DDTHH:MM:SS",
           }),
-          myFormat
         ),
       })
     );
   }
-
   return Transports;
 };
 
 winstonContainer.add("logger", {
   level: configStore.get("/logLevel"),
-  defaultMeta: { service: configStore.get("/service") },
+  defaultMeta,
   transports: getTransports(),
 });
 
@@ -91,7 +71,7 @@ winstonContainer.add("audit", {
     audit: 0,
   },
   level: "audit",
-  defaultMeta: { service: configStore.get("/service") },
+  defaultMeta,
   transports: [
     new transports.DailyRotateFile({
       level: "audit",
@@ -102,14 +82,10 @@ winstonContainer.add("audit", {
       maxSize: configStore.get("/logFileMaxSize"),
       maxFiles: configStore.get("/auditLogTTL"),
       format: combine(
-        label({
-          label: "",
-          message: false,
-        }),
         timestamp({
-          format: "YY-MM-DD HH:MM:SS",
+          format: "YYYY-MM-DDTHH:MM:SS",
         }),
-        myFormat
+        ecsFormat()
       ),
     }),
   ],
@@ -120,7 +96,7 @@ winstonContainer.add("query", {
     query: 0,
   },
   level: "query",
-  defaultMeta: { service: configStore.get("/service") },
+  defaultMeta,
   transports: [
     new transports.DailyRotateFile({
       level: "query",
@@ -131,14 +107,10 @@ winstonContainer.add("query", {
       maxSize: configStore.get("/logFileMaxSize"),
       maxFiles: configStore.get("/logTTL"),
       format: combine(
-        label({
-          label: "",
-          message: false,
-        }),
         timestamp({
-          format: "YY-MM-DD HH:MM:SS",
+          format: "YYYY-MM-DDTHH:MM:SS",
         }),
-        myFormat
+        ecsFormat()
       ),
     }),
   ],
