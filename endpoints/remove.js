@@ -2,7 +2,7 @@
 
 const _ = require("lodash");
 const Joi = require("joi");
-const { getPathName, getScopes, getModelName } = require("../utils");
+const { getPathName, getScopes, getModelName, ucfirst } = require("../utils");
 const configStore = require("../config");
 const { Logger } = require("../helpers/logger");
 const { generateEndpoint } = require("./generate");
@@ -222,10 +222,8 @@ exports.associationRemoveOneEndpoint = function (ownerModel, association) {
     scope = getScopes(ownerModel, "associate");
     const removeScope =
       "remove" +
-      getModelName(ownerModel)[0].toUpperCase() +
-      getModelName(ownerModel).slice(1).toLowerCase() +
-      getModelName(target)[0].toUpperCase() +
-      getModelName(target).slice(1).toLowerCase() +
+      ucfirst(getModelName(ownerModel)) +
+      ucfirst(getModelName(target)) +
       "Scope";
     scope = scope.concat(getScopes(ownerModel, removeScope));
     if (!_.isEmpty(scope)) {
@@ -344,10 +342,8 @@ exports.associationRemoveManyEndpoint = function (ownerModel, association) {
     scope = getScopes(ownerModel, "associate");
     const removeScope =
       "remove" +
-      getModelName(ownerModel)[0].toUpperCase() +
-      getModelName(ownerModel).slice(1).toLowerCase() +
-      getModelName(target)[0].toUpperCase() +
-      getModelName(target).slice(1).toLowerCase() +
+      ucfirst(getModelName(ownerModel)) +
+      ucfirst(getModelName(target)) +
       "Scope";
     scope = scope.concat(getScopes(ownerModel, removeScope));
     if (!_.isEmpty(scope)) {

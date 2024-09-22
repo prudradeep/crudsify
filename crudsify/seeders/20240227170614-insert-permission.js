@@ -5,6 +5,7 @@ module.exports = {
   async up(queryInterface, Sequelize) {
     const superAdminAssignScope = require("../config/super-admin-assign-scopes");
     const { USER_ROLES } = require("crudsify/config/constants");
+    const { ucfirst } = require('crudsify/utils');
     const DB = require("crudsify/models");
 
     let permissions = [
@@ -62,8 +63,7 @@ module.exports = {
 
     for (const modelKey in DB.sequelize.models) {
       if (modelKey.indexOf("_") === -1) {
-        const modelName =
-          modelKey[0].toUpperCase() + modelKey.slice(1).toLowerCase();
+        const modelName = ucfirst(modelKey);
         let name = "";
         let assignScope;
 
@@ -145,8 +145,7 @@ module.exports = {
             associationType === "HasMany" ||
             associationType === "BelongsToMany"
           ) {
-            const associationName =
-              target.name[0].toUpperCase() + target.name.slice(1).toLowerCase();
+            const associationName = ucfirst(target.name);
 
             name = "add" + modelName + associationName;
             assignScope =

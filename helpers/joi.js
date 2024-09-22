@@ -367,7 +367,7 @@ const generateJoiCreateModel = (model, assoc = false, keys = []) => {
       } else if (field.allowOnCreate !== false) {
         let attributeCreateModel = generateJoiModelFromFieldType(field);
 
-        if (field.allowNull === false) {
+        if (field.allowNull === false || field.primaryKey) {
           attributeCreateModel = attributeCreateModel.required();
         }
 

@@ -167,7 +167,9 @@ exports.associationAddManyHandler = async function (
         for (const obj of body) {
           updateOnDuplicate = Object.keys(obj);
           obj[
-            `${ownerModel.name}${ucfirst(configStore.get("/dbPrimaryKey"))}`
+            `${ownerModel.name}${ucfirst(
+              configStore.get("/dbPrimaryKey").name
+            )}`
           ] = owner[configStore.get("/dbPrimaryKey").name];
         }
         data = await association.through.model.bulkCreate(body, {

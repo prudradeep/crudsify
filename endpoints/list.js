@@ -2,7 +2,7 @@
 
 const _ = require("lodash");
 const Joi = require("joi");
-const { getPathName, getScopes, getModelName } = require("../utils");
+const { getPathName, getScopes, getModelName, ucfirst } = require("../utils");
 const configStore = require("../config");
 const { Logger } = require("../helpers/logger");
 const {
@@ -195,10 +195,8 @@ exports.associationGetAllEndpoint = function (DB, ownerModel, association) {
     scope = getScopes(ownerModel, "associate");
     const getScope =
       "get" +
-      getModelName(ownerModel)[0].toUpperCase() +
-      getModelName(ownerModel).slice(1).toLowerCase() +
-      getModelName(target)[0].toUpperCase() +
-      getModelName(target).slice(1).toLowerCase() +
+      ucfirst(getModelName(ownerModel)) +
+      ucfirst(getModelName(target)) +
       "Scope";
     scope = scope.concat(getScopes(ownerModel, getScope));
     if (!_.isEmpty(scope)) {

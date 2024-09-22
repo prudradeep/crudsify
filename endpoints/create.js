@@ -2,7 +2,7 @@
 
 const _ = require("lodash");
 const Joi = require("joi");
-const { getPathName, getScopes, getModelName } = require("../utils");
+const { getPathName, getScopes, getModelName, ucfirst } = require("../utils");
 const configStore = require("../config");
 const { Logger } = require("../helpers/logger");
 const {
@@ -148,10 +148,14 @@ exports.updateEndpoint = function (model) {
   }
   prePolicies.forEach((val) => middlewares.push(val));
 
-  if(routeOptions.updateAuth !== false && authentication && configStore.get("/enableRecordScopes")){
-    middlewares.push(getRecordScopeMiddleware('update', model))
+  if (
+    routeOptions.updateAuth !== false &&
+    authentication &&
+    configStore.get("/enableRecordScopes")
+  ) {
+    middlewares.push(getRecordScopeMiddleware("update", model));
   }
-  
+
   if (routeOptions.updateAuth !== false && authentication)
     middlewares.push(addMeta("update"));
 
@@ -218,10 +222,8 @@ exports.associationAddManyEndpoint = function (ownerModel, association) {
     scope = getScopes(ownerModel, "associate");
     const addScope =
       "add" +
-      getModelName(ownerModel)[0].toUpperCase() +
-      getModelName(ownerModel).slice(1).toLowerCase() +
-      getModelName(target)[0].toUpperCase() +
-      getModelName(target).slice(1).toLowerCase() +
+      ucfirst(getModelName(ownerModel)) +
+      ucfirst(getModelName(target)) +
       "Scope";
     scope = scope.concat(getScopes(ownerModel, addScope));
     if (!_.isEmpty(scope)) {
@@ -255,7 +257,13 @@ exports.associationAddManyEndpoint = function (ownerModel, association) {
                     ? association.through.model
                     : association.target,
                   association.through ? false : true,
-                  association.through ? [] : [association.foreignKeyField]
+                  association.through
+                    ? [
+                        `${ownerModel.name}${ucfirst(
+                          configStore.get("/dbPrimaryKey").name
+                        )}`,
+                      ]
+                    : [association.foreignKeyField]
                 )
               ),
               Joi.array().items(Joi.number().required())
@@ -296,7 +304,7 @@ exports.associationAddManyEndpoint = function (ownerModel, association) {
   ) {
     middlewares.push(getRecordScopeMiddleware("associate", ownerModel));
   }
-  
+
   if (
     routeOptions[getModelName(target)] &&
     routeOptions[getModelName(target)].addAuth !== false &&
@@ -376,10 +384,8 @@ exports.associationAddOneEndpoint = function (ownerModel, association) {
     scope = getScopes(ownerModel, "associate");
     const addScope =
       "add" +
-      getModelName(ownerModel)[0].toUpperCase() +
-      getModelName(ownerModel).slice(1).toLowerCase() +
-      getModelName(target)[0].toUpperCase() +
-      getModelName(target).slice(1).toLowerCase() +
+      ucfirst(getModelName(ownerModel)) +
+      ucfirst(getModelName(target)) +
       "Scope";
     scope = scope.concat(getScopes(ownerModel, addScope));
     if (!_.isEmpty(scope)) {
