@@ -150,6 +150,9 @@ const swaggerHelper = async ({
       422: {
         description: "Unprocessable Entity",
       },
+      428: {
+        description: "Precondition required",
+      },
       429: {
         description: "Too Many Requests",
       },

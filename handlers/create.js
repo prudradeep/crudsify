@@ -180,29 +180,12 @@ exports.associationAddManyHandler = async function (
         data = await owner[accessors.addMultiple](body, { through: through });
       }
     } else {
-      const { data: body, ...through } = req.body;
-      if (body[0].constructor === Object) {
-        let updateOnDuplicate = [];
-        for (const obj of body) {
-          updateOnDuplicate = Object.keys(obj);
-          obj[
-            `${ownerModel.name}${ucfirst(
-              configStore.get("/dbPrimaryKey").name
-            )}`
-          ] = owner[configStore.get("/dbPrimaryKey").name];
-        }
-        data = await childModel.bulkCreate(body, {
-          validate: true,
-          updateOnDuplicate,
-        });
-      } else {
-        const body = req.body.map((obj) => ({
-          ...obj,
-          [association.foreignKeyField]:
-            owner[configStore.get("/dbPrimaryKey").name],
-        }));
-        data = await childModel.bulkCreate(body, { validate: true });
-      }
+      const body = req.body.map((obj) => ({
+        ...obj,
+        [association.foreignKeyField]:
+          owner[configStore.get("/dbPrimaryKey").name],
+      }));
+      data = await childModel.bulkCreate(body, { validate: true });
     }
     try {
       if (
