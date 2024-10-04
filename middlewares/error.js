@@ -7,11 +7,12 @@ const isSequelizeError = (err) => {
   return false;
 };
 const sendResponse = (err, res) => {
+  Logger.error(err);
   return res.status(err.output.statusCode).send(err.output.payload);
 };
 
 const errorResponder = (err, req, res, next) => {
-  Logger.error(err);
+  Logger.error(err.toString());
   if (err.isBoom) {
     return sendResponse(err, res);
   } else if (isSequelizeError(err)) {

@@ -50,7 +50,7 @@ module.exports = {
    */
   setSkip: function (query) {
     if (query.$skip) {
-      return { offset: query.$skip };
+      return { offset: parseInt(query.$skip) };
     }
     return {};
   },
