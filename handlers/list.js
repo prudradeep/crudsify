@@ -9,11 +9,8 @@ const { handleError } = require("./error");
 exports.listHandler = async function (DB, model, req = { query: {} }) {
   try {
     try {
-      if (
-        model.hooks &&
-        model.hooks.list &&
-        model.hooks.list.pre
-      ) {
+      if (!req.query) req.query = {};
+      if (model.hooks && model.hooks.list && model.hooks.list.pre) {
         req = await model.hooks.list.pre(req);
       }
     } catch (err) {
@@ -31,11 +28,7 @@ exports.listHandler = async function (DB, model, req = { query: {} }) {
     }
     let data = await paginateList(DB, model, req, conditions);
     try {
-      if (
-        model.hooks &&
-        model.hooks.list &&
-        model.hooks.list.post
-      ) {
+      if (model.hooks && model.hooks.list && model.hooks.list.post) {
         data.docs = await model.hooks.list.post(req, data.docs);
       }
     } catch (err) {
@@ -53,11 +46,7 @@ exports.findHandler = async function (DB, model, req = { query: {} }) {
       throw Boom.badRequest("Invalid request");
     }
     try {
-      if (
-        model.hooks &&
-        model.hooks.find &&
-        model.hooks.find.pre
-      ) {
+      if (model.hooks && model.hooks.find && model.hooks.find.pre) {
         req = await model.hooks.find.pre(req);
       }
     } catch (err) {
@@ -78,11 +67,7 @@ exports.findHandler = async function (DB, model, req = { query: {} }) {
       include: embeds,
     });
     try {
-      if (
-        model.hooks &&
-        model.hooks.find &&
-        model.hooks.find.post
-      ) {
+      if (model.hooks && model.hooks.find && model.hooks.find.post) {
         data = await model.hooks.find.post(req, data);
       }
     } catch (err) {
@@ -103,6 +88,7 @@ exports.associationGetAllHandler = async function (
   try {
     const { target: childModel, accessors } = association;
     try {
+      if (!req.query) req.query = {};
       if (
         ownerModel.hooks &&
         ownerModel.hooks.getAll &&
