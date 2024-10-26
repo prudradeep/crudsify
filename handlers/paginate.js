@@ -81,14 +81,18 @@ exports.paginateAssocList = async (
   }
 
   const owner = await ownerModel.findByPk(req.params.ownerId);
-  const docs = await owner[accessors.get]({
-    attributes: select,
-    ...conditions,
-    include: embeds,
-    order: [...sort],
-    ...paginate,
-  });
-  const count = await owner[accessors.count](conditions);
+  let docs = [];
+  let count = 0;
+  if (owner) {
+    docs = await owner[accessors.get]({
+      attributes: select,
+      ...conditions,
+      include: embeds,
+      order: [...sort],
+      ...paginate,
+    });
+    count = await owner[accessors.count](conditions);
+  }
 
   const pages = {
     current: parseInt(req.query.$page) || 1,

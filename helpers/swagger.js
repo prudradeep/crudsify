@@ -141,6 +141,9 @@ const swaggerHelper = async ({
       409: {
         description: "Conflict",
       },
+      412: {
+        description: "Precondition Failed",
+      },
       413: {
         description: "Request Entity Too Large",
       },
