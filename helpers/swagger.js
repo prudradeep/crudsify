@@ -32,6 +32,7 @@ const swaggerHelper = async ({
   validate,
   auth,
 }) => {
+  path = path.replaceAll('?', '');
   if (!swaggerData.paths[`${path}`]) swaggerData.paths[`${path}`] = {};
 
   let requestBody = {};
