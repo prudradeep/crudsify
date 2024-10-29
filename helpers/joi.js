@@ -195,10 +195,10 @@ const generatePaginationObjectQuery = () => {
       ),
     $limit: Joi.number()
       .integer()
-      .min(0)
+      .min(-1)
       .optional()
       .description(
-        "The maximum number of records to return. This is typically used in pagination."
+        "The maximum number of records to return. This is typically used in pagination. Set -1 to get all records"
       ),
   }
 }

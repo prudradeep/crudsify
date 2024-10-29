@@ -4,12 +4,14 @@ const _ = require("lodash");
 const queryHelper = require("../helpers/query");
 
 exports.paginateList = async (DB, model, req, conditions = {}) => {
-  const paginate = queryHelper.paginate(req.query);
+  let paginate = queryHelper.paginate(req.query);
   const sort = queryHelper.setSort(req.query);
   let embeds = [];
   if (req.query.$embed) {
     embeds = queryHelper.getEmbeds(DB, req.query.$embed);
   }
+
+  if (parseInt(req.query.$limit) == -1) paginate = {};
 
   let select = {};
   if (req.query.$select) {
@@ -25,6 +27,12 @@ exports.paginateList = async (DB, model, req, conditions = {}) => {
     ...paginate,
   });
   const count = await model.count(conditions);
+
+  if (parseInt(req.query.$limit) == -1) {
+    paginate = {
+      limit: count,
+    };
+  }
 
   const pages = {
     current: parseInt(req.query.$page) || 1,
@@ -66,13 +74,15 @@ exports.paginateAssocList = async (
   req,
   conditions = {}
 ) => {
-  const paginate = queryHelper.paginate(req.query);
+  let paginate = queryHelper.paginate(req.query);
   const sort = queryHelper.setSort(req.query);
 
   let embeds = [];
   if (req.query.$embed) {
     embeds = queryHelper.getEmbeds(DB, req.query.$embed);
   }
+
+  if (parseInt(req.query.$limit) == -1) paginate = {};
 
   let select = {};
   if (req.query.$select) {
@@ -92,6 +102,12 @@ exports.paginateAssocList = async (
       ...paginate,
     });
     count = await owner[accessors.count](conditions);
+  }
+
+  if (parseInt(req.query.$limit) == -1) {
+    paginate = {
+      limit: count,
+    };
   }
 
   const pages = {
