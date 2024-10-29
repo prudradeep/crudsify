@@ -8,9 +8,8 @@ const configStore = require("../config");
 
 exports.createHandler = async function (model, req = {}) {
   try {
-    if (!req.body) {
-      throw Boom.badRequest("Invalid request");
-    }
+    if (!req.body) throw Boom.badRequest("Invalid request");
+
     try {
       if (model.hooks && model.hooks.create && model.hooks.create.pre) {
         req = await model.hooks.create.pre(req);
@@ -47,9 +46,8 @@ exports.createHandler = async function (model, req = {}) {
 
 exports.updateHandler = async function (model, req = { query: {} }) {
   try {
-    if (!req.params) {
-      throw Boom.badRequest("Invalid request");
-    }
+    if (!req.params || !req.params.id) throw Boom.badRequest("Invalid request");
+
     try {
       if (model.hooks && model.hooks.update && model.hooks.update.pre) {
         req = await model.hooks.update.pre(req);
@@ -88,9 +86,9 @@ exports.associationAddOneHandler = async function (
   req = { query: {}, body: {} }
 ) {
   try {
-    if (!req.params) {
+    if (!req.params || !req.params.ownerId || !req.params.childId)
       throw Boom.badRequest("Invalid request");
-    }
+
     const { target: childModel, accessors } = association;
     try {
       if (
@@ -109,6 +107,7 @@ exports.associationAddOneHandler = async function (
       );
     }
     const owner = await ownerModel.findByPk(req.params.ownerId);
+    if (!owner) throw Boom.badRequest("Invalid request");
     let data = await owner[accessors.add](parseInt(req.params.childId), {
       through: { ...req.body },
     });
@@ -135,9 +134,9 @@ exports.associationAddManyHandler = async function (
   req = { query: {} }
 ) {
   try {
-    if (!req.params || !req.body) {
+    if (!req.params || !req.body || !req.params.ownerId)
       throw Boom.badRequest("Invalid request");
-    }
+
     const { target: childModel, accessors, throughModel } = association;
     try {
       if (
@@ -156,9 +155,7 @@ exports.associationAddManyHandler = async function (
       );
     }
     const owner = await ownerModel.findByPk(req.params.ownerId);
-    if (!owner) {
-      throw Boom.badRequest("Invalid request");
-    }
+    if (!owner) throw Boom.badRequest("Invalid request");
     let data = {};
     if (association.through) {
       const { data: body, ...through } = req.body;

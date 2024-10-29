@@ -46,9 +46,8 @@ exports.listHandler = async function (DB, model, req = { query: {} }) {
 
 exports.findHandler = async function (DB, model, req = { query: {} }) {
   try {
-    if (!req.params) {
-      throw Boom.badRequest("Invalid request");
-    }
+    if (!req.params || !req.param.id) throw Boom.badRequest("Invalid request");
+
     try {
       if (model.hooks && model.hooks.find && model.hooks.find.pre) {
         req = await model.hooks.find.pre(req);
@@ -92,6 +91,9 @@ exports.associationGetAllHandler = async function (
   try {
     const { target: childModel, accessors } = association;
     try {
+      if (!req.params || !req.params.ownerId)
+        throw Boom.badRequest("Invalid request");
+
       if (!req.query) req.query = {};
       if (
         ownerModel.hooks &&
@@ -110,9 +112,6 @@ exports.associationGetAllHandler = async function (
     }
     const conditions = createWhereCondition(req.query, childModel);
     if (req.query.$count) {
-      if (!req.params) {
-        throw Boom.badRequest("Invalid request");
-      }
       const owner = await ownerModel.findByPk(req.params.ownerId);
       const count = await owner[accessors.count](conditions);
       return { count };

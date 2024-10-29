@@ -12,11 +12,7 @@ exports.deleteHandler = async function (model, req = { query: {} }) {
         : false
       : false;
     try {
-      if (
-        model.hooks &&
-        model.hooks.delete &&
-        model.hooks.delete.pre
-      ) {
+      if (model.hooks && model.hooks.delete && model.hooks.delete.pre) {
         await model.hooks.delete.pre(req, hardDelete);
       }
     } catch (err) {
@@ -57,11 +53,7 @@ exports.deleteHandler = async function (model, req = { query: {} }) {
       throw Boom.badRequest("Invalid delete request");
     }
     try {
-      if (
-        model.hooks &&
-        model.hooks.delete &&
-        model.hooks.delete.post
-      ) {
+      if (model.hooks && model.hooks.delete && model.hooks.delete.post) {
         await model.hooks.delete.post(req, hardDelete, deleted);
       }
     } catch (err) {
@@ -83,9 +75,9 @@ exports.associationRemoveOneHandler = async function (
   req = { query: {} }
 ) {
   try {
-    if (!req.params) {
+    if (!req.params || !req.params.ownerId || !req.params.childId)
       throw Boom.badRequest("Invalid request");
-    }
+
     const { target: childModel, accessors } = association;
     try {
       if (
@@ -129,9 +121,9 @@ exports.associationRemoveManyHandler = async function (
   req = { query: {} }
 ) {
   try {
-    if (!req.params) {
+    if (!req.params || !req.params.ownerId)
       throw Boom.badRequest("Invalid request");
-    }
+
     const { target: childModel, accessors } = association;
     try {
       if (
