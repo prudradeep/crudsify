@@ -69,7 +69,7 @@ const swaggerHelper = async ({
           type: swagger.properties[val].type,
         },
         in: "path",
-        required: true,
+        required: swagger.properties[val].nullable?false:true,
         description: swagger.properties[val].description,
       });
     });
