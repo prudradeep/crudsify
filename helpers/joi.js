@@ -174,12 +174,11 @@ const generateJoiModelFromFieldType = function (field) {
 };
 
 /**
- * Generates a Joi object that validates a request query for the list function
- * @param model: A model object.
- * @returns {*}: A Joi object
+ * Generates a object for validation of pagination request query for the list function
+ * @returns {*}: A pagination object for validation
  */
-const generateJoiListQueryModel = (model) => {
-  let queryModel = {
+const generatePaginationObjectQuery = () => {
+  return {
     $skip: Joi.number()
       .integer()
       .min(0)
@@ -201,7 +200,16 @@ const generateJoiListQueryModel = (model) => {
       .description(
         "The maximum number of records to return. This is typically used in pagination."
       ),
-  };
+  }
+}
+
+/**
+ * Generates a Joi object that validates a request query for the list function
+ * @param model: A model object.
+ * @returns {*}: A Joi object
+ */
+const generateJoiListQueryModel = (model) => {
+  let queryModel = generatePaginationObjectQuery();
 
   const queryableFields = queryHelper.getQueryableFields(model);
 
@@ -433,4 +441,5 @@ module.exports = {
   generateJoiUpdateModel,
   headersValidation,
   isValidField,
+  generatePaginationObjectQuery,
 };
