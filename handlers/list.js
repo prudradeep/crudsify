@@ -26,7 +26,11 @@ exports.listHandler = async function (DB, model, req = { query: {} }) {
       const count = await model.count(conditions);
       return { count };
     }
-    let data = await paginateList(DB, model, req, conditions);
+    let embeds = false;
+    if (req.query.$embed) {
+      embeds = getEmbeds(DB, req.query.$embed);
+    }
+    let data = await paginateList(model, req, conditions, true, embeds);
     try {
       if (model.hooks && model.hooks.list && model.hooks.list.post) {
         data.docs = await model.hooks.list.post(req, data.docs);
@@ -114,12 +118,16 @@ exports.associationGetAllHandler = async function (
       return { count };
     }
 
+    let embeds = false;
+    if (req.query.$embed) {
+      embeds = getEmbeds(DB, req.query.$embed);
+    }
     let data = await paginateAssocList(
-      DB,
       ownerModel,
       accessors,
       req,
-      conditions
+      conditions,
+      embeds
     );
     try {
       if (
