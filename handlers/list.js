@@ -46,7 +46,7 @@ exports.listHandler = async function (DB, model, req = { query: {} }) {
 
 exports.findHandler = async function (DB, model, req = { query: {} }) {
   try {
-    if (!req.params || !req.param.id) throw Boom.badRequest("Invalid request");
+    if (!req.params || !req.params.id) throw Boom.badRequest("Invalid request");
 
     try {
       if (model.hooks && model.hooks.find && model.hooks.find.pre) {
