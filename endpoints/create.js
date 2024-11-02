@@ -180,7 +180,7 @@ exports.updateEndpoint = function (model) {
     validate: {
       body: updateModel,
       params: Joi.object({
-        id: Joi.number().required(),
+        id: Joi.string().required(),
       }),
     },
     scope,
@@ -335,7 +335,7 @@ exports.associationAddManyEndpoint = function (ownerModel, association) {
     validate: {
       body: payloadValidation,
       params: Joi.object({
-        ownerId: Joi.number().required(),
+        ownerId: Joi.string().required(),
       }),
     },
     scope,
@@ -465,8 +465,8 @@ exports.associationAddOneEndpoint = function (ownerModel, association) {
     validate: {
       body: payloadValidation,
       params: Joi.object({
-        ownerId: Joi.number().required(),
-        childId: Joi.number().required(),
+        ownerId: Joi.string().required(),
+        childId: Joi.string().required(),
       }),
     },
     scope,

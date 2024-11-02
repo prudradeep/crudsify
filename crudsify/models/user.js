@@ -25,7 +25,7 @@ const USER_ROLES = require("crudsify/config/constants").USER_ROLES;
 const { REQUIRED_PASSWORD_STRENGTH } = require("crudsify/config/constants");
 const authentication = configStore.get("/authentication");
 const params = Joi.object({
-  id: Joi.number().required(),
+  id: Joi.string().required(),
 });
 
 module.exports = (sequelize, DataTypes) => {

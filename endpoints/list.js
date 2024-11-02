@@ -154,7 +154,7 @@ exports.findEndpoint = function (DB, model) {
     validate: {
       query: queryModel,
       params: Joi.object({
-        id: Joi.number().required(),
+        id: Joi.string().required(),
       }),
     },
     scope,
@@ -250,7 +250,7 @@ exports.associationGetAllEndpoint = function (DB, ownerModel, association) {
     validate: {
       query: queryModel,
       params: Joi.object({
-        ownerId: Joi.number().required(),
+        ownerId: Joi.string().required(),
       }),
     },
     scope,
