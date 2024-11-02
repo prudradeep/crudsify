@@ -30,7 +30,7 @@ exports.listHandler = async function (DB, model, req = { query: {} }) {
     if (req.query.$embed) {
       embeds = getEmbeds(DB, req.query.$embed);
     }
-    let data = await paginateList(model, req, conditions, true, embeds);
+    let data = await paginateList(model, req, conditions, false, embeds);
     try {
       if (model.hooks && model.hooks.list && model.hooks.list.post) {
         data.docs = await model.hooks.list.post(req, data.docs);
