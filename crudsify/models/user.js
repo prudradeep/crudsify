@@ -58,17 +58,17 @@ module.exports = (sequelize, DataTypes) => {
           include: [{ model: sequelize.models.role }],
         };
 
-        let user = await this.unscoped().findOne(query);
+        let user_ = await this.unscoped().findOne(query);
 
-        if (!user) {
+        if (!user_) {
           return false;
         }
 
-        const source = user.password;
+        const source = user_.password;
 
         let passwordMatch = await Bcrypt.compare(password, source);
         if (passwordMatch) {
-          return user;
+          return user_;
         } else {
           return false;
         }
@@ -229,7 +229,7 @@ module.exports = (sequelize, DataTypes) => {
       () => {
         const getCurrentUserHandler = async function (req, res, next) {
           try {
-            const user = await findHandler(sequelize, user, {
+            const User = await findHandler(sequelize, user, {
               params: {
                 id: req.auth.credentials.user[
                   configStore.get("/dbPrimaryKey").name
@@ -239,7 +239,7 @@ module.exports = (sequelize, DataTypes) => {
                 $embed: ["role"],
               },
             });
-            sendResponse({ data: user, status: 200, res, next });
+            sendResponse({ data: User, status: 200, res, next });
           } catch (err) {
             next(err);
           }
@@ -293,13 +293,13 @@ module.exports = (sequelize, DataTypes) => {
                 ],
               },
             };
-            const User = await user.unscoped().findOne(query);
+            const User = await this.unscoped().findOne(query);
             if (!User) {
               throw Boom.badRequest("Invalid request.");
             }
             const passwordMatch = await Bcrypt.compare(
               req.body.password,
-              user.password
+              User.password
             );
             if (!passwordMatch) throw Boom.unauthorized("User not authorised.");
             next();
@@ -351,7 +351,7 @@ module.exports = (sequelize, DataTypes) => {
           next
         ) {
           try {
-            await updateHandler(User, {
+            await updateHandler(user, {
               params: {
                 id: req.auth.credentials.user[
                   configStore.get("/dbPrimaryKey").name
@@ -407,7 +407,7 @@ module.exports = (sequelize, DataTypes) => {
     () => {
       const activateAccountHandler = async function (req, res, next) {
         try {
-          await updateHandler(User, {
+          await updateHandler(user, {
             params: { id: req.params.id },
             body: { status: true },
           });
@@ -435,7 +435,7 @@ module.exports = (sequelize, DataTypes) => {
     () => {
       const deactivateAccountHandler = async function (req, res, next) {
         try {
-          await updateHandler(User, {
+          await updateHandler(user, {
             params: { id: req.params.id },
             body: { status: false },
           });
@@ -467,11 +467,11 @@ module.exports = (sequelize, DataTypes) => {
             where: {
               [configStore.get("/dbPrimaryKey").name]: req.params.id,
             },
-            include: [{ model: sequelize.role }],
+            include: [{ model: sequelize.models.role }],
           };
 
           let User = await this.findOne(query);
-          const scopes = await sequelize.permission.getScope(User);
+          const scopes = await sequelize.models.permission.getScope(User);
           res.data = scopes;
           sendResponse({ data: scopes, status: 200, res, next });
         } catch (err) {

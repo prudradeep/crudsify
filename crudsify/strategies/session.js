@@ -53,6 +53,7 @@ exports.sessionStrategy = async function (req, res, next) {
     };
     next();
   } catch (err) {
-    next(err);
+    Logger.error(err);
+    next(Boom.unauthorized("Authentication failed"))
   }
 };

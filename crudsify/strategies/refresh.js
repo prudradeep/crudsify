@@ -96,6 +96,6 @@ exports.refreshStrategy = async function (req, res, next) {
     }
   } catch (err) {
     Logger.error(err);
-    next(err);
+    next(Boom.unauthorized("Authentication failed"))
   }
 };
