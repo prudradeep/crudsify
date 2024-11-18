@@ -280,9 +280,9 @@ module.exports = {
       embeds = embed.map((val) => {
         if (val.indexOf(".") !== -1) {
           const em = val.split(".").reduceRight((init, c) => {
-            const init_ = {
+            const init_ = DB[c] ? {
               model: DB[c],
-            };
+            } : c;
             if (!_.isArray(init)) {
               init_.include = [init];
             }
@@ -290,21 +290,21 @@ module.exports = {
           }, []);
           return em;
         }
-        return { model: DB[val] };
+        return DB[val] ? { model: DB[val] } : val;
       });
     } else {
       if (embed.indexOf(".") !== -1) {
         embeds = embed.split(".").reduceRight((init, val) => {
-          const init_ = {
+          const init_ = DB[val] ? {
             model: DB[val],
-          };
+          }: val;
           if (!_.isArray(init)) {
             init_.include = [init];
           }
           return init_;
         }, []);
         embeds = [embeds];
-      } else embeds = [{ model: DB[embed] }];
+      } else embeds = [DB[embed] ? { model: DB[embed] }: embed];
     }
     return embeds;
   },

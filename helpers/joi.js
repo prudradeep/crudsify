@@ -282,8 +282,8 @@ const generateJoiListQueryModel = (model) => {
   if (associations) {
     let embeds = [];
     for (const assoc of Object.values(model.associations)) {
-      const { target } = assoc;
-      embeds.push(target.name);
+      const { target, as } = assoc;
+      embeds.push(as !== target.name ? as : target.name);
     }
     queryModel.$embed = Joi.alternatives().try(
       Joi.array()
@@ -331,8 +331,8 @@ const generateJoiFindQueryModel = (model) => {
   if (associations) {
     let embeds = [];
     for (const assoc of Object.values(model.associations)) {
-      const { target } = assoc;
-      embeds.push(target.name);
+      const { target, as } = assoc;
+      embeds.push(as !== target.name ? as : target.name);
     }
     queryModel.$embed = Joi.alternatives().try(
       Joi.array()
