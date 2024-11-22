@@ -28,7 +28,7 @@ exports.listHandler = async function (DB, model, req = { query: {} }) {
     }
     let embeds = false;
     if (req.query.$embed) {
-      embeds = getEmbeds(DB, req.query.$embed);
+      embeds = getEmbeds(DB, req.query.$embed, model.associations);
     }
     let data = await paginateList(model, req, conditions, false, embeds);
     try {
@@ -57,7 +57,7 @@ exports.findHandler = async function (DB, model, req = { query: {} }) {
     }
     let embeds = [];
     if (req.query && req.query.$embed) {
-      embeds = getEmbeds(DB, req.query.$embed);
+      embeds = getEmbeds(DB, req.query.$embed, model.associations);
     }
 
     let select = {};
@@ -119,7 +119,7 @@ exports.associationGetAllHandler = async function (
 
     let embeds = false;
     if (req.query.$embed) {
-      embeds = getEmbeds(DB, req.query.$embed);
+      embeds = getEmbeds(DB, req.query.$embed, childModel.associations);
     }
     let data = await paginateAssocList(
       ownerModel,

@@ -274,15 +274,20 @@ module.exports = {
     return { where: { [Op.and]: where } };
   },
 
-  getEmbeds: function (DB, embed) {
+  getEmbeds: function (DB, embed, associations = false) {
     let embeds = [];
     if (_.isArray(embed)) {
       embeds = embed.map((val) => {
         if (val.indexOf(".") !== -1) {
           const em = val.split(".").reduceRight((init, c) => {
-            const init_ = DB[c] ? {
-              model: DB[c],
-            } : c;
+            const init_ = DB[c]
+              ? {
+                  model: DB[c],
+                }
+              : {
+                  model: associations[c].target,
+                  as: c,
+                };
             if (!_.isArray(init)) {
               init_.include = [init];
             }
@@ -290,21 +295,39 @@ module.exports = {
           }, []);
           return em;
         }
-        return DB[val] ? { model: DB[val] } : val;
+        return DB[val]
+          ? { model: DB[val] }
+          : {
+              model: associations[val].target,
+              as: val,
+            };
       });
     } else {
       if (embed.indexOf(".") !== -1) {
         embeds = embed.split(".").reduceRight((init, val) => {
-          const init_ = DB[val] ? {
-            model: DB[val],
-          }: val;
+          const init_ = DB[val]
+            ? {
+                model: DB[val],
+              }
+            : {
+                model: associations[val].target,
+                as: val,
+              };
           if (!_.isArray(init)) {
             init_.include = [init];
           }
           return init_;
         }, []);
         embeds = [embeds];
-      } else embeds = [DB[embed] ? { model: DB[embed] }: embed];
+      } else
+        embeds = [
+          DB[embed]
+            ? { model: DB[embed] }
+            : {
+                model: associations[embed].target,
+                as: embed,
+              },
+        ];
     }
     return embeds;
   },
