@@ -69,7 +69,11 @@ exports.deleteOneEndpoint = function (model) {
     middlewares.push(getRecordScopeMiddleware("delete", model));
   }
 
-  if (routeOptions.deleteAuth !== false && authentication)
+  if (
+    routeOptions.deleteAuth !== false &&
+    authentication &&
+    configStore.get("/enableDeletedBy")
+  )
     middlewares.push(addMeta("delete"));
 
   const handler = deleteMiddleware(model);
@@ -259,7 +263,8 @@ exports.associationRemoveOneEndpoint = function (ownerModel, association) {
   if (
     routeOptions[getModelName(target)] &&
     routeOptions[getModelName(target)].removeAuth !== false &&
-    authentication
+    authentication &&
+    configStore.get("/enableDeletedBy")
   )
     middlewares.push(addMeta("delete"));
 
@@ -386,7 +391,8 @@ exports.associationRemoveManyEndpoint = function (ownerModel, association) {
   if (
     routeOptions[getModelName(target)] &&
     routeOptions[getModelName(target)].removeAuth !== false &&
-    authentication
+    authentication &&
+    configStore.get("/enableDeletedBy")
   )
     middlewares.push(addMeta("delete"));
 

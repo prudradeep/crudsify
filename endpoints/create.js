@@ -74,9 +74,11 @@ exports.createEndpoint = function (model) {
   prePolicies.forEach((val) => middlewares.push(val));
 
   if (routeOptions.createAuth !== false && authentication) {
-    middlewares.push(addMeta("create"));
-    middlewares.push(addRecordScope(model));
+    if (configStore.get("/enableCreatedBy"))
+      middlewares.push(addMeta("create"));
+
     if (configStore.get("/enableRecordScopes")) {
+      middlewares.push(addRecordScope(model));
       middlewares.push(addAuthRecordCreatorSope(model));
     }
   }
@@ -156,7 +158,11 @@ exports.updateEndpoint = function (model) {
     middlewares.push(getRecordScopeMiddleware("update", model));
   }
 
-  if (routeOptions.updateAuth !== false && authentication)
+  if (
+    routeOptions.updateAuth !== false &&
+    authentication &&
+    configStore.get("/enableUpdatedBy")
+  )
     middlewares.push(addMeta("update"));
 
   const handler = updateMiddleware(model);
@@ -308,7 +314,8 @@ exports.associationAddManyEndpoint = function (ownerModel, association) {
   if (
     routeOptions[getModelName(target)] &&
     routeOptions[getModelName(target)].addAuth !== false &&
-    authentication
+    authentication &&
+    configStore.get("/enableCreatedBy")
   )
     middlewares.push(addMeta("create"));
 
@@ -438,7 +445,8 @@ exports.associationAddOneEndpoint = function (ownerModel, association) {
   if (
     routeOptions[getModelName(target)] &&
     routeOptions[getModelName(target)].addAuth !== false &&
-    authentication
+    authentication &&
+    configStore.get("/enableUpdatedBy")
   )
     middlewares.push(addMeta("update"));
 
