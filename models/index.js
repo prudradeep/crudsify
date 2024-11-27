@@ -19,7 +19,7 @@ let options = {
   },
   pool: configStore.get("/dbConnectionPool"),
   define: {
-    ...configStore.modelOptions,
+    ...configStore.get("/modelOptions"),
     hooks: {},
   },
 };

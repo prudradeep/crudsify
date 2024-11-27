@@ -28,7 +28,7 @@ exports.deleteHandler = async function (model, req = { query: {} }) {
       if (hardDelete === false) {
         await model.update(
           { deletedBy: req.body.deletedBy },
-          { where: { [configStore.get("/dbPrimaryKey").name]: req.params.id } }
+          { where: { [configStore.get("/dbPrimaryKey").name]: req.params.id }, paranoid: false }
         );
       }
       await model.destroy({
@@ -42,7 +42,7 @@ exports.deleteHandler = async function (model, req = { query: {} }) {
       if (hardDelete === false) {
         await model.update(
           { deletedBy: req.body.deletedBy },
-          { where: { [configStore.get("/dbPrimaryKey").name]: req.body.data } }
+          { where: { [configStore.get("/dbPrimaryKey").name]: req.body.data }, paranoid: false }
         );
       }
       await model.destroy({

@@ -166,6 +166,13 @@ exports.deleteManyEndpoint = function (model) {
     middlewares.push(getRecordScopeMiddleware("delete", model));
   }
 
+  if (
+    routeOptions.deleteAuth !== false &&
+    authentication &&
+    configStore.get("/enableDeletedBy")
+  )
+    middlewares.push(addMeta("delete"));
+
   const handler = deleteMiddleware(model);
 
   let postPolicies = [];
