@@ -11,7 +11,12 @@ exports.createHandler = async function (model, req = {}) {
     if (!req.body) throw Boom.badRequest("Invalid request");
 
     try {
-      if (model.hooks && model.hooks.create && model.hooks.create.pre) {
+      if (
+        model.hooks &&
+        model.hooks.create &&
+        model.hooks.create.pre &&
+        req.preHook === undefined
+      ) {
         req = await model.hooks.create.pre(req);
       }
     } catch (err) {
@@ -28,7 +33,12 @@ exports.createHandler = async function (model, req = {}) {
       data = await model.create(req.body);
     }
     try {
-      if (model.hooks && model.hooks.create && model.hooks.create.post) {
+      if (
+        model.hooks &&
+        model.hooks.create &&
+        model.hooks.create.post &&
+        req.postHook === undefined
+      ) {
         data = await model.hooks.create.post(req, data);
       }
     } catch (err) {
@@ -49,7 +59,12 @@ exports.updateHandler = async function (model, req = { query: {} }) {
     if (!req.params || !req.params.id) throw Boom.badRequest("Invalid request");
 
     try {
-      if (model.hooks && model.hooks.update && model.hooks.update.pre) {
+      if (
+        model.hooks &&
+        model.hooks.update &&
+        model.hooks.update.pre &&
+        req.preHook === undefined
+      ) {
         req = await model.hooks.update.pre(req);
       }
     } catch (err) {
@@ -64,7 +79,12 @@ exports.updateHandler = async function (model, req = { query: {} }) {
     });
     let data = await model.findByPk(req.params.id);
     try {
-      if (model.hooks && model.hooks.update && model.hooks.update.post) {
+      if (
+        model.hooks &&
+        model.hooks.update &&
+        model.hooks.update.post &&
+        req.postHook === undefined
+      ) {
         data = await model.hooks.update.post(req, data);
       }
     } catch (err) {
@@ -95,7 +115,8 @@ exports.associationAddOneHandler = async function (
         ownerModel.hooks &&
         ownerModel.hooks.add &&
         ownerModel.hooks.add[childModel.name] &&
-        ownerModel.hooks.add[childModel.name].pre
+        ownerModel.hooks.add[childModel.name].pre &&
+        req.preHook === undefined
       ) {
         req = await ownerModel.hooks.add[childModel.name].pre(req);
       }
@@ -116,7 +137,8 @@ exports.associationAddOneHandler = async function (
         ownerModel.hooks &&
         ownerModel.hooks.add &&
         ownerModel.hooks.add[childModel.name] &&
-        ownerModel.hooks.add[childModel.name].post
+        ownerModel.hooks.add[childModel.name].post &&
+        req.postHook === undefined
       ) {
         data = await ownerModel.hooks.add[childModel.name].post(req, data);
       }
@@ -143,7 +165,8 @@ exports.associationAddManyHandler = async function (
         ownerModel.hooks &&
         ownerModel.hooks.add &&
         ownerModel.hooks.add[childModel.name] &&
-        ownerModel.hooks.add[childModel.name].pre
+        ownerModel.hooks.add[childModel.name].pre &&
+        req.preHook === undefined
       ) {
         req = await ownerModel.hooks.add[childModel.name].pre(req);
       }
@@ -189,7 +212,8 @@ exports.associationAddManyHandler = async function (
         ownerModel.hooks &&
         ownerModel.hooks.add &&
         ownerModel.hooks.add[childModel.name] &&
-        ownerModel.hooks.add[childModel.name].post
+        ownerModel.hooks.add[childModel.name].post &&
+        req.postHook === undefined
       ) {
         data = await ownerModel.hooks.add[childModel.name].post(req, data);
       }

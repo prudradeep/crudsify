@@ -12,7 +12,12 @@ exports.deleteHandler = async function (model, req = { query: {} }) {
         : false
       : false;
     try {
-      if (model.hooks && model.hooks.delete && model.hooks.delete.pre) {
+      if (
+        model.hooks &&
+        model.hooks.delete &&
+        model.hooks.delete.pre &&
+        req.preHook === undefined
+      ) {
         await model.hooks.delete.pre(req, hardDelete);
       }
     } catch (err) {
@@ -28,7 +33,10 @@ exports.deleteHandler = async function (model, req = { query: {} }) {
       if (hardDelete === false) {
         await model.update(
           { deletedBy: req.body.deletedBy },
-          { where: { [configStore.get("/dbPrimaryKey").name]: req.params.id }, paranoid: false }
+          {
+            where: { [configStore.get("/dbPrimaryKey").name]: req.params.id },
+            paranoid: false,
+          }
         );
       }
       await model.destroy({
@@ -42,7 +50,10 @@ exports.deleteHandler = async function (model, req = { query: {} }) {
       if (hardDelete === false) {
         await model.update(
           { deletedBy: req.body.deletedBy },
-          { where: { [configStore.get("/dbPrimaryKey").name]: req.body.data }, paranoid: false }
+          {
+            where: { [configStore.get("/dbPrimaryKey").name]: req.body.data },
+            paranoid: false,
+          }
         );
       }
       await model.destroy({
@@ -53,7 +64,12 @@ exports.deleteHandler = async function (model, req = { query: {} }) {
       throw Boom.badRequest("Invalid delete request");
     }
     try {
-      if (model.hooks && model.hooks.delete && model.hooks.delete.post) {
+      if (
+        model.hooks &&
+        model.hooks.delete &&
+        model.hooks.delete.post &&
+        req.postHook === undefined
+      ) {
         await model.hooks.delete.post(req, hardDelete, deleted);
       }
     } catch (err) {
@@ -84,7 +100,8 @@ exports.associationRemoveOneHandler = async function (
         ownerModel.hooks &&
         ownerModel.hooks.remove &&
         ownerModel.hooks.remove[childModel.name] &&
-        ownerModel.hooks.remove[childModel.name].pre
+        ownerModel.hooks.remove[childModel.name].pre &&
+        req.preHook === undefined
       ) {
         await ownerModel.hooks.remove[childModel.name].pre(req);
       }
@@ -102,7 +119,8 @@ exports.associationRemoveOneHandler = async function (
         ownerModel.hooks &&
         ownerModel.hooks.remove &&
         ownerModel.hooks.remove[childModel.name] &&
-        ownerModel.hooks.remove[childModel.name].post
+        ownerModel.hooks.remove[childModel.name].post &&
+        req.postHook === undefined
       ) {
         await ownerModel.hooks.remove[childModel.name].post(req);
       }
@@ -130,7 +148,8 @@ exports.associationRemoveManyHandler = async function (
         ownerModel.hooks &&
         ownerModel.hooks.remove &&
         ownerModel.hooks.remove[childModel.name] &&
-        ownerModel.hooks.remove[childModel.name].pre
+        ownerModel.hooks.remove[childModel.name].pre &&
+        req.preHook === undefined
       ) {
         req = await ownerModel.hooks.remove[childModel.name].pre(req);
       }
@@ -148,7 +167,8 @@ exports.associationRemoveManyHandler = async function (
         ownerModel.hooks &&
         ownerModel.hooks.remove &&
         ownerModel.hooks.remove[childModel.name] &&
-        ownerModel.hooks.remove[childModel.name].post
+        ownerModel.hooks.remove[childModel.name].post &&
+        req.postHook === undefined
       ) {
         data = await ownerModel.hooks.remove[childModel.name].post(req);
       }
