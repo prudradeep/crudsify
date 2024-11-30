@@ -14,6 +14,7 @@ let options = {
   host: configStore.get("/database/host"),
   port: configStore.get("/database/port"),
   dialect: configStore.get("/database/dialect"),
+  dialectOptions: configStore.get("/dialectOptions"),
   logging: (msg) => {
     if (configStore.get("/logQuery")) QueryLogger.log("query", msg);
   },

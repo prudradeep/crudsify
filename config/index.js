@@ -342,6 +342,13 @@ const Config = {
   },
 
   /**
+   * DB dialect options
+   */
+  dialectOptions: {
+
+  },
+
+  /**
    * DB replications
    */
   replications: false,
