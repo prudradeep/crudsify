@@ -33,6 +33,11 @@ const Config = {
   version: "1.0.0",
 
   /**
+   * Timezone
+   */
+  timezone: "+05:30",
+
+  /**
    * Path to the logs directory
    * default: './logs/'
    * @type {string}
