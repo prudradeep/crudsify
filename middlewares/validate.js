@@ -7,7 +7,7 @@ const { headersValidation } = require("../helpers/joi");
 exports.headerValidationMiddleware = function (req, res, next) {
   try {
     const { error, value } = headersValidation.validate(req.headers);
-    if (error) throw Boom.badRequest(error.message);
+    if (error) throw Boom.unauthorized(error.message);
     else {
       next();
     }
