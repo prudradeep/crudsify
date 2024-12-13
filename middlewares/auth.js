@@ -5,7 +5,8 @@ const configStore = require("../config");
 exports.basicAuthMiddleware = (req, res, next) => {
   const authheader = req.headers.authorization;
   if (authheader) {
-    const auth = new Buffer.from(authheader.split(" ")[1], "base64")
+    const token = authheader.split(" ")[1] || authheader;
+    const auth = new Buffer.from(token, "base64")
       .toString()
       .split(":");
 
