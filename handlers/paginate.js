@@ -3,7 +3,13 @@
 const _ = require("lodash");
 const queryHelper = require("../helpers/query");
 
-exports.paginateList = async (model, req, conditions = {}, subQuery=false, embeds = false) => {
+exports.paginateList = async (
+  model,
+  req,
+  conditions = {},
+  subQuery = false,
+  embeds = false
+) => {
   let paginate = queryHelper.paginate(req.query);
   const sort = queryHelper.setSort(req.query);
   if (parseInt(req.query.$limit) == -1) paginate = {};
@@ -22,7 +28,7 @@ exports.paginateList = async (model, req, conditions = {}, subQuery=false, embed
     subQuery,
     ...paginate,
   });
-  const count = docs.count;
+  const count = _.isArray(docs.count) ? docs.count.length : docs.count;
 
   if (parseInt(req.query.$limit) == -1) {
     paginate = {
