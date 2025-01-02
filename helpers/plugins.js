@@ -21,15 +21,16 @@ directories.push(pluginPath);
 const registerPlugin = (CrudsifyServer, Crudsify) => {
   try {
     directories.forEach((directory) => {
-      const files = fs.readdirSync(directory);
-
-      for (const file of files) {
-        const ext = path.extname(file);
-        if (ext === ".js") {
-          const fileName = path.basename(file, ".js");
-          const plugin = require(directory + "/" + fileName)(CrudsifyServer);
-          const name = fileName.split(".")[0];
-          Crudsify.plugins[name] = plugin;
+      if(fs.existsSync(directory)){
+        const files = fs.readdirSync(directory);
+        for (const file of files) {
+          const ext = path.extname(file);
+          if (ext === ".js") {
+            const fileName = path.basename(file, ".js");
+            const plugin = require(directory + "/" + fileName)(CrudsifyServer);
+            const name = fileName.split(".")[0];
+            Crudsify.plugins[name] = plugin;
+          }
         }
       }
     });
