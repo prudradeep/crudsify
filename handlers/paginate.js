@@ -20,7 +20,7 @@ exports.paginateList = async (
     else select = [req.query.$select];
   }
 
-  const docs = await model.findAndCountAll({
+  const docs = await model.findAll({
     attributes: select,
     ...conditions,
     include: embeds,
@@ -28,7 +28,9 @@ exports.paginateList = async (
     subQuery,
     ...paginate,
   });
-  const count = _.isArray(docs.count) ? docs.count.length : docs.count;
+  const count = await model.count({
+    ...conditions,
+  });
 
   if (parseInt(req.query.$limit) == -1) {
     paginate = {
@@ -66,7 +68,7 @@ exports.paginateList = async (
     items.end = items.total;
   }
 
-  return { docs: docs.rows, items, pages };
+  return { docs: docs, items, pages };
 };
 
 exports.paginateAssocList = async (
