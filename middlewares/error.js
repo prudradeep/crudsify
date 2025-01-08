@@ -11,6 +11,21 @@ const sendResponse = (err, res) => {
   return res.status(err.output.statusCode).send(err.output.payload);
 };
 
+const handleForeignKeyConstraint = (errorMessage) => {
+  // Check if the error message indicates a foreign key constraint issue
+  const foreignKeyRegex =
+    /foreign key constraint fails.*`(\w+)`\.\`(\w+)`.*FOREIGN KEY \(`(\w+)`\).*REFERENCES `(\w+)` \(`(\w+)`\)/;
+  const match = errorMessage.match(foreignKeyRegex);
+
+  if (match) {
+    const [, , table, foreignKeyColumn, referencedTable] = match;
+    return `You cannot delete/update this record because it is linked to data in the "${table}". Please update/remove the related records in the "${table}" first.`;
+  }
+
+  // Default error message for other cases
+  return "An unexpected error occurred. Please try again later.";
+};
+
 const errorResponder = (err, req, res, next) => {
   Logger.error(err.toString());
   if (err.isBoom) {
@@ -29,7 +44,7 @@ const errorResponder = (err, req, res, next) => {
         );
       case "SequelizeForeignKeyConstraintError":
         return sendResponse(
-          Boom.badData(`Foreign key constraints failed!`),
+          Boom.badData(handleForeignKeyConstraint(err.message)),
           res
         );
       case "SequelizeDatabaseError":
