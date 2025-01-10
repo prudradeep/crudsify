@@ -170,6 +170,7 @@ module.exports = {
     const fields = getFieldsType(model);
     const regex = /Oper$/gm;
     let Oper = false;
+    let or = false;
 
     Object.keys(query).forEach((val) => {
       if (regex.test(val)) {
@@ -270,8 +271,9 @@ module.exports = {
           });
         }
       }
+      if(val === "$or") or = true;
     });
-    return { where: { [Op.and]: where } };
+    return { where: { [or ? Op.or : Op.and]: where } };
   },
 
   getEmbeds: function (DB, embed, associations = false) {

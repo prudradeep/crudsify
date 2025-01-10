@@ -261,6 +261,9 @@ const generateJoiListQueryModel = (model) => {
     queryModel.$count = Joi.boolean().description(
       "If set to true, only a count of the query results will be returned."
     );
+    queryModel.$or = Joi.boolean().description(
+      "If set to true, Search results with OR condition else AND."
+    );
 
     _.each(queryableFields, function (fieldName) {
       const joiModel = generateJoiModelFromFieldType(
