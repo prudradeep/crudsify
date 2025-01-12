@@ -127,9 +127,11 @@ const generateJoiModelFromFieldType = function (field) {
       model = Joi.array().items(generateJoiModelFromFieldType(fieldCopy.type));
       break;
     case "JSON":
-      model = Joi.array().items(
-        generateJoiModelFromFieldType(fieldCopy.jsonType)
-      );
+      if (fieldCopy.jsonType) {
+        model = Joi.array().items(fieldCopy.jsonType);
+      } else {
+        model = Joi.array().items(Joi.string());
+      }
       break;
 
     case "BIGINT":
@@ -200,8 +202,8 @@ const generatePaginationObjectQuery = () => {
       .description(
         "The maximum number of records to return. This is typically used in pagination. Set -1 to get all records"
       ),
-  }
-}
+  };
+};
 
 /**
  * Generates a Joi object that validates a request query for the list function
