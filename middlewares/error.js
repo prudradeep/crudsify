@@ -39,7 +39,7 @@ const errorResponder = (err, req, res, next) => {
       case "SequelizeUniqueConstraintError":
         message = err.errors.map((val) => `${val.path}: '${val.value}'`);
         return sendResponse(
-          Boom.conflict(`${message} | ${req.model.name} already exists!`),
+          Boom.conflict(`${message} | ${req.model?.name} already exists!`),
           res
         );
       case "SequelizeForeignKeyConstraintError":
