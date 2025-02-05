@@ -28,9 +28,12 @@ exports.paginateList = async (
     subQuery,
     ...paginate,
   });
-  const count = await model.count({
+  let count = await model.count({
     ...conditions,
+    include: embeds,
   });
+
+  count = _.isArray(count) ? count.length : count;
 
   if (parseInt(req.query.$limit) == -1) {
     paginate = {
