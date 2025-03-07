@@ -12,6 +12,7 @@ exports.getPrimaryKey = (DataTypes) => {
       autoIncrement: configStore.get("/dbPrimaryKey").autoIncrement,
       primaryKey: true,
       type: DataTypes[configStore.get("/dbPrimaryKey").type],
+      defaultValue: (['UUID','STRING'].indexOf(configStore.get("/dbPrimaryKey").type) !== -1) ? Sequelize.literal('(UUID())'): false,
     },
   };
 };
