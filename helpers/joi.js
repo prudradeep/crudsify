@@ -221,6 +221,7 @@ const generateJoiListQueryModel = (model) => {
 
   const operations = [
     "=",
+    "!=",
     "<",
     "<=",
     ">",
@@ -231,6 +232,8 @@ const generateJoiListQueryModel = (model) => {
     "notIn",
     "like",
     "notLike",
+    "regexp",
+    "notregexp"
   ];
 
   if (queryableFields && readableFields) {

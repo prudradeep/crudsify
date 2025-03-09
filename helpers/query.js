@@ -224,6 +224,9 @@ module.exports = {
               case "=":
                 where.push({ [val]: { [Op.eq]: query[val] } });
                 break;
+              case "!=":
+                where.push({ [val]: { [Op.ne]: query[val] } });
+                break;
               case "<":
                 where.push({ [val]: { [Op.lt]: query[val] } });
                 break;
@@ -236,17 +239,11 @@ module.exports = {
               case ">=":
                 where.push({ [val]: { [Op.gte]: query[val] } });
                 break;
-              case "between":
-                where.push({ [val]: { [Op.between]: query[val] } });
+              case "regexp":
+                where.push({ [val]: { [Op.regexp]: query[val] } });
                 break;
-              case "notBetween":
-                where.push({ [val]: { [Op.notBetween]: query[val] } });
-                break;
-              case "in":
-                where.push({ [val]: { [Op.in]: query[val] } });
-                break;
-              case "notIn":
-                where.push({ [val]: { [Op.notIn]: query[val] } });
+              case "notregexp":
+                where.push({ [val]: { [Op.notRegexp]: query[val] } });
                 break;
               case "like":
                 where.push({ [val]: { [Op.like]: query[val] } });
@@ -271,7 +268,7 @@ module.exports = {
           });
         }
       }
-      if(val === "$or") or = true;
+      if (val === "$or") or = true;
     });
     return { where: { [or ? Op.or : Op.and]: where } };
   },
