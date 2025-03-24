@@ -113,7 +113,7 @@ exports.associationRemoveOneHandler = async function (
       );
     }
     const owner = await ownerModel.findByPk(req.params.ownerId);
-    await owner[accessors.remove](parseInt(req.params.childId));
+    await owner[accessors.remove](req.params.childId);
     try {
       if (
         ownerModel.hooks &&

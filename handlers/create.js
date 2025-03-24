@@ -129,7 +129,7 @@ exports.associationAddOneHandler = async function (
     }
     const owner = await ownerModel.findByPk(req.params.ownerId);
     if (!owner) throw Boom.badRequest("Invalid request");
-    let data = await owner[accessors.add](parseInt(req.params.childId), {
+    let data = await owner[accessors.add](req.params.childId, {
       through: { ...req.body },
     });
     try {
