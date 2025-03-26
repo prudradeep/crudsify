@@ -35,6 +35,11 @@ module.exports = {
         assignScope: JSON.stringify([USER_ROLES.SUPER_ADMIN]),
       },
       {
+        name: "recover",
+        description: "Access to all recover endpoints",
+        assignScope: JSON.stringify([USER_ROLES.SUPER_ADMIN]),
+      },
+      {
         name: "associate",
         description: "Access to all association endpoints",
         assignScope: JSON.stringify([USER_ROLES.SUPER_ADMIN]),
@@ -134,6 +139,17 @@ module.exports = {
         permissions.push({
           name: "delete" + modelName,
           description: "Can delete a " + modelKey,
+          assignScope,
+        });
+
+        name = "recover" + modelName;
+        assignScope =
+          superAdminAssignScope.indexOf(name) > -1
+            ? JSON.stringify([USER_ROLES.SUPER_ADMIN])
+            : JSON.stringify([USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN]);
+        permissions.push({
+          name: "recover" + modelName,
+          description: "Can recover a " + modelKey,
           assignScope,
         });
 

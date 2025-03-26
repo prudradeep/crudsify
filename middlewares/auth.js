@@ -17,5 +17,5 @@ exports.basicAuthMiddleware = (req, res, next) => {
       return next();
   }
   res.setHeader("WWW-Authenticate", 'Basic realm="401"');
-  res.status(401).end("You are not authenticated!");
+  res.status(401).json({message: "You are not authenticated!"});
 };

@@ -15,7 +15,7 @@ module.exports = {
         defaultValue: configStore.get("/auditLogTTL"),
       },
       method: {
-        type: Sequelize.ENUM(_.values(["POST", "PUT", "DELETE", "GET"])),
+        type: Sequelize.ENUM(_.values(["POST", "PUT", "DELETE", "GET", "PATCH"])),
       },
       action: {
         type: Sequelize.STRING,

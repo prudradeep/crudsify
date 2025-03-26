@@ -85,7 +85,7 @@ exports.deleteOneEndpoint = function (model) {
     configStore.get("/enablePolicies")
   ) {
     postPolicies = model.policies.post;
-    postPolicies = (postPolicies.root || []).concat(postPolicies.read || []);
+    postPolicies = (postPolicies.root || []).concat(postPolicies.delete || []);
   }
   postPolicies.forEach((val) => middlewares.push(val));
 
@@ -134,12 +134,12 @@ exports.deleteManyEndpoint = function (model) {
   let payloadModel = null;
   if (configStore.get("/modelOptions").paranoid) {
     payloadModel = Joi.object({
-      data: Joi.array().items(Joi.number().required()).required(),
+      data: Joi.array().items(Joi.alternatives().try(Joi.string(), Joi.number()).required()).required(),
       hardDelete: Joi.bool().default(false),
     });
   } else {
     payloadModel = Joi.object({
-      data: Joi.array().items(Joi.number().required()).required(),
+      data: Joi.array().items(Joi.alternatives().try(Joi.string(), Joi.number()).required()).required(),
     });
   }
 
@@ -366,7 +366,7 @@ exports.associationRemoveManyEndpoint = function (ownerModel, association) {
       }
     }
   }
-  let payloadValidation = Joi.array().items(Joi.number().required()).required();
+  let payloadValidation = Joi.array().items(Joi.alternatives().try(Joi.string(), Joi.number()).required()).required();
 
   payloadValidation = configStore.get("/enablePayloadValidation")
     ? payloadValidation

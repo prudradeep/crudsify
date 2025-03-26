@@ -11,6 +11,7 @@ const {
   findHandler,
   associationGetAllHandler,
 } = require("../handlers/list");
+const { recoverHandler } = require("../handlers/recover");
 const {
   deleteHandler,
   associationRemoveOneHandler,
@@ -74,6 +75,22 @@ exports.deleteMiddleware = function (model) {
   return async function (req, res, next) {
     try {
       await deleteHandler(model, req);
+      sendResponse({
+        status: 204,
+        res,
+        next,
+      });
+    } catch (err) {
+      req.model = model;
+      next(err);
+    }
+  };
+};
+
+exports.recoverMiddleware = function (model) {
+  return async function (req, res, next) {
+    try {
+      await recoverHandler(model, req);
       sendResponse({
         status: 204,
         res,

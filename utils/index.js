@@ -65,6 +65,9 @@ module.exports = {
       case "delete":
         additionalScope = routeScope.deleteScope;
         break;
+      case "recover":
+        additionalScope = routeScope.recoverScope;
+        break;
       case "associate":
         additionalScope = routeScope.associateScope;
         break;

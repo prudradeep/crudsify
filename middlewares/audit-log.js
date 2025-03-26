@@ -135,6 +135,46 @@ exports.logDeleteMiddleware = (model) => {
 };
 
 /**
+ * Middleware to log recover actions.
+ * @param model
+ * @returns {anonymous function}
+ */
+exports.logRecoverMiddleware = (model) => {
+  return async (req, res, next) => {
+    try {
+      const ipAddress = getIP(req);
+      let userId = null;
+      if (configStore.get("/authentication"))
+        userId =
+          req.auth.credentials.user[configStore.get("/dbPrimaryKey").name];
+      let records = req.params.id || req.body.data;
+
+      const log = {
+        method: "PATCH",
+        action: "Recover",
+        endpoint: req.path,
+        user: userId || null,
+        tableName: model.name,
+        childTableName: null,
+        associationType: null,
+        records: records || null,
+        payload: _.isEmpty(req.body) ? null : req.body,
+        params: _.isEmpty(req.params) ? null : req.params,
+        result: res.data || null,
+        isError: _.isError(req.res),
+        statusCode: res.statusCode || null,
+        responseMessage: res.statusMessage || null,
+        ipAddress,
+      };
+      req.auditLog = log;
+      next();
+    } catch (err) {
+      next(err);
+    }
+  };
+};
+
+/**
  * Middleware to log add actions.
  * @param model
  * @returns {anonymous function}

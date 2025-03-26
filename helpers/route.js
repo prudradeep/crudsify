@@ -11,6 +11,7 @@ const {
   findEndpoint,
   associationGetAllEndpoint,
 } = require("../endpoints/list");
+const { recoverOneEndpoint, recoverManyEndpoint } = require("../endpoints/recover");
 const {
   deleteOneEndpoint,
   deleteManyEndpoint,
@@ -28,14 +29,15 @@ for (const model in DB.sequelize.models) {
         endpoint();
       });
     }
-    
+
     listEndpoint(DB, DB[model]);
     findEndpoint(DB, DB[model]);
     createEndpoint(DB[model]);
     updateEndpoint(DB[model]);
     deleteOneEndpoint(DB[model]);
     deleteManyEndpoint(DB[model]);
-
+    recoverOneEndpoint(DB[model]);
+    recoverManyEndpoint(DB[model]);
 
     //Association
     for (const assoc of Object.values(DB[model].associations)) {

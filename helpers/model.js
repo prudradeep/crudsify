@@ -137,6 +137,12 @@ exports.routeScopes = (model) => {
     "!-delete",
     "!-delete" + modelName,
   ];
+  scope.recoverScope = [
+    "recover",
+    "recover" + modelName,
+    "!-recover",
+    "!-recover" + modelName,
+  ];
   scope.associateScope = [
     "associate",
     "associate" + modelName,
@@ -189,13 +195,16 @@ exports.routeOptions = (model) => {
     createAuth: true, //POST /path endpoint
     updateAuth: true, //PUT /path/{_id} endpoint
     deleteAuth: true, //DELETE /path and DELETE /path/{_id} endpoints
+    recoverAuth: true, //PATCH /path and PATCH /path/{_id} endpoints
 
     allowList: true, //Omits GET /path endpoint
     allowRead: true, //Omits GET /path and GET /path/{_id} endpoints
     allowCreate: true, //Omits POST /path endpoint
     allowUpdate: true, //Omits PUT /path/{_id} endpoint
     allowDelete: true, //Omits DELETE /path/{_id} endpoints
-    allowDeleteMany: true //Omits DELETE /path endpoints
+    allowDeleteMany: true, //Omits DELETE /path endpoints
+    allowRecover: true, //Omits PATCH /path/{_id} endpoints
+    allowRecoverMany: true, //Omits PATCH /path endpoints
   };
 
   for (const assoc of Object.values(model.associations)) {

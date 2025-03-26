@@ -272,7 +272,7 @@ exports.associationAddManyEndpoint = function (ownerModel, association) {
                     : [association.foreignKeyField]
                 )
               ),
-              Joi.array().items(Joi.number().required())
+              Joi.array().items(Joi.alternatives().try(Joi.string(), Joi.number()).required())
             )
             .description("the " + getModelName(target) + "'s id"),
         })
@@ -280,7 +280,7 @@ exports.associationAddManyEndpoint = function (ownerModel, association) {
     }
   } else {
     payloadValidation = Joi.object({
-      data: Joi.array().items(Joi.number().required()).required(),
+      data: Joi.array().items(Joi.alternatives().try(Joi.string(), Joi.number()).required()).required(),
     });
   }
 

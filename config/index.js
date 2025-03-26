@@ -158,6 +158,11 @@ const Config = {
   },
 
   /**
+   * Enable soft deleted recovery endpoint
+   */
+  enableRecoverEndpoint: true,
+
+  /**
    * MetaData options
    * - createdBy: dbPrimaryKey of user that created the record.
    * - updatedBy: dbPrimaryKey of user that last updated the record.
