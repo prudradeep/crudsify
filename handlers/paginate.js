@@ -22,6 +22,7 @@ exports.paginateList = async (
 
   const docs = await model.findAll({
     attributes: select,
+    paranoid: req.query.$paranoid ? false : true,
     ...conditions,
     include: embeds,
     order: [...sort],

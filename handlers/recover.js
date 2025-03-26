@@ -25,22 +25,30 @@ exports.recoverHandler = async function (model, req = { query: {} }) {
     let recovered;
     if (req.params && req.params.id) {
       recovered = await model.findByPk(req.params.id);
+      await model.restore(
+        {
+          where: { [configStore.get("/dbPrimaryKey").name]: req.params.id },
+        }
+      );
       await model.update(
         { deletedBy: null },
         {
           where: { [configStore.get("/dbPrimaryKey").name]: req.params.id },
-          paranoid: false,
         }
       );
     } else if (req.body && req.body.data) {
       recovered = await model.findAll({
         where: { [configStore.get("/dbPrimaryKey").name]: req.body.data },
       });
+      await model.restore(
+        {
+          where: { [configStore.get("/dbPrimaryKey").name]: req.body.data },
+        }
+      );
       await model.update(
         { deletedBy: null },
         {
           where: { [configStore.get("/dbPrimaryKey").name]: req.body.data },
-          paranoid: false,
         }
       );
     } else {

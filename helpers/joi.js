@@ -202,6 +202,10 @@ const generatePaginationObjectQuery = () => {
       .description(
         "The maximum number of records to return. This is typically used in pagination. Set -1 to get all records"
       ),
+    $paranoid: Joi.boolean()
+      .description(
+        "If set to true, all records will be returned with deleted one's"
+      ),
   };
 };
 
@@ -233,7 +237,7 @@ const generateJoiListQueryModel = (model) => {
     "like",
     "notLike",
     "regexp",
-    "notregexp"
+    "notregexp",
   ];
 
   if (queryableFields && readableFields) {
