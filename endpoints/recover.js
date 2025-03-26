@@ -6,10 +6,10 @@ const { getPathName, getScopes, getModelName } = require("../utils");
 const { generateEndpoint } = require("./generate");
 const configStore = require("../config");
 const { Logger } = require("../helpers/logger");
-const { generateEndpoint } = require("./generate");
 const { getRecordScopeMiddleware } = require("../middlewares/scope");
 const { recoverMiddleware } = require("../middlewares/handler");
 const { logRecoverMiddleware } = require("../middlewares/audit-log");
+const authentication = configStore.get("/authentication");
 
 /**
  * Creates an endpoint for PATCH /RESOURCE/{_id}
