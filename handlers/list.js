@@ -83,7 +83,7 @@ exports.findHandler = async function (DB, model, req = { query: {} }) {
     let data = await model.findByPk(req.params.id, {
       attributes: select,
       include: embeds,
-      paranoid: req.query.$paranoid ? false : true,
+      paranoid: req.query?.$paranoid ? false : true,
     });
     try {
       if (
