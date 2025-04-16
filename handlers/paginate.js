@@ -31,6 +31,7 @@ exports.paginateList = async (
   });
   let count = await model.count({
     ...conditions,
+    distinct: true,
     paranoid: (req.query && req.query.$paranoid === "true") ? false : true,
     include: embeds,
   });
