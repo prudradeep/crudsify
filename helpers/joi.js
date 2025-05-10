@@ -147,9 +147,11 @@ const generateJoiModelFromFieldType = function (field) {
       model = Joi.number();
       break;
     case "DATE":
-    case "TIME":
     case "DATEONLY":
       model = Joi.date();
+      break;
+    case "TIME":
+      model = Joi.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/);
       break;
     case "BOOLEAN":
       model = Joi.bool();
