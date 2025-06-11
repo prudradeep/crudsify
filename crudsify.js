@@ -30,7 +30,9 @@ Crudsify.use(compression(configStore.get("/compression")))
 Crudsify.use(helmet(configStore.get("/helmet")));
 Crudsify.disable("etag");
 Crudsify.use(cors(configStore.get("/cors")));
-Crudsify.use(express.json());
+Crudsify.use(express.json({
+  limit: "20mb"
+}));
 
 module.exports = async (authStrategy = false, globalMiddleware=[]) => {
   try {
