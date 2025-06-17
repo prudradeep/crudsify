@@ -247,6 +247,17 @@ exports.associationRemoveOneEndpoint = function (ownerModel, association) {
     }
   }
 
+  let payloadModel = null;
+  if (configStore.get("/modelOptions").paranoid) {
+    payloadModel = Joi.object({ hardDelete: Joi.bool().default(false) }).allow(
+      null
+    );
+
+    if (!configStore.get("/enablePayloadValidation")) {
+      payloadModel = Joi.alternatives().try(payloadModel, Joi.any());
+    }
+  }
+
   let prePolicies = [];
   if (
     ownerModel.policies &&
@@ -296,6 +307,7 @@ exports.associationRemoveOneEndpoint = function (ownerModel, association) {
     summary: `Remove a single ${childAlias} from a ${ownerAlias}'s list of ${childAlias}`,
     tags: [ownerAlias],
     validate: {
+      body: payloadModel,
       params: Joi.object({
         ownerId: Joi.string().required(),
         childId: Joi.string().required(),
@@ -366,14 +378,22 @@ exports.associationRemoveManyEndpoint = function (ownerModel, association) {
       }
     }
   }
-  let payloadValidation = Joi.array().items(Joi.alternatives().try(Joi.string(), Joi.number()).required()).required();
 
-  payloadValidation = configStore.get("/enablePayloadValidation")
-    ? payloadValidation
-    : Joi.any();
-  payloadValidation = payloadValidation.description(
-    "An array of ids to remove."
-  );
+  let payloadModel = null;
+  if (configStore.get("/modelOptions").paranoid) {
+    payloadModel = Joi.object({
+      data: Joi.array().items(Joi.alternatives().try(Joi.string(), Joi.number()).required()).required(),
+      hardDelete: Joi.bool().default(false),
+    });
+  } else {
+    payloadModel = Joi.object({
+      data: Joi.array().items(Joi.alternatives().try(Joi.string(), Joi.number()).required()).required(),
+    });
+  }
+
+  if (!configStore.get("/enablePayloadValidation")) {
+    payloadModel = Joi.alternatives().try(payloadModel, Joi.any());
+  }
 
   let prePolicies = [];
   if (
@@ -424,7 +444,7 @@ exports.associationRemoveManyEndpoint = function (ownerModel, association) {
     summary: `Remove multiple ${childAlias} from a ${ownerAlias}'s list of ${childAlias}`,
     tags: [ownerAlias],
     validate: {
-      body: payloadValidation,
+      body: payloadModel,
       params: Joi.object({
         ownerId: Joi.string().required(),
       }),

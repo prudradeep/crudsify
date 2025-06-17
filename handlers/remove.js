@@ -95,6 +95,11 @@ exports.associationRemoveOneHandler = async function (
       throw Boom.badRequest("Invalid request");
 
     const { target: childModel, accessors } = association;
+    const hardDelete = req.body
+      ? req.body.hardDelete === true
+        ? req.body.hardDelete
+        : false
+      : false;
     try {
       if (
         ownerModel.hooks &&
@@ -113,7 +118,7 @@ exports.associationRemoveOneHandler = async function (
       );
     }
     const owner = await ownerModel.findByPk(req.params.ownerId);
-    await owner[accessors.remove](req.params.childId);
+    await owner[accessors.remove](req.params.childId, { force: hardDelete });
     try {
       if (
         ownerModel.hooks &&
@@ -143,6 +148,11 @@ exports.associationRemoveManyHandler = async function (
       throw Boom.badRequest("Invalid request");
 
     const { target: childModel, accessors } = association;
+    const hardDelete = req.body
+      ? req.body.hardDelete === true
+        ? req.body.hardDelete
+        : false
+      : false;
     try {
       if (
         ownerModel.hooks &&
@@ -161,7 +171,7 @@ exports.associationRemoveManyHandler = async function (
       );
     }
     const owner = await ownerModel.findByPk(req.params.ownerId);
-    await owner[accessors.removeMultiple](req.body);
+    await owner[accessors.removeMultiple](req.body, { force: hardDelete });
     try {
       if (
         ownerModel.hooks &&
