@@ -83,7 +83,7 @@ exports.findHandler = async function (DB, model, req = { query: {} }) {
     let data = await model.findByPk(req.params.id, {
       attributes: select,
       include: embeds,
-      paranoid: (req.query && req.query.$paranoid === "true") ? false : true,
+      paranoid: req.query && req.query.$paranoid === "true" ? false : true,
     });
     try {
       if (
@@ -135,7 +135,10 @@ exports.associationGetAllHandler = async function (
     const conditions = createWhereCondition(req.query, childModel);
     if (req.query.$count) {
       const owner = await ownerModel.findByPk(req.params.ownerId);
-      const count = await owner[accessors.count](conditions);
+      const count = await owner[accessors.count]({
+        ...conditions,
+        paranoid: req.query && req.query.$paranoid === "true" ? false : true,
+      });
       return { count };
     }
 

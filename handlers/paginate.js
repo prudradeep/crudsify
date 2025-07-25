@@ -22,7 +22,7 @@ exports.paginateList = async (
 
   const docs = await model.findAll({
     attributes: select,
-    paranoid: (req.query && req.query.$paranoid === "true") ? false : true,
+    paranoid: req.query && req.query.$paranoid === "true" ? false : true,
     ...conditions,
     include: embeds,
     order: [...sort],
@@ -32,7 +32,7 @@ exports.paginateList = async (
   let count = await model.count({
     ...conditions,
     distinct: true,
-    paranoid: (req.query && req.query.$paranoid === "true") ? false : true,
+    paranoid: req.query && req.query.$paranoid === "true" ? false : true,
     include: embeds,
   });
 
@@ -101,6 +101,7 @@ exports.paginateAssocList = async (
     docs = await owner[accessors.get]({
       attributes: select,
       ...conditions,
+      paranoid: req.query && req.query.$paranoid === "true" ? false : true,
       include: embeds,
       order: [...sort],
       ...paginate,
