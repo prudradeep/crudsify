@@ -24,7 +24,10 @@ const { findHandler } = require("crudsify/handlers/list");
 const { deleteHandler } = require("crudsify/handlers/remove");
 const { logApiMiddleware } = require("crudsify/middlewares/audit-log");
 const USER_ROLES = require("crudsify/config/constants").USER_ROLES;
-const { REQUIRED_PASSWORD_STRENGTH } = require("crudsify/config/constants");
+const {
+  REQUIRED_PASSWORD_STRENGTH,
+  PASSWORD_MAX_LENGTH,
+} = require("crudsify/config/constants");
 const authentication = configStore.get("/authentication");
 const params = Joi.object({
   id: Joi.string().required(),
@@ -385,11 +388,14 @@ module.exports = (sequelize, DataTypes) => {
           tags: ["user"],
           validate: {
             body: Joi.object({
-              oldPassword: Joi.string().required().messages({
-                "any.required": "Current password is required",
-                "string.empty": "Current password can't be empty",
-              }),
-              password: Joi.string().required().messages({
+              oldPassword: Joi.string()
+                .max(PASSWORD_MAX_LENGTH)
+                .required()
+                .messages({
+                  "any.required": "Current password is required",
+                  "string.empty": "Current password can't be empty",
+                }),
+              password: Joi.string().max(PASSWORD_MAX_LENGTH).required().messages({
                 "any.required": "Password is required",
                 "string.empty": "Password can't be empty",
               }),

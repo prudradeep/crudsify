@@ -38,6 +38,7 @@ const {
   TOKEN_TYPES,
   USER_ROLES,
   REQUIRED_PASSWORD_STRENGTH,
+  PASSWORD_MAX_LENGTH,
   EXPIRATION_PERIOD,
   AUTH_ATTEMPTS,
 } = require("crudsify/config/constants");
@@ -119,7 +120,7 @@ generateEndpoint({
   tags: ["auth"],
   validate: {
     body: Joi.object({
-      password: Joi.string().required().messages({
+      password: Joi.string().max(PASSWORD_MAX_LENGTH).required().messages({
         "any.required": "Password is required",
         "string.empty": "Password can't be empty",
       }),
@@ -281,7 +282,7 @@ generateEndpoint({
         "any.required": "Name is required",
         "string.empty": "Name can't be empty",
       }),
-      password: Joi.string().required().messages({
+      password: Joi.string().max(PASSWORD_MAX_LENGTH).required().messages({
         "any.required": "Password is required",
         "string.empty": "Password can't be empty",
       }),
@@ -583,15 +584,7 @@ const forgotPasswordMiddleware = {
         },
       };
 
-      let user = await User.findOne(conditions);
-      // NOTE: For more secure applications, the server should respond with a success even if the user isn't found
-      // since this reveals the existence of an account. For more information, refer to the links below:
-      // https://postmarkapp.com/guides/password-reset-best-practices
-      // https://security.stackexchange.com/questions/40694/disclose-to-user-if-account-exists
-      if (!user) {
-        throw Boom.notFound("User not found.");
-      }
-      req.user = user;
+      req.user = await User.findOne(conditions);
       next();
     } catch (err) {
       next(err);
@@ -601,17 +594,17 @@ const forgotPasswordMiddleware = {
 
 const forgotPasswordHandler = async function (req, res, next) {
   try {
-    let keyHash = {};
-    let user = {};
-    keyHash = generateHash();
+    const keyHash = generateHash();
 
     const update = {
       resetPasswordHash: keyHash.hash,
     };
-    user = await updateHandler(User, {
-      params: { id: req.user[configStore.get("/dbPrimaryKey").name] },
-      body: update,
-    });
+    if (req.user) {
+      await updateHandler(User, {
+        params: { id: req.user[configStore.get("/dbPrimaryKey").name] },
+        body: update,
+      });
+    }
     const token = Jwt.sign(
       {
         tokenType: TOKEN_TYPES.PASSWORD_RESET,
@@ -768,7 +761,7 @@ generateEndpoint({
         "any.required": "Token is required",
         "string.empty": "Token can't be empty",
       }),
-      password: Joi.string().required().messages({
+      password: Joi.string().max(PASSWORD_MAX_LENGTH).required().messages({
         "any.required": "Password is required",
         "string.empty": "Password can't be empty",
       }),
@@ -938,7 +931,7 @@ generateEndpoint({
           "alternatives.match": "Please enter valid email or mobile number",
           "any.required": "Please enter valid email or mobile number",
         }),
-      password: Joi.string().required().messages({
+      password: Joi.string().max(PASSWORD_MAX_LENGTH).required().messages({
         "any.required": "Password is required",
         "string.empty": "Password can't be empty",
       }),

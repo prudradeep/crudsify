@@ -27,6 +27,7 @@ module.exports = {
     ADMIN: 3,
     SUPER_ADMIN: 4,
   },
+  PASSWORD_MAX_LENGTH: 128,
   EXPIRATION_PERIOD: {
     SHORT: "10m",
     MEDIUM: "4h",

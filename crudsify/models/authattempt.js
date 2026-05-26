@@ -3,6 +3,9 @@ const { Model, Op } = require("sequelize");
 const _ = require("lodash");
 const { getPrimaryKey, getTimestamps } = require("crudsify/helpers/model");
 const { LOCKOUT_PERIOD, AUTH_ATTEMPTS } = require("crudsify/config/constants");
+const CLEANUP_INTERVAL_MS = 5 * 60 * 1000;
+let nextCleanupAt = 0;
+
 module.exports = (sequelize, DataTypes) => {
   class authAttempt extends Model {
     /**
@@ -14,8 +17,28 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
     }
 
+    static async removeExpired() {
+      const now = Date.now();
+      if (now < nextCleanupAt) return;
+
+      nextCleanupAt = now + CLEANUP_INTERVAL_MS;
+      try {
+        await this.destroy({
+          where: {
+            time: {
+              [Op.lte]: now - LOCKOUT_PERIOD * 60000,
+            },
+          },
+        });
+      } catch (err) {
+        nextCleanupAt = 0;
+        throw err;
+      }
+    }
+
     static async createInstance(ip, mobile_email) {
       try {
+        await this.removeExpired();
         const record = {
           ip,
           mobileEmail: mobile_email,
