@@ -2,7 +2,27 @@
 
 const _ = require("lodash");
 const queryHelper = require("../helpers/query");
-const configStore = require("../config");
+
+const createPaginationResult = (docs, query, paginate, count) => {
+  const currentPage = Math.max(parseInt(query.$page) || 1, 1);
+  const limit = parseInt(paginate.limit);
+  const pages = {
+    current: currentPage,
+    prev: currentPage - 1,
+    hasPrev: currentPage - 1 !== 0,
+    next: currentPage + 1,
+    hasNext: currentPage + 1 <= (limit > 0 ? Math.ceil(count / limit) : 0),
+    total: limit > 0 ? Math.ceil(count / limit) : 0,
+  };
+  const items = {
+    limit,
+    begin: Math.min(currentPage * limit - limit + 1, count),
+    end: Math.min(currentPage * limit, count),
+    total: count,
+  };
+
+  return { docs, items, pages };
+};
 
 exports.paginateList = async (
   model,
@@ -11,27 +31,12 @@ exports.paginateList = async (
   subQuery = false,
   embeds = false
 ) => {
-  let paginate = queryHelper.paginate(req.query);
+  const paginate = queryHelper.paginate(req.query);
   const sort = queryHelper.setSort(req.query);
 
-  let select = {};
-  if (req.query.$select) {
-    const requestedSelect = _.isArray(req.query.$select)
-      ? req.query.$select
-      : [req.query.$select];
-    select = requestedSelect.filter((field) =>
-      queryHelper.getReadableFields(model).includes(field)
-    );
-  }
-
   const docs = await model.findAll({
-    attributes: select,
-    paranoid:
-      configStore.get("/allowParanoidQueries") &&
-      req.query &&
-      req.query.$paranoid === "true"
-        ? false
-        : true,
+    attributes: queryHelper.getSelectedFields(model, req.query.$select),
+    paranoid: queryHelper.getParanoidOption(req.query),
     ...conditions,
     include: embeds,
     order: [...sort],
@@ -41,47 +46,12 @@ exports.paginateList = async (
   let count = await model.count({
     ...conditions,
     distinct: true,
-    paranoid:
-      configStore.get("/allowParanoidQueries") &&
-      req.query &&
-      req.query.$paranoid === "true"
-        ? false
-        : true,
+    paranoid: queryHelper.getParanoidOption(req.query),
     include: embeds,
   });
 
   count = _.isArray(count) ? count.length : count;
-
-  const currentPage = Math.max(parseInt(req.query.$page) || 1, 1);
-  const limit = parseInt(paginate.limit);
-  const pages = {
-    current: currentPage,
-    prev: 0,
-    hasPrev: false,
-    next: 0,
-    hasNext: false,
-    total: 0,
-  };
-  const items = {
-    limit,
-    begin: currentPage * limit - limit + 1,
-    end: currentPage * limit,
-    total: count,
-  };
-
-  pages.total = limit > 0 ? Math.ceil(count / limit) : 0;
-  pages.next = pages.current + 1;
-  pages.hasNext = pages.next <= pages.total;
-  pages.prev = pages.current - 1;
-  pages.hasPrev = pages.prev !== 0;
-  if (items.begin > items.total) {
-    items.begin = items.total;
-  }
-  if (items.end > items.total) {
-    items.end = items.total;
-  }
-
-  return { docs: docs, items, pages };
+  return createPaginationResult(docs, req.query, paginate, count);
 };
 
 exports.paginateAssocList = async (
@@ -92,20 +62,11 @@ exports.paginateAssocList = async (
   embeds = false,
   childModel = false
 ) => {
-  let paginate = queryHelper.paginate(req.query);
+  const paginate = queryHelper.paginate(req.query);
   const sort = queryHelper.setSort(req.query);
-
-  let select = {};
-  if (req.query.$select) {
-    const requestedSelect = _.isArray(req.query.$select)
-      ? req.query.$select
-      : [req.query.$select];
-    select = childModel
-      ? requestedSelect.filter((field) =>
-          queryHelper.getReadableFields(childModel).includes(field)
-        )
-      : [];
-  }
+  const select = childModel
+    ? queryHelper.getSelectedFields(childModel, req.query.$select)
+    : {};
 
   const owner = await ownerModel.findByPk(req.params.ownerId);
   let docs = [];
@@ -114,46 +75,12 @@ exports.paginateAssocList = async (
     docs = await owner[accessors.get]({
       attributes: select,
       ...conditions,
-      paranoid:
-        configStore.get("/allowParanoidQueries") &&
-        req.query &&
-        req.query.$paranoid === "true"
-          ? false
-          : true,
+      paranoid: queryHelper.getParanoidOption(req.query),
       include: embeds,
       order: [...sort],
       ...paginate,
     });
     count = await owner[accessors.count](conditions);
   }
-
-  const currentPage = Math.max(parseInt(req.query.$page) || 1, 1);
-  const limit = parseInt(paginate.limit);
-  const pages = {
-    current: currentPage,
-    prev: 0,
-    hasPrev: false,
-    next: 0,
-    hasNext: false,
-    total: 0,
-  };
-  const items = {
-    limit,
-    begin: currentPage * limit - limit + 1,
-    end: currentPage * limit,
-    total: count,
-  };
-
-  pages.total = limit > 0 ? Math.ceil(count / limit) : 0;
-  pages.next = pages.current + 1;
-  pages.hasNext = pages.next <= pages.total;
-  pages.prev = pages.current - 1;
-  pages.hasPrev = pages.prev !== 0;
-  if (items.begin > items.total) {
-    items.begin = items.total;
-  }
-  if (items.end > items.total) {
-    items.end = items.total;
-  }
-  return { docs, items, pages };
+  return createPaginationResult(docs, req.query, paginate, count);
 };

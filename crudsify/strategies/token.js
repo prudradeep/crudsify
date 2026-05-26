@@ -1,36 +1,12 @@
 "use strict";
 
 const Boom = require("@hapi/boom");
-const configStore = require("crudsify/config");
 const { TOKEN_TYPES } = require("crudsify/config/constants");
-const { ucfirst, verifyToken } = require("crudsify/utils");
-
-const getUserSession = async (sessionId, sessionKey) => {
-  const {
-    user: User,
-    session: Session,
-    role,
-    permission: Permission,
-  } = require("crudsify/models");
-  const session = await Session.findByCredentials(sessionId, sessionKey);
-  if (!session) return {};
-
-  const user = await User.unscoped().findByPk(
-    session[`user${ucfirst(configStore.get("/dbPrimaryKey").name)}`],
-    { include: { model: role } }
-  );
-  const deletedAt = configStore.get("/modelOptions").deletedAt || "deletedAt";
-  if (
-    !user ||
-    !user.isActive ||
-    user[deletedAt] ||
-    user.password !== session.passwordHash
-  ) {
-    return {};
-  }
-
-  return { user, session, scope: await Permission.getScope(user) };
-};
+const { verifyToken } = require("crudsify/utils");
+const {
+  getAuthenticatedSession,
+  passwordUpdateRequired,
+} = require("./authenticated-session");
 
 exports.tokenStrategy = async function (req, res, next) {
   try {
@@ -44,12 +20,12 @@ exports.tokenStrategy = async function (req, res, next) {
     ) {
       throw Boom.unauthorized("Invalid token");
     }
-    const { user, session, scope } = await getUserSession(
+    const { user, session, scope } = await getAuthenticatedSession(
       decoded.sessionId,
       decoded.sessionKey
     );
     if (!session || !user) throw Boom.unauthorized("Authentication failed");
-    if (user.passwordUpdateRequired && req.path !== "/user/my/password") {
+    if (passwordUpdateRequired(user, req.path)) {
       throw Boom.forbidden("Password update required");
     }
 

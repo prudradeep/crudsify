@@ -1,37 +1,13 @@
 "use strict";
 
 const Boom = require("@hapi/boom");
-const configStore = require("crudsify/config");
 const { EXPIRATION_PERIOD, TOKEN_TYPES } = require("crudsify/config/constants");
 const { Logger } = require("crudsify/helpers/logger");
-const { generateToken, ucfirst, verifyToken } = require("crudsify/utils");
-
-const getUserSession = async (sessionId, sessionKey) => {
-  const {
-    user: User,
-    session: Session,
-    role,
-    permission: Permission,
-  } = require("crudsify/models");
-  const session = await Session.findByCredentials(sessionId, sessionKey);
-  if (!session) return {};
-
-  const user = await User.unscoped().findByPk(
-    session[`user${ucfirst(configStore.get("/dbPrimaryKey").name)}`],
-    { include: { model: role } }
-  );
-  const deletedAt = configStore.get("/modelOptions").deletedAt || "deletedAt";
-  if (
-    !user ||
-    !user.isActive ||
-    user[deletedAt] ||
-    user.password !== session.passwordHash
-  ) {
-    return {};
-  }
-
-  return { user, session, scope: await Permission.getScope(user) };
-};
+const { generateToken, verifyToken } = require("crudsify/utils");
+const {
+  getAuthenticatedSession,
+  getSessionTokenData,
+} = require("./authenticated-session");
 
 exports.refreshStrategy = async function (req, res, next) {
   try {
@@ -46,17 +22,14 @@ exports.refreshStrategy = async function (req, res, next) {
       throw Boom.unauthorized("Refresh token required");
     }
 
-    const { user, session, scope } = await getUserSession(
+    const { user, session, scope } = await getAuthenticatedSession(
       decoded.sessionId,
       decoded.sessionKey
     );
     if (!session || !user) throw Boom.unauthorized("Authentication failed");
 
     if (res) {
-      const sessionData = {
-        sessionId: session[configStore.get("/dbPrimaryKey").name],
-        sessionKey: session.key,
-      };
+      const sessionData = getSessionTokenData(session);
       res.set(
         "X-Access-Token",
         generateToken(

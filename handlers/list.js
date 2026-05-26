@@ -1,16 +1,15 @@
 "use strict";
 
-const _ = require("lodash");
 const Boom = require("@hapi/boom");
 const { Op } = require("sequelize");
 const { paginateList, paginateAssocList } = require("./paginate");
 const {
   createWhereCondition,
   getEmbeds,
-  getReadableFields,
+  getSelectedFields,
+  getParanoidOption,
 } = require("../helpers/query");
 const { handleError } = require("./error");
-const configStore = require("../config");
 
 exports.listHandler = async function (DB, model, req = { query: {} }) {
   try {
@@ -81,24 +80,10 @@ exports.findHandler = async function (DB, model, req = { query: {} }) {
       embeds = getEmbeds(DB, req.query.$embed, model.associations);
     }
 
-    let select = {};
-    if (req.query && req.query.$select) {
-      const requestedSelect = _.isArray(req.query.$select)
-        ? req.query.$select
-        : [req.query.$select];
-      select = requestedSelect.filter((field) =>
-        getReadableFields(model).includes(field)
-      );
-    }
     let data = await model.findByPk(req.params.id, {
-      attributes: select,
+      attributes: getSelectedFields(model, req.query && req.query.$select),
       include: embeds,
-      paranoid:
-        configStore.get("/allowParanoidQueries") &&
-        req.query &&
-        req.query.$paranoid === "true"
-          ? false
-          : true,
+      paranoid: getParanoidOption(req.query),
     });
     try {
       if (
@@ -152,12 +137,7 @@ exports.associationGetAllHandler = async function (
       const owner = await ownerModel.findByPk(req.params.ownerId);
       const count = await owner[accessors.count]({
         ...conditions,
-        paranoid:
-          configStore.get("/allowParanoidQueries") &&
-          req.query &&
-          req.query.$paranoid === "true"
-            ? false
-            : true,
+        paranoid: getParanoidOption(req.query),
       });
       return { count };
     }

@@ -15,6 +15,20 @@ const getFieldsType = function (model) {
   return fields;
 };
 
+const getReadableFields = function (model) {
+  const readableFields = [];
+
+  const fields = model.rawAttributes;
+  for (const fieldName in fields) {
+    const field = fields[fieldName];
+    if (!field.exclude) {
+      readableFields.push(fieldName);
+    }
+  }
+
+  return readableFields;
+};
+
 module.exports = {
   /**
    * Handle pagination for the query if needed.
@@ -116,18 +130,21 @@ module.exports = {
    * @param model: A model object.
    * @returns {Array}: A list of fields.
    */
-  getReadableFields: function (model) {
-    const readableFields = [];
+  getReadableFields,
 
-    const fields = model.rawAttributes;
-    for (const fieldName in fields) {
-      const field = fields[fieldName];
-      if (!field.exclude) {
-        readableFields.push(fieldName);
-      }
-    }
+  getSelectedFields: function (model, select) {
+    if (!select) return {};
 
-    return readableFields;
+    const requestedFields = _.isArray(select) ? select : [select];
+    const readableFields = getReadableFields(model);
+
+    return requestedFields.filter((field) => readableFields.includes(field));
+  },
+
+  getParanoidOption: function (query = {}) {
+    return !(
+      configStore.get("/allowParanoidQueries") && query.$paranoid === "true"
+    );
   },
 
   /**
