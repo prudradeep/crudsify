@@ -4,6 +4,7 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     const { USER_ROLES } = require("crudsify/config/constants");
+    const { role } = require("crudsify/models");
     const roles = [
       {
         name: USER_ROLES.SUPER_ADMIN,
@@ -21,7 +22,7 @@ module.exports = {
         description: "A standard user account.",
       },
     ];
-    await queryInterface.bulkInsert("roles", roles);
+    await role.bulkCreate(roles);
     console.table(roles);
   },
 

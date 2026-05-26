@@ -199,7 +199,10 @@ module.exports = {
         }
       }
     }
-    await queryInterface.bulkInsert("permissions", permissions, {
+    permissions.forEach((permission) => {
+      permission.assignScope = JSON.parse(permission.assignScope);
+    });
+    await DB.permission.bulkCreate(permissions, {
       ignoreDuplicates: true,
     });
   },

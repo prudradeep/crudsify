@@ -3,6 +3,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
+    const { group } = require("crudsify/models");
     const groups = [
       {
         name: "Read Only",
@@ -19,7 +20,7 @@ module.exports = {
           "Group with full permissions except root. Role restrictions remain.",
       },
     ];
-    await queryInterface.bulkInsert("groups", groups);
+    await group.bulkCreate(groups);
     console.table(groups);
   },
 

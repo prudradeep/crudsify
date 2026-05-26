@@ -35,6 +35,9 @@ exports.tokenStrategy = async function (req, res, next) {
     };
     next();
   } catch (err) {
+    if (Boom.isBoom(err) && err.output.statusCode === 403) {
+      return next(err);
+    }
     next(Boom.unauthorized("Authentication failed"));
   }
 };
