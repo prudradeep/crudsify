@@ -61,6 +61,20 @@ module.exports = (sequelize, DataTypes) => {
       }
     }
 
+    static async ipAbuseDetected(ip, limit = AUTH_ATTEMPTS.FOR_IP) {
+      const expirationDate = LOCKOUT_PERIOD
+        ? { [Op.gt]: Date.now() - LOCKOUT_PERIOD * 60000 }
+        : { [Op.lt]: Date.now() };
+      const attemptCount = await this.count({
+        where: {
+          ip,
+          time: expirationDate,
+        },
+      });
+
+      return attemptCount >= limit;
+    }
+
     static async identifierAbuseDetected(id) {
       try {
         const expirationDate = LOCKOUT_PERIOD
@@ -95,5 +109,17 @@ module.exports = (sequelize, DataTypes) => {
       modelName: "authAttempt",
     }
   );
+
+  authAttempt.routeOptions = {
+    allowList: false,
+    allowRead: false,
+    allowCreate: false,
+    allowUpdate: false,
+    allowDelete: false,
+    allowDeleteMany: false,
+    allowRecover: false,
+    allowRecoverMany: false,
+  };
+
   return authAttempt;
 };

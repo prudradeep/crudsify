@@ -7,105 +7,78 @@ const { Logger } = require("crudsify/helpers/logger");
 const { generateToken, ucfirst, verifyToken } = require("crudsify/utils");
 
 const getUserSession = async (sessionId, sessionKey) => {
-  try {
-    const {
-      user: User,
-      session: Session,
-      role,
-      permission: Permission,
-    } = require("crudsify/models");
-    const session = await Session.findByCredentials(sessionId, sessionKey);
-    if (!session) {
-      return { user: null, session };
-    }
-    const user = await User.unscoped().findByPk(
-      session[`user${ucfirst(configStore.get("/dbPrimaryKey").name)}`],
-      { include: { model: role } }
-    );
-    const scope = user ? await Permission.getScope(user) : null;
-    return { user, session, scope };
-  } catch (err) {
-    throw err;
+  const {
+    user: User,
+    session: Session,
+    role,
+    permission: Permission,
+  } = require("crudsify/models");
+  const session = await Session.findByCredentials(sessionId, sessionKey);
+  if (!session) return {};
+
+  const user = await User.unscoped().findByPk(
+    session[`user${ucfirst(configStore.get("/dbPrimaryKey").name)}`],
+    { include: { model: role } }
+  );
+  const deletedAt = configStore.get("/modelOptions").deletedAt || "deletedAt";
+  if (
+    !user ||
+    !user.isActive ||
+    user[deletedAt] ||
+    user.password !== session.passwordHash
+  ) {
+    return {};
   }
-}
+
+  return { user, session, scope: await Permission.getScope(user) };
+};
 
 exports.refreshStrategy = async function (req, res, next) {
   try {
     const decoded = await verifyToken(
       req.headers.authorization.replace("Bearer ", "")
     );
-    const { sessionId, sessionKey } = decoded;
-    // if the token is expired, respond with token type so the client can switch to refresh token if necessary
-    if (decoded.exp < Math.floor(Date.now() / 1000)) {
-      if (decoded.user) {
-        throw Boom.unauthorized("Expired Access Token", "Token", null);
-      } else {
-        throw Boom.unauthorized("Expired Refresh Token", "Token", null);
-      }
+    if (
+      decoded.tokenType !== TOKEN_TYPES.REFRESH ||
+      !decoded.sessionId ||
+      !decoded.sessionKey
+    ) {
+      throw Boom.unauthorized("Refresh token required");
     }
 
-    // If the token does not contain session info, then simply authenticate and continue
-    if (decoded.tokenType === TOKEN_TYPES.ACCESS && decoded.user) {
-      req.auth = {
-        isValid: true,
-        credentials: { user: decoded.user, scope: decoded.scope },
+    const { user, session, scope } = await getUserSession(
+      decoded.sessionId,
+      decoded.sessionKey
+    );
+    if (!session || !user) throw Boom.unauthorized("Authentication failed");
+
+    if (res) {
+      const sessionData = {
+        sessionId: session[configStore.get("/dbPrimaryKey").name],
+        sessionKey: session.key,
       };
-      return next();
+      res.set(
+        "X-Access-Token",
+        generateToken(
+          { tokenType: TOKEN_TYPES.ACCESS, ...sessionData },
+          EXPIRATION_PERIOD.SHORT
+        )
+      );
+      res.set(
+        "X-Refresh-Token",
+        generateToken(
+          { tokenType: TOKEN_TYPES.REFRESH, ...sessionData },
+          EXPIRATION_PERIOD.LONG
+        )
+      );
     }
-    // If the token does contain session info (i.e. a refresh token), then use the session to
-    // authenticate and respond with a fresh set of tokens in the header
-    else if (
-      decoded.tokenType === TOKEN_TYPES.REFRESH &&
-      sessionId &&
-      sessionKey
-    ) {
-      const { user, session, scope } = await getUserSession(sessionId, sessionKey);
-      if (!session || !user || user.password !== session.passwordHash) {
-        throw Boom.unauthorized("Authentication failed");
-      }
-      if (res) {
-        const userData = {
-          tokenType: TOKEN_TYPES.ACCESS,
-          user: {
-            name: user.name,
-            mobile: user.mobile,
-            role: {
-              name: user.role.name,
-              rank: user.role.rank,
-            },
-            [configStore.get("/dbPrimaryKey").name]:
-              user[configStore.get("/dbPrimaryKey").name],
-          },
-          scope: scope,
-        };
-        res.set(
-          "X-Access-Token",
-          generateToken(userData, EXPIRATION_PERIOD.SHORT)
-        );
-        const sessionData = {
-          tokenType: TOKEN_TYPES.REFRESH,
-          sessionId: session[configStore.get("/dbPrimaryKey").name],
-          sessionKey: session.key,
-          scope,
-        };
-        res.set(
-          "X-Refresh-Token",
-          generateToken(sessionData, EXPIRATION_PERIOD.LONG)
-        );
-      }
-      req.auth = {
-        isValid: true,
-        credentials: {
-          user,
-          session,
-          scope,
-        },
-      };
-      return next();
-    }
-    throw Boom.unauthorized("Authentication failed");
+    req.auth = {
+      isValid: true,
+      credentials: { user, session, scope },
+    };
+    next();
   } catch (err) {
     Logger.error(err);
-    next(Boom.unauthorized("Authentication failed"))
+    next(Boom.unauthorized("Authentication failed"));
   }
 };

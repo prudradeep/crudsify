@@ -5,12 +5,18 @@ module.exports = {
   async up(queryInterface, Sequelize) {
     const { faker } = require("@faker-js/faker");
     const ObjectID = require("bson-objectid");
+    const zxcvbn = require("zxcvbn");
     const { ucfirst } = require("crudsify/utils");
     const configStore = require("crudsify/config");
     const { role, user } = require("crudsify/models");
     const roles = await role.findAll();
     const password = process.env.USER_DEFAULT_PASSWORD;
     const domain = process.env.USER_EMAIL_DOMAIN;
+    if (!password || zxcvbn(password).score < 4) {
+      throw new Error(
+        "USER_DEFAULT_PASSWORD must be configured with a strong unique seed password."
+      );
+    }
     const users = [
       {
         name: faker.person.fullName(),
@@ -104,8 +110,11 @@ module.exports = {
         isActive: true,
       },
     ];
+    users.forEach((record) => {
+      record.passwordUpdateRequired = true;
+    });
     await user.bulkCreate(users);
-    console.table(users, ['name', 'mobile', 'email', 'password']);
+    console.table(users, ["name", "mobile", "email"]);
   },
 
   async down(queryInterface, Sequelize) {

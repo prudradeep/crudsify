@@ -54,6 +54,7 @@ const setAuthMiddleware = (middleware) => {
  * @param {string[]} scope: A scope for the authorization.
  * @param {boolean} isJsonFields: Set true if model has json type field, Model is required.
  * @param {Sequelize model} model: A sequelize model
+ * @param {(req, res, next)} authMiddleware: An optional authentication middleware for this endpoint.
  * @param {(req, res, next)[]} middlewares: A list of middlewares.
  * @param {(req, res, next)} handler: Handler method
  * @param {(req, res, next)[]} afterMiddlewares: A list of after middlewares.
@@ -70,6 +71,7 @@ const generateEndpoint = ({
   scope,
   isJsonFields,
   model,
+  authMiddleware: endpointAuthMiddleware,
   middlewares,
   handler,
   afterMiddlewares,
@@ -98,7 +100,11 @@ const generateEndpoint = ({
       if (!_.isArray(scope)) scope = [scope];
       if (!_.isEmpty(scope)) middlewares.unshift(getScopeMiddleware(scope));
     }
-    middlewares = [headerValidationMiddleware, authMiddleware, ...middlewares];
+    middlewares = [
+      headerValidationMiddleware,
+      endpointAuthMiddleware || authMiddleware,
+      ...middlewares,
+    ];
   }
 
   afterMiddlewares = afterMiddlewares

@@ -3,6 +3,7 @@
 module.exports = {
   OTP_SEND_ATTEMPT_PREFIX: "otp-send:",
   OTP_VERIFY_ATTEMPT_PREFIX: "otp-verify:",
+  PUBLIC_AUTH_ATTEMPT_PREFIX: "public-auth:",
   OTP_VALIDITY_PERIOD_MS: 10 * 60 * 1000,
   TOKEN_TYPES: {
     ACCESS: "access",
@@ -35,5 +36,6 @@ module.exports = {
   AUTH_ATTEMPTS: {
     FOR_IP: 50,
     FOR_IP_AND_USER: 5,
+    FOR_PUBLIC_IP: 200,
   },
 };

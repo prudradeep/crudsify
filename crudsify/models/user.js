@@ -118,7 +118,8 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false,
         allowOnCreate: false,
-        allowOnUpdate: false
+        allowOnUpdate: false,
+        exclude: true,
       },
       passwordUpdateRequired: {
         type: DataTypes.BOOLEAN,
@@ -128,7 +129,8 @@ module.exports = (sequelize, DataTypes) => {
       resetPasswordHash: {
         type: DataTypes.STRING,
         allowOnCreate: false,
-        allowOnUpdate: false
+        allowOnUpdate: false,
+        exclude: true,
       },
       ..._.cloneDeep(getRecordScopes(DataTypes)),
       ..._.cloneDeep(getTimestamps(DataTypes)),

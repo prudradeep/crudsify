@@ -26,18 +26,34 @@ const {
   verifyToken,
 } = require("crudsify/utils");
 const { logApiMiddleware } = require("crudsify/middlewares/audit-log");
+const { refreshStrategy } = require("../strategies/refresh");
 const { Op } = require("sequelize");
 const { deleteHandler } = require("crudsify/handlers/remove");
 const { createHandler, updateHandler } = require("crudsify/handlers/create");
 const {
   OTP_SEND_ATTEMPT_PREFIX,
   OTP_VERIFY_ATTEMPT_PREFIX,
+  PUBLIC_AUTH_ATTEMPT_PREFIX,
   OTP_VALIDITY_PERIOD_MS,
   TOKEN_TYPES,
   USER_ROLES,
   REQUIRED_PASSWORD_STRENGTH,
   EXPIRATION_PERIOD,
+  AUTH_ATTEMPTS,
 } = require("crudsify/config/constants");
+
+const publicAuthRateLimitMiddleware = async function (req, res, next) {
+  try {
+    const ip = `${PUBLIC_AUTH_ATTEMPT_PREFIX}${getIP(req) || "unknown"}`;
+    if (await AuthAttempt.ipAbuseDetected(ip, AUTH_ATTEMPTS.FOR_PUBLIC_IP)) {
+      throw Boom.tooManyRequests("Too many authentication requests. Try again later.");
+    }
+    await AuthAttempt.createInstance(ip, `${PUBLIC_AUTH_ATTEMPT_PREFIX}${req.path}`);
+    next();
+  } catch (err) {
+    next(err);
+  }
+};
 
 const checkUserHandler = async function (req, res, next) {
   try {
@@ -73,6 +89,7 @@ generateEndpoint({
     }),
   },
   auth: false,
+  middlewares: [publicAuthRateLimitMiddleware],
   handler: checkUserHandler,
   afterMiddlewares: [logApiMiddleware({ payloadFilter: [] })],
   log: `Generating Check Mobile endpoint for user.`,
@@ -109,6 +126,7 @@ generateEndpoint({
     }),
   },
   auth: false,
+  middlewares: [publicAuthRateLimitMiddleware],
   handler: checkPasswordHandler,
   afterMiddlewares: [logApiMiddleware({ payloadFilter: [] })],
   log: `Generating Check Password Strength endpoint for user.`,
@@ -277,7 +295,7 @@ generateEndpoint({
         }),
     }),
   },
-  middlewares: Object.values(registerMiddleware),
+  middlewares: [publicAuthRateLimitMiddleware, ...Object.values(registerMiddleware)],
   handler: registerHandler,
   afterMiddlewares: [
     logApiMiddleware({
@@ -343,6 +361,14 @@ const otpAttemptMiddleware = {
 
 const sendOtpHandler = async function (req, res, next) {
   try {
+    const exposeOtpForLocalTesting =
+      process.env.EXPOSE_OTP_FOR_LOCAL_TESTING === "true";
+    if (
+      exposeOtpForLocalTesting &&
+      !["development", "test"].includes(process.env.NODE_ENV)
+    ) {
+      throw Boom.forbidden("OTP exposure is only allowed for local testing.");
+    }
     const pin = generatePassword(4, false, /\d/);
     let keyHash = generateHash(pin);
     let exists = await Otp.findOne({
@@ -390,7 +416,7 @@ const sendOtpHandler = async function (req, res, next) {
       }
     );
     const data = { token };
-    if (process.env.NODE_ENV === "development") data.sms = sms;
+    if (exposeOtpForLocalTesting) data.sms = sms;
 
     sendResponse({
       data,
@@ -421,7 +447,7 @@ generateEndpoint({
         }),
     }),
   },
-  middlewares: [otpAttemptMiddleware.send],
+  middlewares: [publicAuthRateLimitMiddleware, otpAttemptMiddleware.send],
   handler: sendOtpHandler,
   log: `Generating Send OTP endpoint for user.`,
 });
@@ -517,6 +543,7 @@ generateEndpoint({
     }),
   },
   middlewares: [
+    publicAuthRateLimitMiddleware,
     ...Object.values(verifyOtpMiddleware),
     otpAttemptMiddleware.verify,
   ],
@@ -630,7 +657,7 @@ generateEndpoint({
         }),
     }),
   },
-  middlewares: Object.values(forgotPasswordMiddleware),
+  middlewares: [publicAuthRateLimitMiddleware, ...Object.values(forgotPasswordMiddleware)],
   handler: forgotPasswordHandler,
   afterMiddlewares: [logApiMiddleware({ payloadFilter: [] })],
   log: "Generating Forgot Password endpoint.",
@@ -714,7 +741,11 @@ const resetPasswordHandler = async function (req, res, next) {
 
     await updateHandler(User, {
       params: { id: req.user[configStore.get("/dbPrimaryKey").name] },
-      body: { password: passwordHash.hash, resetPasswordHash: null },
+      body: {
+        password: passwordHash.hash,
+        resetPasswordHash: null,
+        passwordUpdateRequired: false,
+      },
     });
     sendResponse({
       status: 204,
@@ -751,7 +782,7 @@ generateEndpoint({
         }),
     }),
   },
-  middlewares: Object.values(resetPasswordMiddleware),
+  middlewares: [publicAuthRateLimitMiddleware, ...Object.values(resetPasswordMiddleware)],
   handler: resetPasswordHandler,
   afterMiddlewares: [
     logApiMiddleware({
@@ -849,18 +880,8 @@ const loginMiddleware = {
     try {
       const userData = {
         tokenType: TOKEN_TYPES.ACCESS,
-        user: {
-          name: req.user.name,
-          mobile: req.user.mobile,
-          email: req.user.email,
-          role: {
-            name: req.user.role.name,
-            rank: req.user.role.rank,
-          },
-          [configStore.get("/dbPrimaryKey").name]:
-            req.user[configStore.get("/dbPrimaryKey").name],
-        },
-        scope: req.scope,
+        sessionId: req.session[configStore.get("/dbPrimaryKey").name],
+        sessionKey: req.session.key,
       };
       req.standardToken = generateToken(userData, EXPIRATION_PERIOD.SHORT);
       next();
@@ -874,7 +895,6 @@ const loginMiddleware = {
         tokenType: TOKEN_TYPES.REFRESH,
         sessionId: req.session[configStore.get("/dbPrimaryKey").name],
         sessionKey: req.session.key,
-        scope: req.scope,
       };
       req.refreshToken = generateToken(sessionData, EXPIRATION_PERIOD.LONG);
       next();
@@ -924,7 +944,7 @@ generateEndpoint({
       }),
     }),
   },
-  middlewares: Object.values(loginMiddleware),
+  middlewares: [publicAuthRateLimitMiddleware, ...Object.values(loginMiddleware)],
   handler: loginHandler,
   afterMiddlewares: [
     logApiMiddleware({ action: "login", payloadFilter: ["mobile_email"] }),
@@ -972,6 +992,7 @@ generateEndpoint({
   summary: `User logout`,
   tags: ["auth"],
   auth: true,
+  authMiddleware: refreshStrategy,
   handler: logoutHandler,
   log: "Generating logout endpoint.",
 });

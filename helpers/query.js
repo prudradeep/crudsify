@@ -63,8 +63,11 @@ module.exports = {
   setPage: function (query) {
     const page = Math.max(parseInt(query.$page) || 1, 1);
     const requestedLimit = parseInt(query.$limit);
-    const limit =
-      requestedLimit > 0 ? requestedLimit : configStore.get("/limit");
+    const maxLimit = configStore.get("/maxLimit") || 100;
+    const limit = Math.min(
+      requestedLimit > 0 ? requestedLimit : configStore.get("/limit"),
+      maxLimit
+    );
     return {
       offset: (page - 1) * limit,
     };
@@ -76,11 +79,12 @@ module.exports = {
    * @returns {*}: The updated query.
    */
   setLimit: function (query) {
+    const maxLimit = configStore.get("/maxLimit") || 100;
     if (query.$limit) {
       const limit = parseInt(query.$limit);
-      if (limit === -1 || limit > 0) return { limit };
+      if (limit > 0) return { limit: Math.min(limit, maxLimit) };
     }
-    return { limit: configStore.get("/limit") };
+    return { limit: Math.min(configStore.get("/limit"), maxLimit) };
   },
 
   /**

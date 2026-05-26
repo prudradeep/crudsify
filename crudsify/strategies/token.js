@@ -1,24 +1,64 @@
 "use strict";
 
 const Boom = require("@hapi/boom");
+const configStore = require("crudsify/config");
 const { TOKEN_TYPES } = require("crudsify/config/constants");
-const { verifyToken } = require("crudsify/utils");
+const { ucfirst, verifyToken } = require("crudsify/utils");
+
+const getUserSession = async (sessionId, sessionKey) => {
+  const {
+    user: User,
+    session: Session,
+    role,
+    permission: Permission,
+  } = require("crudsify/models");
+  const session = await Session.findByCredentials(sessionId, sessionKey);
+  if (!session) return {};
+
+  const user = await User.unscoped().findByPk(
+    session[`user${ucfirst(configStore.get("/dbPrimaryKey").name)}`],
+    { include: { model: role } }
+  );
+  const deletedAt = configStore.get("/modelOptions").deletedAt || "deletedAt";
+  if (
+    !user ||
+    !user.isActive ||
+    user[deletedAt] ||
+    user.password !== session.passwordHash
+  ) {
+    return {};
+  }
+
+  return { user, session, scope: await Permission.getScope(user) };
+};
 
 exports.tokenStrategy = async function (req, res, next) {
   try {
     const decoded = await verifyToken(
       req.headers.authorization.replace("Bearer ", "")
     );
-    if (decoded.tokenType !== TOKEN_TYPES.ACCESS || !decoded.user) {
+    if (
+      decoded.tokenType !== TOKEN_TYPES.ACCESS ||
+      !decoded.sessionId ||
+      !decoded.sessionKey
+    ) {
       throw Boom.unauthorized("Invalid token");
     }
-    const { user, scope } = decoded;
+    const { user, session, scope } = await getUserSession(
+      decoded.sessionId,
+      decoded.sessionKey
+    );
+    if (!session || !user) throw Boom.unauthorized("Authentication failed");
+    if (user.passwordUpdateRequired && req.path !== "/user/my/password") {
+      throw Boom.forbidden("Password update required");
+    }
+
     req.auth = {
       isValid: true,
-      credentials: { user, scope },
+      credentials: { user, session, scope },
     };
     next();
   } catch (err) {
-    next(Boom.badRequest("Invalid token"));
+    next(Boom.unauthorized("Authentication failed"));
   }
 };

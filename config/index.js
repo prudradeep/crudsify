@@ -107,10 +107,7 @@ const Config = {
    * Cors settings for generated endpoints. Can be set to false to disable.
    * @type {{headers: string[], exposedHeaders: string[]}}
    */
-  cors: {
-    origin: "*",
-    exposedHeaders: ["X-Access-Token", "X-Refresh-Token"],
-  },
+  cors: false,
 
   /**
    * Express trust proxy setting. Set this to the exact proxy hop count or
@@ -171,6 +168,12 @@ const Config = {
   enableRecoverEndpoint: true,
 
   /**
+   * Allow generated delete endpoints to permanently remove records.
+   * default: false
+   */
+  allowHardDelete: false,
+
+  /**
    * MetaData options
    * - createdBy: dbPrimaryKey of user that created the record.
    * - updatedBy: dbPrimaryKey of user that last updated the record.
@@ -188,6 +191,25 @@ const Config = {
    * @type {number}
    */
   limit: 20,
+
+  /**
+   * Maximum limit and association expansion accepted from query parameters.
+   */
+  maxLimit: 100,
+  maxEmbeds: 5,
+  maxEmbedDepth: 2,
+
+  /**
+   * Permit client queries to include soft-deleted rows.
+   * Keep disabled unless routes add appropriate administrative authorization.
+   */
+  allowParanoidQueries: false,
+
+  /**
+   * Maximum JSON request body size.
+   * default: 1mb
+   */
+  jsonBodyLimit: "1mb",
 
   /**
    * Authentication to be used for all generated endpoints.

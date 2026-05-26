@@ -39,6 +39,8 @@ module.exports = (sequelize, DataTypes) => {
     allowDelete: false,
     allowDeleteMany: false,
     allowUpdate: false,
+    allowRecover: false,
+    allowRecoverMany: false,
   };
 
   return otp;

@@ -18,6 +18,10 @@ const {
 const { addMeta } = require("../middlewares/add-meta-data");
 const { getRecordScopeMiddleware } = require("../middlewares/scope");
 const authentication = configStore.get("/authentication");
+const hardDeleteValidation = () =>
+  Joi.bool()
+    .valid(...(configStore.get("/allowHardDelete") ? [false, true] : [false]))
+    .default(false);
 
 /**
  * Creates an endpoint for DELETE /RESOURCE/{_id}
@@ -41,7 +45,7 @@ exports.deleteOneEndpoint = function (model) {
   }
   let payloadModel = null;
   if (configStore.get("/modelOptions").paranoid) {
-    payloadModel = Joi.object({ hardDelete: Joi.bool().default(false) }).allow(
+    payloadModel = Joi.object({ hardDelete: hardDeleteValidation() }).allow(
       null
     );
 
@@ -135,7 +139,7 @@ exports.deleteManyEndpoint = function (model) {
   if (configStore.get("/modelOptions").paranoid) {
     payloadModel = Joi.object({
       data: Joi.array().items(Joi.alternatives().try(Joi.string(), Joi.number()).required()).required(),
-      hardDelete: Joi.bool().default(false),
+      hardDelete: hardDeleteValidation(),
     });
   } else {
     payloadModel = Joi.object({
@@ -249,7 +253,7 @@ exports.associationRemoveOneEndpoint = function (ownerModel, association) {
 
   let payloadModel = null;
   if (configStore.get("/modelOptions").paranoid) {
-    payloadModel = Joi.object({ hardDelete: Joi.bool().default(false) }).allow(
+    payloadModel = Joi.object({ hardDelete: hardDeleteValidation() }).allow(
       null
     );
 
@@ -383,7 +387,7 @@ exports.associationRemoveManyEndpoint = function (ownerModel, association) {
   if (configStore.get("/modelOptions").paranoid) {
     payloadModel = Joi.object({
       data: Joi.array().items(Joi.alternatives().try(Joi.string(), Joi.number()).required()).required(),
-      hardDelete: Joi.bool().default(false),
+      hardDelete: hardDeleteValidation(),
     });
   } else {
     payloadModel = Joi.object({

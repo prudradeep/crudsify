@@ -6,11 +6,12 @@ const configStore = require("../config");
 
 exports.deleteHandler = async function (model, req = { query: {} }) {
   try {
-    const hardDelete = req.body
+    const hardDeleteRequested = req.body
       ? req.body.hardDelete === true
         ? req.body.hardDelete
         : false
       : false;
+    const hardDelete = req.allowHardDelete === false ? false : hardDeleteRequested;
     try {
       if (
         model.hooks &&
@@ -95,11 +96,12 @@ exports.associationRemoveOneHandler = async function (
       throw Boom.badRequest("Invalid request");
 
     const { target: childModel, accessors } = association;
-    const hardDelete = req.body
+    const hardDeleteRequested = req.body
       ? req.body.hardDelete === true
         ? req.body.hardDelete
         : false
       : false;
+    const hardDelete = req.allowHardDelete === false ? false : hardDeleteRequested;
     try {
       if (
         ownerModel.hooks &&
@@ -148,11 +150,12 @@ exports.associationRemoveManyHandler = async function (
       throw Boom.badRequest("Invalid request");
 
     const { target: childModel, accessors } = association;
-    const hardDelete = req.body
+    const hardDeleteRequested = req.body
       ? req.body.hardDelete === true
         ? req.body.hardDelete
         : false
       : false;
+    const hardDelete = req.allowHardDelete === false ? false : hardDeleteRequested;
     try {
       if (
         ownerModel.hooks &&

@@ -30,9 +30,11 @@ if (sslOptions.cert && sslOptions.key) {
 Crudsify.use(compression(configStore.get("/compression")))
 Crudsify.use(helmet(configStore.get("/helmet")));
 Crudsify.disable("etag");
-Crudsify.use(cors(configStore.get("/cors")));
+if (configStore.get("/cors")) {
+  Crudsify.use(cors(configStore.get("/cors")));
+}
 Crudsify.use(express.json({
-  limit: "20mb"
+  limit: configStore.get("/jsonBodyLimit")
 }));
 
 module.exports = async (authStrategy = false, globalMiddleware=[]) => {
@@ -47,6 +49,14 @@ module.exports = async (authStrategy = false, globalMiddleware=[]) => {
       if (!["HS256", "HS384", "HS512"].includes(jwtConfig.algo)) {
         throw new Error(
           "JWT_ALGO must be a supported HMAC algorithm: HS256, HS384, or HS512."
+        );
+      }
+    }
+    if (configStore.get("/enableSwagger")) {
+      const basicAuth = configStore.get("/basicAuth");
+      if (!basicAuth.username || !basicAuth.password) {
+        throw new Error(
+          "Swagger requires BASIC_AUTH_USERNAME and BASIC_AUTH_PASSWORD configuration, or enableSwagger must be false."
         );
       }
     }

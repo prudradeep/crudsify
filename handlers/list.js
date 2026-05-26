@@ -4,8 +4,13 @@ const _ = require("lodash");
 const Boom = require("@hapi/boom");
 const { Op } = require("sequelize");
 const { paginateList, paginateAssocList } = require("./paginate");
-const { createWhereCondition, getEmbeds } = require("../helpers/query");
+const {
+  createWhereCondition,
+  getEmbeds,
+  getReadableFields,
+} = require("../helpers/query");
 const { handleError } = require("./error");
+const configStore = require("../config");
 
 exports.listHandler = async function (DB, model, req = { query: {} }) {
   try {
@@ -78,13 +83,22 @@ exports.findHandler = async function (DB, model, req = { query: {} }) {
 
     let select = {};
     if (req.query && req.query.$select) {
-      if (_.isArray(req.query.$select)) select = req.query.$select;
-      else select = [req.query.$select];
+      const requestedSelect = _.isArray(req.query.$select)
+        ? req.query.$select
+        : [req.query.$select];
+      select = requestedSelect.filter((field) =>
+        getReadableFields(model).includes(field)
+      );
     }
     let data = await model.findByPk(req.params.id, {
       attributes: select,
       include: embeds,
-      paranoid: req.query && req.query.$paranoid === "true" ? false : true,
+      paranoid:
+        configStore.get("/allowParanoidQueries") &&
+        req.query &&
+        req.query.$paranoid === "true"
+          ? false
+          : true,
     });
     try {
       if (
@@ -138,7 +152,12 @@ exports.associationGetAllHandler = async function (
       const owner = await ownerModel.findByPk(req.params.ownerId);
       const count = await owner[accessors.count]({
         ...conditions,
-        paranoid: req.query && req.query.$paranoid === "true" ? false : true,
+        paranoid:
+          configStore.get("/allowParanoidQueries") &&
+          req.query &&
+          req.query.$paranoid === "true"
+            ? false
+            : true,
       });
       return { count };
     }
@@ -152,7 +171,8 @@ exports.associationGetAllHandler = async function (
       accessors,
       req,
       conditions,
-      embeds
+      embeds,
+      childModel
     );
     try {
       if (

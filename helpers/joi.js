@@ -182,7 +182,8 @@ const generateJoiModelFromFieldType = function (field) {
  * @returns {*}: A pagination object for validation
  */
 const generatePaginationObjectQuery = () => {
-  return {
+  const maxLimit = configStore.get("/maxLimit") || 100;
+  const query = {
     $skip: Joi.number()
       .integer()
       .min(0)
@@ -199,18 +200,42 @@ const generatePaginationObjectQuery = () => {
       ),
     $limit: Joi.number()
       .integer()
-      .custom((value, helpers) => {
-        if (value === -1 || value >= 1) return value;
-        return helpers.error("any.invalid");
-      })
+      .min(1)
+      .max(maxLimit)
       .optional()
       .description(
-        "The maximum number of records to return. This is typically used in pagination. Set -1 to get all records"
+        `The maximum number of records to return. This is typically used in pagination and cannot exceed ${maxLimit}.`
       ),
-    $paranoid: Joi.boolean().description(
-      "If set to true, all records will be returned with deleted one's"
-    ),
   };
+  if (configStore.get("/allowParanoidQueries")) {
+    query.$paranoid = Joi.boolean().description(
+      "If set to true, soft-deleted records will be included."
+    );
+  }
+  return query;
+};
+
+const generateEmbedQuery = (embeds) => {
+  const maxEmbeds = configStore.get("/maxEmbeds") || 5;
+  const maxEmbedDepth = configStore.get("/maxEmbedDepth") || 2;
+  const embed = Joi.string().custom((value, helpers) => {
+    const path = value.split(".");
+    if (!embeds.includes(path[0]) || path.length > maxEmbedDepth) {
+      return helpers.error("any.invalid");
+    }
+    return value;
+  }, "embed bounds validation");
+
+  return Joi.alternatives().try(
+    Joi.array()
+      .items(embed)
+      .max(maxEmbeds)
+      .description(
+        "A set of complex object properties to populate. Valid first level values include " +
+          embeds.toString().replace(/,/g, ", ")
+      ),
+    embed
+  );
 };
 
 /**
@@ -301,15 +326,7 @@ const generateJoiListQueryModel = (model) => {
       const { target, as } = assoc;
       embeds.push(as !== target.name ? as : target.name);
     }
-    queryModel.$embed = Joi.alternatives().try(
-      Joi.array()
-        .items(Joi.string())
-        .description(
-          "A set of complex object properties to populate. Valid first level values include " +
-            Object.values(embeds).toString().replace(/,/g, ", ")
-        ),
-      Joi.string()
-    );
+    queryModel.$embed = generateEmbedQuery(embeds);
   }
 
   queryModel = Joi.object(queryModel);
@@ -327,11 +344,12 @@ const generateJoiListQueryModel = (model) => {
  * @returns {*}: A Joi object
  */
 const generateJoiFindQueryModel = (model) => {
-  let queryModel = {
-    $paranoid: Joi.boolean().description(
-      "If set to true, all records will be returned with deleted one's"
-    ),
-  };
+  let queryModel = {};
+  if (configStore.get("/allowParanoidQueries")) {
+    queryModel.$paranoid = Joi.boolean().description(
+      "If set to true, soft-deleted records will be included."
+    );
+  }
 
   const readableFields = queryHelper.getReadableFields(model);
 
@@ -354,15 +372,7 @@ const generateJoiFindQueryModel = (model) => {
       const { target, as } = assoc;
       embeds.push(as !== target.name ? as : target.name);
     }
-    queryModel.$embed = Joi.alternatives().try(
-      Joi.array()
-        .items(Joi.string())
-        .description(
-          "A set of complex object properties to populate. Valid first level values include " +
-            Object.values(embeds).toString().replace(/,/g, ", ")
-        ),
-      Joi.string()
-    );
+    queryModel.$embed = generateEmbedQuery(embeds);
   }
 
   queryModel = Joi.object(queryModel);

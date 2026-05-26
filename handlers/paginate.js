@@ -2,6 +2,7 @@
 
 const _ = require("lodash");
 const queryHelper = require("../helpers/query");
+const configStore = require("../config");
 
 exports.paginateList = async (
   model,
@@ -12,17 +13,25 @@ exports.paginateList = async (
 ) => {
   let paginate = queryHelper.paginate(req.query);
   const sort = queryHelper.setSort(req.query);
-  if (parseInt(req.query.$limit) == -1) paginate = {};
 
   let select = {};
   if (req.query.$select) {
-    if (_.isArray(req.query.$select)) select = req.query.$select;
-    else select = [req.query.$select];
+    const requestedSelect = _.isArray(req.query.$select)
+      ? req.query.$select
+      : [req.query.$select];
+    select = requestedSelect.filter((field) =>
+      queryHelper.getReadableFields(model).includes(field)
+    );
   }
 
   const docs = await model.findAll({
     attributes: select,
-    paranoid: req.query && req.query.$paranoid === "true" ? false : true,
+    paranoid:
+      configStore.get("/allowParanoidQueries") &&
+      req.query &&
+      req.query.$paranoid === "true"
+        ? false
+        : true,
     ...conditions,
     include: embeds,
     order: [...sort],
@@ -32,17 +41,16 @@ exports.paginateList = async (
   let count = await model.count({
     ...conditions,
     distinct: true,
-    paranoid: req.query && req.query.$paranoid === "true" ? false : true,
+    paranoid:
+      configStore.get("/allowParanoidQueries") &&
+      req.query &&
+      req.query.$paranoid === "true"
+        ? false
+        : true,
     include: embeds,
   });
 
   count = _.isArray(count) ? count.length : count;
-
-  if (parseInt(req.query.$limit) == -1) {
-    paginate = {
-      limit: count,
-    };
-  }
 
   const currentPage = Math.max(parseInt(req.query.$page) || 1, 1);
   const limit = parseInt(paginate.limit);
@@ -81,16 +89,22 @@ exports.paginateAssocList = async (
   accessors,
   req,
   conditions = {},
-  embeds = false
+  embeds = false,
+  childModel = false
 ) => {
   let paginate = queryHelper.paginate(req.query);
   const sort = queryHelper.setSort(req.query);
-  if (parseInt(req.query.$limit) == -1) paginate = {};
 
   let select = {};
   if (req.query.$select) {
-    if (_.isArray(req.query.$select)) select = req.query.$select;
-    else select = [req.query.$select];
+    const requestedSelect = _.isArray(req.query.$select)
+      ? req.query.$select
+      : [req.query.$select];
+    select = childModel
+      ? requestedSelect.filter((field) =>
+          queryHelper.getReadableFields(childModel).includes(field)
+        )
+      : [];
   }
 
   const owner = await ownerModel.findByPk(req.params.ownerId);
@@ -100,18 +114,17 @@ exports.paginateAssocList = async (
     docs = await owner[accessors.get]({
       attributes: select,
       ...conditions,
-      paranoid: req.query && req.query.$paranoid === "true" ? false : true,
+      paranoid:
+        configStore.get("/allowParanoidQueries") &&
+        req.query &&
+        req.query.$paranoid === "true"
+          ? false
+          : true,
       include: embeds,
       order: [...sort],
       ...paginate,
     });
     count = await owner[accessors.count](conditions);
-  }
-
-  if (parseInt(req.query.$limit) == -1) {
-    paginate = {
-      limit: count,
-    };
   }
 
   const currentPage = Math.max(parseInt(req.query.$page) || 1, 1);

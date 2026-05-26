@@ -18,6 +18,7 @@ const {
   associationRemoveManyHandler,
 } = require("../handlers/remove");
 const { sendResponse } = require("../helpers/sendResponse");
+const configStore = require("../config");
 
 exports.listMiddleware = function (DB, model) {
   return async function (req, res, next) {
@@ -74,6 +75,7 @@ exports.createMiddleware = function (model) {
 exports.deleteMiddleware = function (model) {
   return async function (req, res, next) {
     try {
+      req.allowHardDelete = configStore.get("/allowHardDelete") === true;
       await deleteHandler(model, req);
       sendResponse({
         status: 204,
@@ -186,6 +188,7 @@ exports.associationAddManyMiddleware = function (ownerModel, association) {
 exports.associationRemoveOneMiddleware = function (ownerModel, association) {
   return async function (req, res, next) {
     try {
+      req.allowHardDelete = configStore.get("/allowHardDelete") === true;
       await associationRemoveOneHandler(ownerModel, association, req);
       sendResponse({
         status: 204,
@@ -202,6 +205,7 @@ exports.associationRemoveOneMiddleware = function (ownerModel, association) {
 exports.associationRemoveManyMiddleware = function (ownerModel, association) {
   return async function (req, res, next) {
     try {
+      req.allowHardDelete = configStore.get("/allowHardDelete") === true;
       await associationRemoveManyHandler(ownerModel, association, req);
       sendResponse({
         status: 204,
