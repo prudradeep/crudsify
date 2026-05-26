@@ -4,7 +4,8 @@
   "description": "CRUDSIFY - A Simplified RESTful API generator",
   "main": "crudsify.js",
   "scripts": {
-    "start": "nodemon"
+    "start": "nodemon",
+    "audit": "npm audit"
   },
   "bin": {
     "crudsify-cli": "./bin/index.js"

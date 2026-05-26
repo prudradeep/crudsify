@@ -1,15 +1,19 @@
 "use strict";
 
 const Boom = require("@hapi/boom");
-const Jwt = require("jsonwebtoken");
 const configStore = require("crudsify/config");
-const { EXPIRATION_PERIOD } = require("crudsify/config/constants");
+const { EXPIRATION_PERIOD, TOKEN_TYPES } = require("crudsify/config/constants");
 const { Logger } = require("crudsify/helpers/logger");
-const { generateToken, ucfirst } = require("crudsify/utils");
+const { generateToken, ucfirst, verifyToken } = require("crudsify/utils");
 
 const getUserSession = async (sessionId, sessionKey) => {
   try {
-    const { user: User, session: Session, role } = require("crudsify/models");
+    const {
+      user: User,
+      session: Session,
+      role,
+      permission: Permission,
+    } = require("crudsify/models");
     const session = await Session.findByCredentials(sessionId, sessionKey);
     if (!session) {
       return { user: null, session };
@@ -18,7 +22,8 @@ const getUserSession = async (sessionId, sessionKey) => {
       session[`user${ucfirst(configStore.get("/dbPrimaryKey").name)}`],
       { include: { model: role } }
     );
-    return { user, session };
+    const scope = user ? await Permission.getScope(user) : null;
+    return { user, session, scope };
   } catch (err) {
     throw err;
   }
@@ -26,17 +31,20 @@ const getUserSession = async (sessionId, sessionKey) => {
 
 exports.sessionStrategy = async function (req, res, next) {
   try {
-    const decoded = await Jwt.verify(
-      req.headers.authorization.replace("Bearer ", ""),
-      configStore.get("/jwt").secret
+    const decoded = await verifyToken(
+      req.headers.authorization.replace("Bearer ", "")
     );
-    const { sessionId, sessionKey, scope } = decoded;
-    const { user, session } = await getUserSession(sessionId, sessionKey);
+    if (decoded.tokenType !== TOKEN_TYPES.REFRESH) {
+      throw Boom.unauthorized("Authentication failed");
+    }
+    const { sessionId, sessionKey } = decoded;
+    const { user, session, scope } = await getUserSession(sessionId, sessionKey);
     if (!session || !user || user.password !== session.passwordHash) {
       throw Boom.unauthorized("Authentication failed");
     }
     if (res) {
       const data = {
+        tokenType: TOKEN_TYPES.REFRESH,
         sessionId: session[configStore.get("/dbPrimaryKey").name],
         sessionKey: session.key,
         scope: scope,

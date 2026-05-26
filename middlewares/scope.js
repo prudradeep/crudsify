@@ -162,25 +162,23 @@ exports.getRecordScopeMiddleware = (action, model) => {
     try {
       const id = action !== "associate" ? req.params.id : req.params.ownerId;
       if (id === undefined && (action === "delete" || action === "recover")) {
+        if (!req.body || !Array.isArray(req.body.data)) {
+          return next(Boom.badRequest("Invalid request"));
+        }
+        const requestedIds = [...new Set(req.body.data)];
         const data = await model.findAll({
           attributes: [
             configStore.get("/dbPrimaryKey").name,
             configStore.get("/recordScopeKey"),
           ],
-          where: { [configStore.get("/dbPrimaryKey").name]: req.body.data },
+          where: { [configStore.get("/dbPrimaryKey").name]: requestedIds },
           paranoid: action === "recover" ? false : undefined,
         });
-        data.forEach((record) => {
-          const valid = validateRecordScope(record, action, req);
-          if (!valid) {
-            // Remove unauthorized ids from the bulk action request.
-            const index = req.body.data.indexOf(
-              record[configStore.get("/dbPrimaryKey").name]
-            );
-            req.body.data.splice(index, 1);
-          }
-        });
-        if (req.body.data.length <= 0) {
+        const authorizedIds = data
+          .filter((record) => validateRecordScope(record, action, req))
+          .map((record) => record[configStore.get("/dbPrimaryKey").name]);
+        req.body.data = authorizedIds;
+        if (authorizedIds.length <= 0) {
           return next(Boom.forbidden("Insufficient record scope"));
         }
         return next();

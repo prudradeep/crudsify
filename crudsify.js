@@ -37,13 +37,23 @@ Crudsify.use(express.json({
 
 module.exports = async (authStrategy = false, globalMiddleware=[]) => {
   try {
+    if (configStore.get("/authentication")) {
+      const jwtConfig = configStore.get("/jwt");
+      if (!jwtConfig.secret || !jwtConfig.algo) {
+        throw new Error(
+          "Authentication requires JWT_SECRET and JWT_ALGO configuration."
+        );
+      }
+      if (!["HS256", "HS384", "HS512"].includes(jwtConfig.algo)) {
+        throw new Error(
+          "JWT_ALGO must be a supported HMAC algorithm: HS256, HS384, or HS512."
+        );
+      }
+    }
     await sequelize.authenticate();
     const { Endpoints, setAuthMiddleware } = require("./endpoints/generate");
     if (configStore.get("/authentication")) {
       if (authStrategy) setAuthMiddleware(authStrategy);
-      else {
-        throw "Authentication is enabled, Auth strategy required!";
-      }
     }
 
     globalMiddleware.forEach(middleware => Crudsify.use(middleware));

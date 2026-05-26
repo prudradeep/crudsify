@@ -191,10 +191,10 @@ const Config = {
 
   /**
    * Authentication to be used for all generated endpoints.
-   * default: false
+   * default: true
    * @type {boolean}
    */
-  authentication: false,
+  authentication: true,
 
   /**
    * Enables record level authorization.

@@ -1,6 +1,16 @@
 "use strict";
 
 module.exports = {
+  OTP_SEND_ATTEMPT_PREFIX: "otp-send:",
+  OTP_VERIFY_ATTEMPT_PREFIX: "otp-verify:",
+  OTP_VALIDITY_PERIOD_MS: 10 * 60 * 1000,
+  TOKEN_TYPES: {
+    ACCESS: "access",
+    REFRESH: "refresh",
+    OTP_CHALLENGE: "otp-challenge",
+    OTP_VERIFIED: "otp-verified",
+    PASSWORD_RESET: "password-reset",
+  },
   PERMISSION_STATES: {
     INCLUDED: "Included",
     EXCLUDED: "Excluded",

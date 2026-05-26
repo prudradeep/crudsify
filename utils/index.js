@@ -40,6 +40,12 @@ module.exports = {
       throw err;
     }
   },
+  verifyToken: (token) => {
+    const jwtConfig = configStore.get("/jwt");
+    return Jwt.verify(token, jwtConfig.secret, {
+      algorithms: [jwtConfig.algo],
+    });
+  },
   getScopes: (model, type) => {
     const routeScope = model.routeScopes || {};
     const rootScope = routeScope.rootScope;

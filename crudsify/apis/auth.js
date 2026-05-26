@@ -18,12 +18,22 @@ const {
 const configStore = require("crudsify/config");
 const { sendResponse } = require("crudsify/helpers/sendResponse");
 const { generateEndpoint } = require("crudsify/endpoints/generate");
-const { getIP, generateHash, ucfirst, generateToken } = require("crudsify/utils");
+const {
+  getIP,
+  generateHash,
+  ucfirst,
+  generateToken,
+  verifyToken,
+} = require("crudsify/utils");
 const { logApiMiddleware } = require("crudsify/middlewares/audit-log");
 const { Op } = require("sequelize");
 const { deleteHandler } = require("crudsify/handlers/remove");
 const { createHandler, updateHandler } = require("crudsify/handlers/create");
 const {
+  OTP_SEND_ATTEMPT_PREFIX,
+  OTP_VERIFY_ATTEMPT_PREFIX,
+  OTP_VALIDITY_PERIOD_MS,
+  TOKEN_TYPES,
   USER_ROLES,
   REQUIRED_PASSWORD_STRENGTH,
   EXPIRATION_PERIOD,
@@ -108,10 +118,12 @@ const registerMiddleware = {
   verifiedContacts: async function (req, res, next) {
     try {
       const [mobileVerification, emailVerification] = await Promise.all([
-        Jwt.verify(req.body.mobileToken, configStore.get("/jwt").secret),
-        Jwt.verify(req.body.emailToken, configStore.get("/jwt").secret),
+        verifyToken(req.body.mobileToken),
+        verifyToken(req.body.emailToken),
       ]);
       if (
+        mobileVerification.tokenType !== TOKEN_TYPES.OTP_VERIFIED ||
+        emailVerification.tokenType !== TOKEN_TYPES.OTP_VERIFIED ||
         mobileVerification.otpVerified !== true ||
         emailVerification.otpVerified !== true ||
         String(mobileVerification.mobile_email) !== String(req.body.mobile) ||
@@ -275,15 +287,13 @@ generateEndpoint({
   log: `Generating registration endpoint.`,
 });
 
-const OTP_ATTEMPT_PREFIX = "otp:";
-
-const getOtpAttemptKeys = (req, mobileEmail) => ({
-  ip: `${OTP_ATTEMPT_PREFIX}${getIP(req) || "unknown"}`,
-  mobileEmail: `${OTP_ATTEMPT_PREFIX}${mobileEmail}`,
+const getOtpAttemptKeys = (req, mobileEmail, prefix) => ({
+  ip: `${prefix}${getIP(req) || "unknown"}`,
+  mobileEmail: `${prefix}${mobileEmail}`,
 });
 
-const rejectOtpAbuse = async (req, mobileEmail) => {
-  const attempt = getOtpAttemptKeys(req, mobileEmail);
+const rejectOtpAbuse = async (req, mobileEmail, prefix) => {
+  const attempt = getOtpAttemptKeys(req, mobileEmail, prefix);
   const abuseDetected = await Promise.all([
     AuthAttempt.abuseDetected(attempt.ip, attempt.mobileEmail),
     AuthAttempt.identifierAbuseDetected(attempt.mobileEmail),
@@ -295,14 +305,22 @@ const rejectOtpAbuse = async (req, mobileEmail) => {
 };
 
 const recordFailedOtpAttempt = async (req) => {
-  const attempt = getOtpAttemptKeys(req, req.decoded.mobile_email);
+  const attempt = getOtpAttemptKeys(
+    req,
+    req.decoded.mobile_email,
+    OTP_VERIFY_ATTEMPT_PREFIX
+  );
   await AuthAttempt.createInstance(attempt.ip, attempt.mobileEmail);
 };
 
 const otpAttemptMiddleware = {
   send: async function (req, res, next) {
     try {
-      const attempt = await rejectOtpAbuse(req, req.body.mobile_email);
+      const attempt = await rejectOtpAbuse(
+        req,
+        req.body.mobile_email,
+        OTP_SEND_ATTEMPT_PREFIX
+      );
       await AuthAttempt.createInstance(attempt.ip, attempt.mobileEmail);
       next();
     } catch (err) {
@@ -311,7 +329,11 @@ const otpAttemptMiddleware = {
   },
   verify: async function (req, res, next) {
     try {
-      await rejectOtpAbuse(req, req.decoded.mobile_email);
+      await rejectOtpAbuse(
+        req,
+        req.decoded.mobile_email,
+        OTP_VERIFY_ATTEMPT_PREFIX
+      );
       next();
     } catch (err) {
       next(err);
@@ -329,6 +351,15 @@ const sendOtpHandler = async function (req, res, next) {
       },
     });
     if (exists) {
+      const configuredCreatedAt = configStore.get("/modelOptions").createdAt;
+      const createdAtKey =
+        typeof configuredCreatedAt === "string" ? configuredCreatedAt : "createdAt";
+      const createdAt = exists[createdAtKey]
+        ? new Date(exists[createdAtKey]).getTime()
+        : null;
+      if (!createdAt || createdAt > Date.now() - OTP_VALIDITY_PERIOD_MS) {
+        throw Boom.tooManyRequests("An OTP is already active. Try again later.");
+      }
       await deleteHandler(Otp, {
         params: { id: exists[configStore.get("/dbPrimaryKey").name] },
         body: { hardDelete: true },
@@ -348,6 +379,7 @@ const sendOtpHandler = async function (req, res, next) {
 
     const token = Jwt.sign(
       {
+        tokenType: TOKEN_TYPES.OTP_CHALLENGE,
         mobile_email: req.body.mobile_email,
         id: otpData[configStore.get("/dbPrimaryKey").name],
       },
@@ -397,10 +429,10 @@ generateEndpoint({
 const verifyOtpMiddleware = {
   decoded: async function (req, res, next) {
     try {
-      const decode = await Jwt.verify(
-        req.body.token,
-        configStore.get("/jwt").secret
-      );
+      const decode = await verifyToken(req.body.token);
+      if (decode.tokenType !== TOKEN_TYPES.OTP_CHALLENGE) {
+        throw Boom.badRequest("Invalid token");
+      }
       req.decoded = decode;
       next();
     } catch (err) {
@@ -442,6 +474,7 @@ const verifyOtpHandler = async function (req, res, next) {
     });
     const token = Jwt.sign(
       {
+        tokenType: TOKEN_TYPES.OTP_VERIFIED,
         mobile_email: req.decoded.mobile_email,
         otpVerified: true,
       },
@@ -554,6 +587,7 @@ const forgotPasswordHandler = async function (req, res, next) {
     });
     const token = Jwt.sign(
       {
+        tokenType: TOKEN_TYPES.PASSWORD_RESET,
         mobile_email: req.decoded.mobile_email,
         key: keyHash.key,
       },
@@ -605,10 +639,10 @@ generateEndpoint({
 const resetPasswordMiddleware = {
   decoded: async function (req, res, next) {
     try {
-      const decode = await Jwt.verify(
-        req.body.token,
-        configStore.get("/jwt").secret
-      );
+      const decode = await verifyToken(req.body.token);
+      if (decode.tokenType !== TOKEN_TYPES.PASSWORD_RESET) {
+        throw Boom.badRequest("Invalid token");
+      }
       req.decoded = decode;
       next();
     } catch (err) {
@@ -814,6 +848,7 @@ const loginMiddleware = {
   standardToken: async function (req, res, next) {
     try {
       const userData = {
+        tokenType: TOKEN_TYPES.ACCESS,
         user: {
           name: req.user.name,
           mobile: req.user.mobile,
@@ -836,6 +871,7 @@ const loginMiddleware = {
   sessionRefreshToken: async function (req, res, next) {
     try {
       const sessionData = {
+        tokenType: TOKEN_TYPES.REFRESH,
         sessionId: req.session[configStore.get("/dbPrimaryKey").name],
         sessionKey: req.session.key,
         scope: req.scope,
@@ -849,11 +885,13 @@ const loginMiddleware = {
 };
 
 const loginHandler = async function (req, res, next) {
-  delete req.user.password;
+  const user = req.user.toJSON();
+  delete user.password;
+  delete user.resetPasswordHash;
 
   sendResponse({
     data: {
-      user: req.user,
+      user,
       refreshToken: req.refreshToken,
       accessToken: req.standardToken,
       scope: req.scope,

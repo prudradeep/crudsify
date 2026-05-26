@@ -1,4 +1,6 @@
 "use strict";
 
 const server = require("crudsify");
-server();
+const { refreshStrategy } = require("./strategies/refresh");
+
+server(refreshStrategy);

@@ -4,9 +4,9 @@ const express = require("express");
 const Endpoints = express.Router();
 const _ = require("lodash");
 const Boom = require("@hapi/boom");
-const Jwt = require("jsonwebtoken");
 const { Logger } = require("../helpers/logger");
 const configStore = require("../config");
+const { verifyToken } = require("../utils");
 const {
   validationMiddleware,
   jsonFieldQuery,
@@ -21,10 +21,12 @@ const {
 
 let authMiddleware = async (req, res, next) => {
   try {
-    const decoded = await Jwt.verify(
-      req.headers.authorization.replace("Bearer ", ""),
-      configStore.get("/jwt").secret
+    const decoded = await verifyToken(
+      req.headers.authorization.replace("Bearer ", "")
     );
+    if (!decoded.user) {
+      throw Boom.unauthorized("Invalid token");
+    }
     const { user, scope } = decoded;
     req.auth = {
       isValid: true,
