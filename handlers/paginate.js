@@ -44,8 +44,10 @@ exports.paginateList = async (
     };
   }
 
+  const currentPage = Math.max(parseInt(req.query.$page) || 1, 1);
+  const limit = parseInt(paginate.limit);
   const pages = {
-    current: parseInt(req.query.$page) || 1,
+    current: currentPage,
     prev: 0,
     hasPrev: false,
     next: 0,
@@ -53,16 +55,13 @@ exports.paginateList = async (
     total: 0,
   };
   const items = {
-    limit: parseInt(paginate.limit),
-    begin:
-      (req.query.$page || 1) * parseInt(paginate.limit) -
-      parseInt(paginate.limit) +
-      1,
-    end: (req.query.$page || 1) * parseInt(paginate.limit),
+    limit,
+    begin: currentPage * limit - limit + 1,
+    end: currentPage * limit,
     total: count,
   };
 
-  pages.total = Math.ceil(count / parseInt(paginate.limit));
+  pages.total = limit > 0 ? Math.ceil(count / limit) : 0;
   pages.next = pages.current + 1;
   pages.hasNext = pages.next <= pages.total;
   pages.prev = pages.current - 1;
@@ -115,8 +114,10 @@ exports.paginateAssocList = async (
     };
   }
 
+  const currentPage = Math.max(parseInt(req.query.$page) || 1, 1);
+  const limit = parseInt(paginate.limit);
   const pages = {
-    current: parseInt(req.query.$page) || 1,
+    current: currentPage,
     prev: 0,
     hasPrev: false,
     next: 0,
@@ -124,16 +125,13 @@ exports.paginateAssocList = async (
     total: 0,
   };
   const items = {
-    limit: paginate.limit,
-    begin:
-      (req.query.$page || 1) * parseInt(paginate.limit) -
-      parseInt(paginate.limit) +
-      1,
-    end: (req.query.$page || 1) * parseInt(paginate.limit),
+    limit,
+    begin: currentPage * limit - limit + 1,
+    end: currentPage * limit,
     total: count,
   };
 
-  pages.total = Math.ceil(count / parseInt(paginate.limit));
+  pages.total = limit > 0 ? Math.ceil(count / limit) : 0;
   pages.next = pages.current + 1;
   pages.hasNext = pages.next <= pages.total;
   pages.prev = pages.current - 1;

@@ -2,6 +2,7 @@
 
 const Boom = require("@hapi/boom");
 const Jwt = require("jsonwebtoken");
+const configStore = require("crudsify/config");
 
 exports.tokenStrategy = async function (req, res, next) {
   try {

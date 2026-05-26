@@ -12,7 +12,7 @@ module.exports = {
     SUPER_ADMIN: "Super Admin",
   },
   REQUIRED_PASSWORD_STRENGTH: {
-    USER: 0,
+    USER: 2,
     ADMIN: 3,
     SUPER_ADMIN: 4,
   },

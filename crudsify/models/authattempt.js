@@ -60,6 +60,24 @@ module.exports = (sequelize, DataTypes) => {
         throw err;
       }
     }
+
+    static async identifierAbuseDetected(id) {
+      try {
+        const expirationDate = LOCKOUT_PERIOD
+          ? { [Op.gt]: Date.now() - LOCKOUT_PERIOD * 60000 }
+          : { [Op.lt]: Date.now() };
+        const attemptCount = await this.count({
+          where: {
+            mobileEmail: id,
+            time: expirationDate,
+          },
+        });
+
+        return attemptCount >= AUTH_ATTEMPTS.FOR_IP_AND_USER;
+      } catch (err) {
+        throw err;
+      }
+    }
   }
   authAttempt.init(
     {

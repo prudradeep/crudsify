@@ -278,47 +278,49 @@ exports.logRemoveMiddleware = (ownerModel, childModel, associationType) => {
  * @returns {anonymous function}
  */
 exports.logApiMiddleware = (options = {}) => {
-  if (configStore.get("/enableAuditLog")) {
-    return async (req, res, next) => {
-      try {
-        const ipAddress = getIP(req);
-        let userId = null;
-        if (configStore.get("/authentication"))
-          userId = req.auth
-            ? req.auth.credentials.user[configStore.get("/dbPrimaryKey").name]
-            : null;
-
-        let payload = {};
-        if (options.payloadFilter) {
-          payload = _.pick(req.body, options.payloadFilter);
-        } else {
-          payload = req.body;
-        }
-
-        const log = {
-          method: req.method.toUpperCase(),
-          action: options.action || null,
-          endpoint: req.path,
-          user: userId || null,
-          tableName: options.name || null,
-          childTableName: options.child ? options.child.name : null,
-          associationType: options.associationType || null,
-          records: options.records || null,
-          payload: _.isEmpty(payload) ? null : payload,
-          params: _.isEmpty(req.params) ? null : req.params,
-          result: res.data || null,
-          isError: _.isError(req.res),
-          statusCode: res.statusCode || null,
-          responseMessage: res.statusMessage || null,
-          ipAddress,
-        };
-        req.auditLog = log;
-        next();
-      } catch (err) {
-        next(err);
-      }
-    };
+  if (!configStore.get("/enableAuditLog")) {
+    return (req, res, next) => next();
   }
+
+  return async (req, res, next) => {
+    try {
+      const ipAddress = getIP(req);
+      let userId = null;
+      if (configStore.get("/authentication"))
+        userId = req.auth
+          ? req.auth.credentials.user[configStore.get("/dbPrimaryKey").name]
+          : null;
+
+      let payload = {};
+      if (options.payloadFilter) {
+        payload = _.pick(req.body, options.payloadFilter);
+      } else {
+        payload = req.body;
+      }
+
+      const log = {
+        method: req.method.toUpperCase(),
+        action: options.action || null,
+        endpoint: req.path,
+        user: userId || null,
+        tableName: options.name || null,
+        childTableName: options.child ? options.child.name : null,
+        associationType: options.associationType || null,
+        records: options.records || null,
+        payload: _.isEmpty(payload) ? null : payload,
+        params: _.isEmpty(req.params) ? null : req.params,
+        result: res.data || null,
+        isError: _.isError(req.res),
+        statusCode: res.statusCode || null,
+        responseMessage: res.statusMessage || null,
+        ipAddress,
+      };
+      req.auditLog = log;
+      next();
+    } catch (err) {
+      next(err);
+    }
+  };
 };
 
 exports.saveLogMiddleware = (req, res, next) => {

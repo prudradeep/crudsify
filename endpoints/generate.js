@@ -3,6 +3,7 @@
 const express = require("express");
 const Endpoints = express.Router();
 const _ = require("lodash");
+const Boom = require("@hapi/boom");
 const Jwt = require("jsonwebtoken");
 const { Logger } = require("../helpers/logger");
 const configStore = require("../config");
@@ -19,16 +20,20 @@ const {
 } = require("../middlewares/audit-log");
 
 let authMiddleware = async (req, res, next) => {
-  const decoded = await Jwt.verify(
-    req.headers.authorization.replace("Bearer ", ""),
-    configStore.get("/jwt").secret
-  );
-  const { user, scope } = decoded;
-  req.auth = {
-    isValid: true,
-    credentials: { user, scope },
-  };
-  next();
+  try {
+    const decoded = await Jwt.verify(
+      req.headers.authorization.replace("Bearer ", ""),
+      configStore.get("/jwt").secret
+    );
+    const { user, scope } = decoded;
+    req.auth = {
+      isValid: true,
+      credentials: { user, scope },
+    };
+    next();
+  } catch (err) {
+    next(Boom.unauthorized("Invalid token"));
+  }
 };
 
 const setAuthMiddleware = (middleware) => {

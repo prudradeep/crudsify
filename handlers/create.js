@@ -145,6 +145,7 @@ exports.associationAddOneHandler = async function (
     } catch (err) {
       handleError(err, "There was a postprocessing error.", Boom.badRequest);
     }
+    return data;
   } catch (err) {
     throw err;
   }

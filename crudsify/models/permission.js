@@ -184,9 +184,11 @@ module.exports = (sequelize, DataTypes) => {
         scope = scope.concat(
           permissions
             .map(function (permission) {
-              const state = permission.roles_permissions
-                ? permission.roles_permissions.dataValues.state
-                : permission.groups_permissions.dataValues.state;
+              const through =
+                permission.users_permissions ||
+                permission.groups_permissions ||
+                permission.roles_permissions;
+              const state = through && through.dataValues.state;
               switch (state) {
                 case PERMISSION_STATES.INCLUDED:
                   return permission.name;

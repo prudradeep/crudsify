@@ -1,5 +1,6 @@
 "use strict";
 
+const _ = require("lodash");
 const Boom = require("@hapi/boom");
 const { Op } = require("sequelize");
 const { paginateList, paginateAssocList } = require("./paginate");

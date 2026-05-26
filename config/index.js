@@ -113,6 +113,14 @@ const Config = {
   },
 
   /**
+   * Express trust proxy setting. Set this to the exact proxy hop count or
+   * trusted proxy addresses when the application is deployed behind a proxy.
+   * default: false
+   * @type {boolean|number|string|string[]}
+   */
+  trustProxy: false,
+
+  /**
    * SSL certificate and key absolute path to enable ssl.
    */
   ssl: {
@@ -276,10 +284,10 @@ const Config = {
 
   /**
    * Enables policies
-   * default: false
+   * default: true
    * @type {boolean}
    */
-  enablePolicies: false,
+  enablePolicies: true,
 
   /**
    * Validation options:

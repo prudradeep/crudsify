@@ -15,6 +15,7 @@ const { errorResponder, handleNotFoundError } = require("./middlewares/error");
 
 const Crudsify = express();
 Crudsify.plugins = {};
+Crudsify.set("trust proxy", configStore.get("/trustProxy"));
 let CrudsifyServer;
 if (sslOptions.cert && sslOptions.key) {
   const options = {

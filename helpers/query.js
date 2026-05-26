@@ -61,10 +61,12 @@ module.exports = {
    * @returns {*}: The updated query.
    */
   setPage: function (query) {
+    const page = Math.max(parseInt(query.$page) || 1, 1);
+    const requestedLimit = parseInt(query.$limit);
+    const limit =
+      requestedLimit > 0 ? requestedLimit : configStore.get("/limit");
     return {
-      offset:
-        (parseInt(query.$page) - 1) *
-        (query.$limit ? parseInt(query.$limit) : configStore.get("/limit")),
+      offset: (page - 1) * limit,
     };
   },
 
@@ -75,7 +77,8 @@ module.exports = {
    */
   setLimit: function (query) {
     if (query.$limit) {
-      return { limit: parseInt(query.$limit) };
+      const limit = parseInt(query.$limit);
+      if (limit === -1 || limit > 0) return { limit };
     }
     return { limit: configStore.get("/limit") };
   },

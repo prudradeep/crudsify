@@ -101,6 +101,7 @@ exports.promoteAuth = function (sequelize) {
           );
         else return next();
       }
+      return next();
     } catch (err) {
       next(err);
     }

@@ -4,6 +4,7 @@ const _ = require("lodash");
 const Bcrypt = require("bcryptjs");
 const GeneratePassword = require("password-generator");
 const Joi = require("joi");
+const Boom = require("@hapi/boom");
 const zxcvbn = require("zxcvbn");
 const configStore = require("crudsify/config");
 const {
@@ -21,6 +22,7 @@ const { sendResponse } = require("crudsify/helpers/sendResponse");
 const { generateEndpoint } = require("crudsify/endpoints/generate");
 const { findHandler } = require("crudsify/handlers/list");
 const { deleteHandler } = require("crudsify/handlers/remove");
+const { logApiMiddleware } = require("crudsify/middlewares/audit-log");
 const USER_ROLES = require("crudsify/config/constants").USER_ROLES;
 const { REQUIRED_PASSWORD_STRENGTH } = require("crudsify/config/constants");
 const authentication = configStore.get("/authentication");
@@ -286,23 +288,29 @@ module.exports = (sequelize, DataTypes) => {
       () => {
         const updateCurrentUserPasswordMiddleware = {
           checkOldPassword: async function (req, res, next) {
-            const query = {
-              where: {
-                id: req.auth.credentials.user[
-                  configStore.get("/dbPrimaryKey").name
-                ],
-              },
-            };
-            const User = await this.unscoped().findOne(query);
-            if (!User) {
-              throw Boom.badRequest("Invalid request.");
+            try {
+              const query = {
+                where: {
+                  [configStore.get("/dbPrimaryKey").name]:
+                    req.auth.credentials.user[
+                      configStore.get("/dbPrimaryKey").name
+                    ],
+                },
+              };
+              const currentUser = await user.unscoped().findOne(query);
+              if (!currentUser) {
+                throw Boom.badRequest("Invalid request.");
+              }
+              const passwordMatch = await Bcrypt.compare(
+                req.body.oldPassword,
+                currentUser.password
+              );
+              if (!passwordMatch)
+                throw Boom.unauthorized("User not authorised.");
+              next();
+            } catch (err) {
+              next(err);
             }
-            const passwordMatch = await Bcrypt.compare(
-              req.body.password,
-              User.password
-            );
-            if (!passwordMatch) throw Boom.unauthorized("User not authorised.");
-            next();
           },
           passwordCheck: async function (req, res, next) {
             try {
@@ -310,7 +318,7 @@ module.exports = (sequelize, DataTypes) => {
 
               let requiredPasswordStrength = 4;
 
-              switch (req.auth.credentials.user.roleName) {
+              switch (req.auth.credentials.user.role.name) {
                 case USER_ROLES.USER:
                   requiredPasswordStrength = REQUIRED_PASSWORD_STRENGTH.USER;
                   break;
@@ -397,6 +405,7 @@ module.exports = (sequelize, DataTypes) => {
           auth: authentication,
           middlewares: Object.values(updateCurrentUserPasswordMiddleware),
           handler: updateCurrentUserPasswordHandler,
+          afterMiddlewares: [logApiMiddleware({ payloadFilter: [] })],
           log: `Generating Update Current User Password endpoint for user.`,
         });
       },
@@ -409,7 +418,7 @@ module.exports = (sequelize, DataTypes) => {
         try {
           await updateHandler(user, {
             params: { id: req.params.id },
-            body: { status: true },
+            body: { isActive: true },
           });
           sendResponse({ status: 204, res, next });
         } catch (err) {
@@ -437,7 +446,7 @@ module.exports = (sequelize, DataTypes) => {
         try {
           await updateHandler(user, {
             params: { id: req.params.id },
-            body: { status: false },
+            body: { isActive: false },
           });
           sendResponse({ status: 204, res, next });
         } catch (err) {
@@ -470,7 +479,7 @@ module.exports = (sequelize, DataTypes) => {
             include: [{ model: sequelize.models.role }],
           };
 
-          let User = await this.findOne(query);
+          let User = await user.findOne(query);
           const scopes = await sequelize.models.permission.getScope(User);
           res.data = scopes;
           sendResponse({ data: scopes, status: 200, res, next });

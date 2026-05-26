@@ -31,29 +31,14 @@ const {
 
 const checkUserHandler = async function (req, res, next) {
   try {
-    let result = await User.findOne({
-      where: {
-        [Op.or]: {
-          mobile: req.body.mobile_email,
-          email: req.body.mobile_email,
-        },
+    sendResponse({
+      data: {
+        message: "If an account exists, further instructions will follow.",
       },
+      status: 200,
+      res,
+      next,
     });
-    if (result) {
-      sendResponse({
-        data: { exist: true, name: result.name },
-        status: 200,
-        res,
-        next,
-      });
-    } else {
-      sendResponse({
-        data: { exist: false },
-        status: 200,
-        res,
-        next,
-      });
-    }
   } catch (err) {
     next(err);
   }
@@ -79,6 +64,7 @@ generateEndpoint({
   },
   auth: false,
   handler: checkUserHandler,
+  afterMiddlewares: [logApiMiddleware({ payloadFilter: [] })],
   log: `Generating Check Mobile endpoint for user.`,
 });
 
@@ -114,34 +100,30 @@ generateEndpoint({
   },
   auth: false,
   handler: checkPasswordHandler,
+  afterMiddlewares: [logApiMiddleware({ payloadFilter: [] })],
   log: `Generating Check Password Strength endpoint for user.`,
 });
 
 const registerMiddleware = {
-  decoded: async function (req, res, next) {
+  verifiedContacts: async function (req, res, next) {
     try {
-      const decode = await Jwt.verify(
-        req.body.token,
-        configStore.get("/jwt").secret
-      );
-      req.decoded = decode;
-      delete req.body.token;
+      const [mobileVerification, emailVerification] = await Promise.all([
+        Jwt.verify(req.body.mobileToken, configStore.get("/jwt").secret),
+        Jwt.verify(req.body.emailToken, configStore.get("/jwt").secret),
+      ]);
+      if (
+        mobileVerification.otpVerified !== true ||
+        emailVerification.otpVerified !== true ||
+        String(mobileVerification.mobile_email) !== String(req.body.mobile) ||
+        emailVerification.mobile_email !== req.body.email
+      ) {
+        throw Boom.unauthorized("OTP verification required.");
+      }
+      delete req.body.mobileToken;
+      delete req.body.emailToken;
       next();
     } catch (err) {
-      next(Boom.badRequest("Invalid token"));
-    }
-  },
-  setMobileEmail: async function (req, res, next) {
-    try {
-      const user = req.decoded.mobile_email;
-      const mobilePattern = /^[0-9]{10}$/;
-      const emailPattern = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,63}$/;
-      if (mobilePattern.test(user)) req.body.mobile = user;
-      else if (emailPattern.test(user)) req.body.email = user;
-      else throw Boom.badRequest("Invalid request");
-      next();
-    } catch (err) {
-      next(err);
+      next(Boom.badRequest("Invalid verification token"));
     }
   },
   checkUser: async function (req, res, next) {
@@ -244,9 +226,13 @@ generateEndpoint({
   tags: ["auth"],
   validate: {
     body: Joi.object({
-      token: Joi.string().required().messages({
-        "any.required": "Token is required",
-        "string.empty": "Token can't be empty",
+      mobileToken: Joi.string().required().messages({
+        "any.required": "Mobile verification token is required",
+        "string.empty": "Mobile verification token can't be empty",
+      }),
+      emailToken: Joi.string().required().messages({
+        "any.required": "Email verification token is required",
+        "string.empty": "Email verification token can't be empty",
       }),
       mobile: Joi.string()
         .regex(/^[0-9]{10}$/)
@@ -289,6 +275,50 @@ generateEndpoint({
   log: `Generating registration endpoint.`,
 });
 
+const OTP_ATTEMPT_PREFIX = "otp:";
+
+const getOtpAttemptKeys = (req, mobileEmail) => ({
+  ip: `${OTP_ATTEMPT_PREFIX}${getIP(req) || "unknown"}`,
+  mobileEmail: `${OTP_ATTEMPT_PREFIX}${mobileEmail}`,
+});
+
+const rejectOtpAbuse = async (req, mobileEmail) => {
+  const attempt = getOtpAttemptKeys(req, mobileEmail);
+  const abuseDetected = await Promise.all([
+    AuthAttempt.abuseDetected(attempt.ip, attempt.mobileEmail),
+    AuthAttempt.identifierAbuseDetected(attempt.mobileEmail),
+  ]);
+  if (abuseDetected.includes(true)) {
+    throw Boom.tooManyRequests("Too many OTP requests. Try again later.");
+  }
+  return attempt;
+};
+
+const recordFailedOtpAttempt = async (req) => {
+  const attempt = getOtpAttemptKeys(req, req.decoded.mobile_email);
+  await AuthAttempt.createInstance(attempt.ip, attempt.mobileEmail);
+};
+
+const otpAttemptMiddleware = {
+  send: async function (req, res, next) {
+    try {
+      const attempt = await rejectOtpAbuse(req, req.body.mobile_email);
+      await AuthAttempt.createInstance(attempt.ip, attempt.mobileEmail);
+      next();
+    } catch (err) {
+      next(err);
+    }
+  },
+  verify: async function (req, res, next) {
+    try {
+      await rejectOtpAbuse(req, req.decoded.mobile_email);
+      next();
+    } catch (err) {
+      next(err);
+    }
+  },
+};
+
 const sendOtpHandler = async function (req, res, next) {
   try {
     const pin = generatePassword(4, false, /\d/);
@@ -324,11 +354,14 @@ const sendOtpHandler = async function (req, res, next) {
       configStore.get("/jwt").secret,
       {
         algorithm: configStore.get("/jwt").algo,
-        expiresIn: EXPIRATION_PERIOD.MEDIUM,
+        expiresIn: EXPIRATION_PERIOD.SHORT,
       }
     );
+    const data = { token };
+    if (process.env.NODE_ENV === "development") data.sms = sms;
+
     sendResponse({
-      data: { sms, token },
+      data,
       status: 200,
       res,
       next,
@@ -356,6 +389,7 @@ generateEndpoint({
         }),
     }),
   },
+  middlewares: [otpAttemptMiddleware.send],
   handler: sendOtpHandler,
   log: `Generating Send OTP endpoint for user.`,
 });
@@ -399,14 +433,26 @@ const verifyOtpHandler = async function (req, res, next) {
     const key = req.body.otp;
     let keyMatch = await Bcrypt.compare(key, req.hash.otpHash);
     if (!keyMatch) {
+      await recordFailedOtpAttempt(req);
       throw Boom.unauthorized("Invalid token or otp.");
     }
     await deleteHandler(Otp, {
       params: { id: req.hash[configStore.get("/dbPrimaryKey").name] },
       body: { hardDelete: true },
     });
+    const token = Jwt.sign(
+      {
+        mobile_email: req.decoded.mobile_email,
+        otpVerified: true,
+      },
+      configStore.get("/jwt").secret,
+      {
+        algorithm: configStore.get("/jwt").algo,
+        expiresIn: EXPIRATION_PERIOD.MEDIUM,
+      }
+    );
     sendResponse({
-      data: { mobile_email: req.decoded.mobile_email, token: req.body.token },
+      data: { mobile_email: req.decoded.mobile_email, token },
       status: 200,
       res,
       next,
@@ -437,19 +483,24 @@ generateEndpoint({
         }),
     }),
   },
-  middlewares: Object.values(verifyOtpMiddleware),
+  middlewares: [
+    ...Object.values(verifyOtpMiddleware),
+    otpAttemptMiddleware.verify,
+  ],
   handler: verifyOtpHandler,
-  afterMiddlewares: [logApiMiddleware({ payloadFilter: ["token", "otp"] })],
+  afterMiddlewares: [logApiMiddleware({ payloadFilter: [] })],
   log: "Generating Verify OTP endpoint.",
 });
 
 const forgotPasswordMiddleware = {
   ...verifyOtpMiddleware,
+  throttle: otpAttemptMiddleware.verify,
   verifyOtp: async function (req, res, next) {
     try {
       const key = req.body.otp;
       let keyMatch = await Bcrypt.compare(key, req.hash.otpHash);
       if (!keyMatch) {
+        await recordFailedOtpAttempt(req);
         throw Boom.unauthorized("Invalid token or otp.");
       }
       await deleteHandler(Otp, {
@@ -509,7 +560,7 @@ const forgotPasswordHandler = async function (req, res, next) {
       configStore.get("/jwt").secret,
       {
         algorithm: configStore.get("/jwt").algo,
-        expiresIn: EXPIRATION_PERIOD.MEDIUM,
+        expiresIn: EXPIRATION_PERIOD.SHORT,
       }
     );
 
@@ -547,6 +598,7 @@ generateEndpoint({
   },
   middlewares: Object.values(forgotPasswordMiddleware),
   handler: forgotPasswordHandler,
+  afterMiddlewares: [logApiMiddleware({ payloadFilter: [] })],
   log: "Generating Forgot Password endpoint.",
 });
 
@@ -636,7 +688,7 @@ const resetPasswordHandler = async function (req, res, next) {
       next,
     });
   } catch (err) {
-    throw Boom.unauthorized("Invalid mobile or key.");
+    next(Boom.unauthorized("Invalid mobile or key."));
   }
 };
 
@@ -669,7 +721,7 @@ generateEndpoint({
   handler: resetPasswordHandler,
   afterMiddlewares: [
     logApiMiddleware({
-      payloadFilter: ["token"],
+      payloadFilter: [],
     }),
   ],
   log: "Generating Reset Password endpoint.",
@@ -786,7 +838,6 @@ const loginMiddleware = {
       const sessionData = {
         sessionId: req.session[configStore.get("/dbPrimaryKey").name],
         sessionKey: req.session.key,
-        passwordHash: req.session.passwordHash,
         scope: req.scope,
       };
       req.refreshToken = generateToken(sessionData, EXPIRATION_PERIOD.LONG);
@@ -838,7 +889,7 @@ generateEndpoint({
   middlewares: Object.values(loginMiddleware),
   handler: loginHandler,
   afterMiddlewares: [
-    logApiMiddleware({ action: "login", payloadFilter: ["mobile"] }),
+    logApiMiddleware({ action: "login", payloadFilter: ["mobile_email"] }),
   ],
   log: "Generating login endpoint.",
 });

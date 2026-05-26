@@ -16,10 +16,11 @@ exports.addAuthRecordCreatorSope = (model) => {
         throw Boom.badRequest(message);
       }
       const authRecordCreator = configStore.get("/authorizeRecordCreator");
+      const modelAuthRecordCreator = model.authorizeRecordCreator || {};
       Object.keys(authRecordCreator).forEach((scopeType) => {
         if (
           authRecordCreator[scopeType] ||
-          model.authorizeRecordCreator[scopeType]
+          modelAuthRecordCreator[scopeType]
         ) {
           if (_.isArray(req.body)) {
             req.body.forEach(function (record) {
@@ -40,7 +41,7 @@ exports.addAuthRecordCreatorSope = (model) => {
       });
       next();
     } catch (err) {
-      next(err)
+      next(err);
     }
   };
 };
@@ -70,7 +71,7 @@ exports.addRecordScope = (model) => {
       }
       next();
     } catch (err) {
-      next(err)
+      next(err);
     }
   };
 };

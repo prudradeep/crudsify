@@ -4,6 +4,7 @@ const Boom = require("@hapi/boom");
 const Jwt = require("jsonwebtoken");
 const configStore = require("crudsify/config");
 const { EXPIRATION_PERIOD } = require("crudsify/config/constants");
+const { Logger } = require("crudsify/helpers/logger");
 const { generateToken, ucfirst } = require("crudsify/utils");
 
 const getUserSession = async (sessionId, sessionKey) => {
@@ -29,16 +30,15 @@ exports.sessionStrategy = async function (req, res, next) {
       req.headers.authorization.replace("Bearer ", ""),
       configStore.get("/jwt").secret
     );
-    const { sessionId, sessionKey, passwordHash, scope } = decoded;
+    const { sessionId, sessionKey, scope } = decoded;
     const { user, session } = await getUserSession(sessionId, sessionKey);
-    if (!session || !user || user.password !== passwordHash) {
+    if (!session || !user || user.password !== session.passwordHash) {
       throw Boom.unauthorized("Authentication failed");
     }
     if (res) {
       const data = {
         sessionId: session[configStore.get("/dbPrimaryKey").name],
         sessionKey: session.key,
-        passwordHash: session.passwordHash,
         scope: scope,
       };
       res.set("X-Access-Token", generateToken(data, EXPIRATION_PERIOD.LONG));

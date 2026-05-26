@@ -192,14 +192,17 @@ const generatePaginationObjectQuery = () => {
       ),
     $page: Joi.number()
       .integer()
-      .min(0)
+      .min(1)
       .optional()
       .description(
         "The number of records to skip based on the $limit parameter. This is typically used in pagination."
       ),
     $limit: Joi.number()
       .integer()
-      .min(-1)
+      .custom((value, helpers) => {
+        if (value === -1 || value >= 1) return value;
+        return helpers.error("any.invalid");
+      })
       .optional()
       .description(
         "The maximum number of records to return. This is typically used in pagination. Set -1 to get all records"

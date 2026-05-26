@@ -2,6 +2,7 @@
 
 const Boom = require("@hapi/boom");
 const { Logger } = require("../helpers/logger");
+const unexpectedErrorMessage = "An unexpected error occurred. Please try again later.";
 const isSequelizeError = (err) => {
   if (err.name && err.name.indexOf("Sequelize") >= 0) return true;
   return false;
@@ -48,14 +49,9 @@ const errorResponder = (err, req, res, next) => {
           res
         );
       case "SequelizeDatabaseError":
-        res.status(419).send({
-          statusCode: 419,
-          error: "query error",
-          message: err.message,
-        });
-        return;
+        return sendResponse(Boom.badImplementation(unexpectedErrorMessage), res);
       default:
-        return sendResponse(Boom.badData(err.message), res);
+        return sendResponse(Boom.badData(unexpectedErrorMessage), res);
     }
   } else if (err.name === "AggregateError") {
     let message = "";
@@ -68,9 +64,9 @@ const errorResponder = (err, req, res, next) => {
     message = [...new Set(message)];
     return sendResponse(Boom.preconditionRequired(message), res);
   } else if (err instanceof Error) {
-    return sendResponse(Boom.boomify(err, { statusCode: 400 }), res);
+    return sendResponse(Boom.badImplementation(unexpectedErrorMessage), res);
   } else {
-    return sendResponse(Boom.badImplementation(err.message), res);
+    return sendResponse(Boom.badImplementation(unexpectedErrorMessage), res);
   }
 };
 

@@ -32,7 +32,7 @@ exports.deleteHandler = async function (model, req = { query: {} }) {
       deleted = await model.findByPk(req.params.id);
       if (hardDelete === false) {
         await model.update(
-          { deletedBy: req.body.deletedBy },
+          { deletedBy: req.body ? req.body.deletedBy : null },
           {
             where: { [configStore.get("/dbPrimaryKey").name]: req.params.id },
             paranoid: false,
@@ -49,7 +49,7 @@ exports.deleteHandler = async function (model, req = { query: {} }) {
       });
       if (hardDelete === false) {
         await model.update(
-          { deletedBy: req.body.deletedBy },
+          { deletedBy: req.body.deletedBy || null },
           {
             where: { [configStore.get("/dbPrimaryKey").name]: req.body.data },
             paranoid: false,
@@ -180,7 +180,7 @@ exports.associationRemoveManyHandler = async function (
         ownerModel.hooks.remove[childModel.name].post &&
         req.postHook === undefined
       ) {
-        data = await ownerModel.hooks.remove[childModel.name].post(req);
+        await ownerModel.hooks.remove[childModel.name].post(req);
       }
     } catch (err) {
       handleError(err, "There was a postprocessing error.", Boom.badRequest);

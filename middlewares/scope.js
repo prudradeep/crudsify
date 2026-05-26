@@ -125,8 +125,17 @@ exports.getScopeMiddleware = (SCOPE) => {
 
 const validateRecordScope = (record, action, req) => {
   const scopeErrors = [];
+  if (!record) return false;
+
   const recordScope = record[configStore.get("/recordScopeKey")];
   if (!recordScope) return true;
+
+  if (
+    !Array.isArray(recordScope[action]) ||
+    !Array.isArray(recordScope.root)
+  ) {
+    return false;
+  }
 
   const actionScope = recordScope[action].concat(recordScope.root);
   let scope = setupScope(actionScope);
@@ -152,18 +161,19 @@ exports.getRecordScopeMiddleware = (action, model) => {
   return async (req, res, next) => {
     try {
       const id = action !== "associate" ? req.params.id : req.params.ownerId;
-      if (id === undefined && action === "delete") {
+      if (id === undefined && (action === "delete" || action === "recover")) {
         const data = await model.findAll({
           attributes: [
             configStore.get("/dbPrimaryKey").name,
             configStore.get("/recordScopeKey"),
           ],
           where: { [configStore.get("/dbPrimaryKey").name]: req.body.data },
+          paranoid: action === "recover" ? false : undefined,
         });
         data.forEach((record) => {
           const valid = validateRecordScope(record, action, req);
           if (!valid) {
-            //Remove unauthorized ids from delete request
+            // Remove unauthorized ids from the bulk action request.
             const index = req.body.data.indexOf(
               record[configStore.get("/dbPrimaryKey").name]
             );
@@ -194,7 +204,11 @@ exports.getRecordScopeMiddleware = (action, model) => {
       }
       const data = await model.findByPk(id, {
         attributes: [configStore.get("/recordScopeKey")],
+        paranoid: action === "recover" ? false : undefined,
       });
+      if (!data) {
+        return next(Boom.notFound("Resource not found"));
+      }
       const valid = validateRecordScope(data, action, req);
       if (!valid) {
         next(Boom.forbidden("Insufficient record scope"));

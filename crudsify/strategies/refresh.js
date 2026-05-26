@@ -30,7 +30,7 @@ exports.refreshStrategy = async function (req, res, next) {
       req.headers.authorization.replace("Bearer ", ""),
       configStore.get("/jwt").secret
     );
-    const { sessionId, sessionKey, passwordHash, scope } = decoded;
+    const { sessionId, sessionKey, scope } = decoded;
     // if the token is expired, respond with token type so the client can switch to refresh token if necessary
     if (decoded.exp < Math.floor(Date.now() / 1000)) {
       if (decoded.user) {
@@ -52,7 +52,7 @@ exports.refreshStrategy = async function (req, res, next) {
     // authenticate and respond with a fresh set of tokens in the header
     else if (sessionId) {
       const { user, session } = await getUserSession(sessionId, sessionKey);
-      if (!session || !user || user.password !== passwordHash) {
+      if (!session || !user || user.password !== session.passwordHash) {
         throw Boom.unauthorized("Authentication failed");
       }
       if (res) {
@@ -76,7 +76,6 @@ exports.refreshStrategy = async function (req, res, next) {
         const sessionData = {
           sessionId: session[configStore.get("/dbPrimaryKey").name],
           sessionKey: session.key,
-          passwordHash: session.passwordHash,
           scope: decoded.scope,
         };
         res.set(

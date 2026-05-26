@@ -27,12 +27,7 @@ module.exports = {
     }
   },
   getIP: (req) => {
-    return (
-      req.headers["x-real-ip"] ||
-      req.headers["x-forwarded-for"] ||
-      req.connection.remoteAddress ||
-      req.ip
-    );
+    return req.ip || req.socket.remoteAddress || req.connection.remoteAddress;
   },
   generateToken: (data, expirationPeriod) => {
     try {
