@@ -29,6 +29,56 @@ const getReadableFields = function (model) {
   return readableFields;
 };
 
+const normalizeToArray = (value) => (_.isArray(value) ? value : [value]);
+
+const isCountEmbed = (value) => {
+  return typeof value === "string" && value.split(".").pop() === "count";
+};
+
+const createEmbed = (DB, embed, associations) => {
+  if (embed.indexOf(".") !== -1) {
+    return embed.split(".").reduceRight((init, val) => {
+      const init_ = DB[val]
+        ? {
+            model: DB[val],
+          }
+        : {
+            model: associations[val].target,
+            as: val,
+          };
+      if (!_.isArray(init)) {
+        init_.include = [init];
+      }
+      return init_;
+    }, []);
+  }
+
+  return DB[embed]
+    ? { model: DB[embed] }
+    : {
+        model: associations[embed].target,
+        as: embed,
+      };
+};
+
+const setEmbedCount = async (record, association, query) => {
+  if (!record || !association || !association.accessors) return;
+
+  const { as, accessors } = association;
+  const countAccessor = accessors.count;
+  if (!countAccessor || typeof record[countAccessor] !== "function") return;
+
+  const count = await record[countAccessor]({
+    paranoid: module.exports.getParanoidOption(query),
+  });
+
+  if (typeof record.setDataValue === "function") {
+    record.setDataValue(as, { count });
+  } else {
+    record[as] = { count };
+  }
+};
+
 module.exports = {
   /**
    * Handle pagination for the query if needed.
@@ -298,60 +348,38 @@ module.exports = {
   },
 
   getEmbeds: function (DB, embed, associations = false) {
-    let embeds = [];
-    if (_.isArray(embed)) {
-      embeds = embed.map((val) => {
-        if (val.indexOf(".") !== -1) {
-          const em = val.split(".").reduceRight((init, c) => {
-            const init_ = DB[c]
-              ? {
-                  model: DB[c],
-                }
-              : {
-                  model: associations[c].target,
-                  as: c,
-                };
-            if (!_.isArray(init)) {
-              init_.include = [init];
-            }
-            return init_;
-          }, []);
-          return em;
-        }
-        return DB[val]
-          ? { model: DB[val] }
-          : {
-              model: associations[val].target,
-              as: val,
-            };
-      });
-    } else {
-      if (embed.indexOf(".") !== -1) {
-        embeds = embed.split(".").reduceRight((init, val) => {
-          const init_ = DB[val]
-            ? {
-                model: DB[val],
-              }
-            : {
-                model: associations[val].target,
-                as: val,
-              };
-          if (!_.isArray(init)) {
-            init_.include = [init];
-          }
-          return init_;
-        }, []);
-        embeds = [embeds];
-      } else
-        embeds = [
-          DB[embed]
-            ? { model: DB[embed] }
-            : {
-                model: associations[embed].target,
-                as: embed,
-              },
-        ];
-    }
-    return embeds;
+    return normalizeToArray(embed)
+      .filter((val) => !isCountEmbed(val))
+      .map((val) => createEmbed(DB, val, associations));
+  },
+
+  getEmbedCounts: function (embed) {
+    if (!embed) return [];
+
+    return normalizeToArray(embed)
+      .filter(isCountEmbed)
+      .map((val) => val.split(".").slice(0, -1).join("."));
+  },
+
+  populateEmbedCounts: async function (model, records, embedCounts, query = {}) {
+    if (!embedCounts || !embedCounts.length) return records;
+
+    const docs = _.isArray(records) ? records : [records];
+    await Promise.all(
+      docs.map(async (record) => {
+        await Promise.all(
+          embedCounts.map(async (embed) => {
+            const associationName = embed.split(".")[0];
+            await setEmbedCount(
+              record,
+              model.associations && model.associations[associationName],
+              query
+            );
+          })
+        );
+      })
+    );
+
+    return records;
   },
 };

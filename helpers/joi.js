@@ -220,7 +220,8 @@ const generateEmbedQuery = (embeds) => {
   const maxEmbedDepth = configStore.get("/maxEmbedDepth") || 2;
   const embed = Joi.string().custom((value, helpers) => {
     const path = value.split(".");
-    if (!embeds.includes(path[0]) || path.length > maxEmbedDepth) {
+    const embedPath = path[path.length - 1] === "count" ? path.slice(0, -1) : path;
+    if (!embeds.includes(embedPath[0]) || embedPath.length > maxEmbedDepth) {
       return helpers.error("any.invalid");
     }
     return value;

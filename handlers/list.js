@@ -6,8 +6,10 @@ const { paginateList, paginateAssocList } = require("./paginate");
 const {
   createWhereCondition,
   getEmbeds,
+  getEmbedCounts,
   getSelectedFields,
   getParanoidOption,
+  populateEmbedCounts,
 } = require("../helpers/query");
 const { handleError } = require("./error");
 
@@ -37,10 +39,13 @@ exports.listHandler = async function (DB, model, req = { query: {} }) {
       return { count };
     }
     let embeds = false;
+    let embedCounts = [];
     if (req.query.$embed) {
       embeds = getEmbeds(DB, req.query.$embed, model.associations);
+      embedCounts = getEmbedCounts(req.query.$embed);
     }
     let data = await paginateList(model, req, conditions, true, embeds);
+    await populateEmbedCounts(model, data.docs, embedCounts, req.query);
     try {
       if (
         model.hooks &&
@@ -76,8 +81,10 @@ exports.findHandler = async function (DB, model, req = { query: {} }) {
       handleError(err, "There was a preprocessing error.", Boom.badRequest);
     }
     let embeds = [];
+    let embedCounts = [];
     if (req.query && req.query.$embed) {
       embeds = getEmbeds(DB, req.query.$embed, model.associations);
+      embedCounts = getEmbedCounts(req.query.$embed);
     }
 
     let data = await model.findByPk(req.params.id, {
@@ -85,6 +92,7 @@ exports.findHandler = async function (DB, model, req = { query: {} }) {
       include: embeds,
       paranoid: getParanoidOption(req.query),
     });
+    await populateEmbedCounts(model, data, embedCounts, req.query);
     try {
       if (
         model.hooks &&
@@ -143,8 +151,10 @@ exports.associationGetAllHandler = async function (
     }
 
     let embeds = false;
+    let embedCounts = [];
     if (req.query.$embed) {
       embeds = getEmbeds(DB, req.query.$embed, childModel.associations);
+      embedCounts = getEmbedCounts(req.query.$embed);
     }
     let data = await paginateAssocList(
       ownerModel,
@@ -154,6 +164,7 @@ exports.associationGetAllHandler = async function (
       embeds,
       childModel
     );
+    await populateEmbedCounts(childModel, data.docs, embedCounts, req.query);
     try {
       if (
         ownerModel.hooks &&
