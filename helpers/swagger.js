@@ -24,6 +24,150 @@ const queryParam = (name, type, description, items = false) => {
   return param;
 };
 
+const jsonResponse = (description, schema, example) => ({
+  description,
+  content: {
+    "application/json": {
+      schema,
+      example,
+    },
+  },
+});
+
+const successResponse = (description, example) =>
+  jsonResponse(
+    description,
+    {
+      type: "object",
+      additionalProperties: true,
+    },
+    example
+  );
+
+const errorResponse = (statusCode, error, message, details) => {
+  const example = {
+    statusCode,
+    error,
+    message,
+  };
+
+  if (details) {
+    example.details = details;
+  }
+
+  return jsonResponse(
+    error,
+    {
+      type: "object",
+      properties: {
+        statusCode: {
+          type: "integer",
+          example: statusCode,
+        },
+        error: {
+          type: "string",
+          example: error,
+        },
+        message: {
+          type: "string",
+          example: message,
+        },
+        details: {
+          type: "array",
+          items: {
+            type: "object",
+            additionalProperties: true,
+          },
+        },
+      },
+      required: ["statusCode", "error", "message"],
+    },
+    example
+  );
+};
+
+const getSuccessExample = (method, path, summary = "") => {
+  const normalizedSummary = summary.toLowerCase();
+  const isListResponse =
+    method === "get" &&
+    !path.includes("{") &&
+    (normalizedSummary.includes("list") ||
+      normalizedSummary.includes("get all"));
+
+  if (isListResponse) {
+    return {
+      docs: [
+        {
+          id: "record-id",
+        },
+      ],
+      items: {
+        limit: 10,
+        begin: 1,
+        end: 1,
+        total: 1,
+      },
+      pages: {
+        current: 1,
+        prev: 0,
+        hasPrev: false,
+        next: 2,
+        hasNext: false,
+        total: 1,
+      },
+    };
+  }
+
+  return {
+    id: "record-id",
+  };
+};
+
+const getSwaggerResponses = (method, path, summary) => ({
+  200: successResponse("Successful", getSuccessExample(method, path, summary)),
+  201: successResponse("Created", {
+    id: "record-id",
+  }),
+  204: {
+    description: "The request was completed successfully with no response body.",
+  },
+  400: errorResponse(400, "Bad Request", "Invalid request", [
+    {
+      message: "\"field\" is required",
+      path: ["field"],
+      type: "any.required",
+    },
+  ]),
+  401: errorResponse(
+    401,
+    "Unauthorized",
+    "The authentication header was missing/malformed, or the token has expired."
+  ),
+  403: errorResponse(403, "Forbidden", "Insufficient scope"),
+  404: errorResponse(404, "Not Found", "Resource not found"),
+  409: errorResponse(
+    409,
+    "Conflict",
+    "name: 'example' | Resource already exists!"
+  ),
+  422: errorResponse(
+    422,
+    "Unprocessable Entity",
+    "You cannot delete/update this record because it is linked to related data."
+  ),
+  428: errorResponse(428, "Precondition Required", "field must not be null"),
+  429: errorResponse(
+    429,
+    "Too Many Requests",
+    "Too many requests. Try again later."
+  ),
+  500: errorResponse(
+    500,
+    "Internal Server Error",
+    "An unexpected error occurred. Please try again later."
+  ),
+});
+
 const swaggerHelper = async ({
   method,
   path,
@@ -113,69 +257,7 @@ const swaggerHelper = async ({
     tags: tags,
     requestBody: requestBody,
     parameters: parameters,
-    responses: {
-      200: {
-        description: "Successful",
-      },
-      201: {
-        description: "Created",
-      },
-      204: {
-        description: "The resource(s) was/were found successfully.",
-      },
-      400: {
-        description: "Bad Request",
-      },
-      401: {
-        description:
-          "The authentication header was missing/malformed, or the token has expired.",
-      },
-      403: {
-        description: "Forbidden",
-      },
-      404: {
-        description: "Not Found",
-      },
-      408: {
-        description: "Request Time-out",
-      },
-      409: {
-        description: "Conflict",
-      },
-      412: {
-        description: "Precondition Failed",
-      },
-      413: {
-        description: "Request Entity Too Large",
-      },
-      419: {
-        description: "Query Error",
-      },
-      422: {
-        description: "Unprocessable Entity",
-      },
-      428: {
-        description: "Precondition required",
-      },
-      429: {
-        description: "Too Many Requests",
-      },
-      500: {
-        description: "Internal Server Error",
-      },
-      501: {
-        description: "Not Implemented",
-      },
-      502: {
-        description: "Bad Gateway",
-      },
-      503: {
-        description: "There was a problem with the database.",
-      },
-      504: {
-        description: "Request Timeout Error",
-      },
-    },
+    responses: getSwaggerResponses(method, path, summary),
   };
 
   if (auth) {

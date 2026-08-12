@@ -71,6 +71,8 @@ module.exports = async (authStrategy = false, globalMiddleware=[]) => {
     require("./helpers/plugins")(CrudsifyServer, Crudsify);
     require("./helpers/api");
     require("./helpers/route");
+    const { crudsifyDocRouter } = require("./helpers/crudsify-doc");
+    Crudsify.use("/", crudsifyDocRouter);
     Crudsify.use("/", Endpoints);
     if (configStore.get("/enableSwagger")) {
       const { swaggerRouter } = require("./helpers/swagger");

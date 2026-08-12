@@ -1,0 +1,1843 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CRUDSIFY Documentation</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f7f8fb;
+        --panel: #ffffff;
+        --text: #18202f;
+        --muted: #586174;
+        --line: #dde2eb;
+        --accent: #0f766e;
+        --accent-2: #1d4ed8;
+        --accent-soft: #e0f2fe;
+        --warning-soft: #fef3c7;
+        --code-bg: #111827;
+        --code-text: #ecfdf5;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font: 15px/1.65 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      a {
+        color: var(--accent-2);
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 320px minmax(0, 1fr);
+        min-height: 100vh;
+      }
+
+      aside {
+        position: sticky;
+        top: 0;
+        align-self: start;
+        height: 100vh;
+        overflow: auto;
+        padding: 28px 22px;
+        background: #101827;
+        color: #dbeafe;
+      }
+
+      aside h1 {
+        margin: 0 0 6px;
+        font-size: 24px;
+        line-height: 1.2;
+        letter-spacing: 0;
+      }
+
+      aside p {
+        margin: 0 0 18px;
+        color: #a9b8d2;
+      }
+
+      .search {
+        margin: 0 0 18px;
+      }
+
+      .search label {
+        display: block;
+        margin: 0 0 7px;
+        color: #e0f2fe;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+
+      .search input {
+        width: 100%;
+        height: 40px;
+        padding: 8px 10px;
+        border: 1px solid #334155;
+        border-radius: 7px;
+        background: #0b1220;
+        color: #f8fafc;
+        font: inherit;
+      }
+
+      .search input:focus {
+        outline: 2px solid #38bdf8;
+        outline-offset: 1px;
+      }
+
+      .search-results {
+        margin-top: 8px;
+        border: 1px solid #243044;
+        border-radius: 7px;
+        background: #0b1220;
+        max-height: 260px;
+        overflow: auto;
+      }
+
+      .search-results:empty {
+        display: none;
+      }
+
+      .search-result {
+        display: block;
+        width: 100%;
+        padding: 9px 10px;
+        border: 0;
+        border-bottom: 1px solid #1f2937;
+        background: transparent;
+        color: #dbeafe;
+        text-align: left;
+        font: inherit;
+        cursor: pointer;
+      }
+
+      .search-result:last-child {
+        border-bottom: 0;
+      }
+
+      .search-result:hover,
+      .search-result:focus {
+        background: #172033;
+        outline: none;
+      }
+
+      .search-result strong {
+        display: block;
+        color: #f8fafc;
+        font-size: 13px;
+      }
+
+      .search-result span {
+        display: block;
+        color: #93a4bd;
+        font-size: 12px;
+      }
+
+      .nav-title {
+        margin: 18px 0 8px;
+        color: #93c5fd;
+        font-size: 12px;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      nav a {
+        display: block;
+        padding: 6px 0;
+        color: #dbeafe;
+        font-size: 14px;
+      }
+
+      nav a.sub {
+        padding-left: 12px;
+        color: #b9c8df;
+        font-size: 13px;
+      }
+
+      main {
+        width: min(1120px, 100%);
+        padding: 42px 42px 80px;
+      }
+
+      section {
+        scroll-margin-top: 18px;
+        padding: 30px 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      section.search-hit {
+        animation: searchPulse 1.5s ease-out;
+      }
+
+      h2 {
+        margin: 0 0 14px;
+        font-size: 28px;
+        line-height: 1.25;
+        letter-spacing: 0;
+      }
+
+      h3 {
+        margin: 30px 0 10px;
+        font-size: 19px;
+        letter-spacing: 0;
+      }
+
+      h3::before {
+        content: "";
+        display: block;
+        width: 44px;
+        height: 3px;
+        margin: 0 0 10px;
+        border-radius: 3px;
+        background: var(--accent);
+      }
+
+      h4 {
+        margin: 22px 0 8px;
+        font-size: 16px;
+        letter-spacing: 0;
+      }
+
+      p,
+      ul,
+      ol {
+        margin: 0 0 14px;
+      }
+
+      li {
+        margin: 5px 0;
+      }
+
+      code {
+        padding: 2px 5px;
+        border-radius: 5px;
+        background: #e9edf5;
+        color: #111827;
+        font-size: 0.92em;
+      }
+
+      pre {
+        overflow: auto;
+        margin: 14px 0 18px;
+        padding: 16px;
+        border-radius: 8px;
+        background: var(--code-bg);
+        color: var(--code-text);
+      }
+
+      pre code {
+        padding: 0;
+        background: transparent;
+        color: inherit;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 16px 0 22px;
+        background: var(--panel);
+      }
+
+      th,
+      td {
+        padding: 10px 12px;
+        border: 1px solid var(--line);
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        background: #edf2f7;
+      }
+
+      .intro {
+        padding: 38px 0 28px;
+      }
+
+      .intro h2 {
+        font-size: 38px;
+      }
+
+      .note {
+        padding: 14px 16px;
+        border-left: 4px solid var(--accent);
+        background: #ecfdf5;
+        color: #134e4a;
+      }
+
+      .section-summary {
+        margin: 0 0 18px;
+        color: var(--muted);
+        font-size: 16px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .tile {
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+      }
+
+      .tile h3 {
+        margin-top: 0;
+      }
+
+      .tile h3::before {
+        display: none;
+      }
+
+      @keyframes searchPulse {
+        0% {
+          background: var(--warning-soft);
+          box-shadow: 0 0 0 8px var(--warning-soft);
+        }
+        100% {
+          background: transparent;
+          box-shadow: 0 0 0 0 transparent;
+        }
+      }
+
+      @media (max-width: 880px) {
+        .layout {
+          display: block;
+        }
+
+        aside {
+          position: static;
+          height: auto;
+        }
+
+        main {
+          padding: 28px 18px 60px;
+        }
+
+        .intro h2 {
+          font-size: 30px;
+        }
+
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="layout">
+      <aside>
+        <h1>CRUDSIFY</h1>
+        <p>Backend package documentation</p>
+        <div class="search">
+          <label for="doc-search">Search documentation</label>
+          <input id="doc-search" type="search" placeholder="Search config, auth, handlers..." autocomplete="off" />
+          <div id="search-results" class="search-results" aria-live="polite"></div>
+        </div>
+        <nav aria-label="Documentation sections">
+          <div class="nav-title">Start</div>
+          <a href="#overview">Overview</a>
+          <a href="#install">Install and Initialize</a>
+          <a class="sub" href="#quickstart">Quick Start and CLI</a>
+          <a href="#env">Environment</a>
+          <div class="nav-title">Configure</div>
+          <a href="#config">Configuration</a>
+          <a class="sub" href="#server-options">Server Options</a>
+          <a href="#models">Models</a>
+          <a class="sub" href="#migrations">Models and Migrations CLI</a>
+          <a href="#endpoints">Generated Endpoints</a>
+          <a href="#queries">Query Parameters</a>
+          <a href="#validation">Validation</a>
+          <div class="nav-title">Security</div>
+          <a href="#auth">Authentication</a>
+          <a class="sub" href="#built-in-auth">Built-In Auth APIs</a>
+          <a class="sub" href="#strategies">Token Strategies</a>
+          <a href="#authorization">Authorization</a>
+          <a class="sub" href="#quickstart-models">Quick-Start Models</a>
+          <a class="sub" href="#built-in-policies">Built-In Policies</a>
+          <a href="#policies">Policies</a>
+          <a href="#audit">Audit Logs</a>
+          <a href="#soft-delete">Soft Delete</a>
+          <a href="#metadata">Metadata</a>
+          <div class="nav-title">Extend</div>
+          <a href="#custom-api">Custom APIs</a>
+          <a class="sub" href="#hooks">Hooks</a>
+          <a class="sub" href="#handlers">Handlers</a>
+          <a class="sub" href="#response-helper">Response Helper</a>
+          <a class="sub" href="#utilities">Utilities</a>
+          <a class="sub" href="#query-helpers">Query Helpers</a>
+          <a class="sub" href="#errors">Error Handling</a>
+          <a class="sub" href="#security-constants">Security Constants</a>
+          <a href="#plugins">Plugins</a>
+          <a href="#swagger">Swagger</a>
+          <div class="nav-title">Finish</div>
+          <a href="#checklist">Backend Checklist</a>
+        </nav>
+      </aside>
+
+      <main>
+        <section id="overview" class="intro">
+          <h2>Build a REST backend with CRUDSIFY</h2>
+          <p>
+            CRUDSIFY is an Express and Sequelize based REST API generator. It loads your Sequelize models,
+            creates CRUD routes, applies validation, authorization, audit logging, soft delete behavior,
+            custom policies, and optional Swagger documentation.
+          </p>
+          <p class="note">
+            This documentation is served from the package at <code>/crudsifydoc</code>. Swagger for generated
+            API contracts is available at <code>/docs</code> when <code>enableSwagger</code> is enabled.
+          </p>
+        </section>
+
+        <section id="install">
+          <h2>Install and Initialize</h2>
+          <p>Install CRUDSIFY in your Node.js backend project and run the CLI initializer.</p>
+          <pre><code>npm install https://github.com/prudradeep/crudsify.git</code></pre>
+          <pre><code># Windows
+node_modules/.bin/crudsify-cli.cmd init
+
+# macOS/Linux
+node_modules/.bin/crudsify-cli init</code></pre>
+          <p>The initializer copies starter folders and files such as config, models, migrations, seeders, and server entry points into your project.</p>
+
+          <h3>Start the API server</h3>
+          <pre><code>node index.js</code></pre>
+          <p>The server listens on <code>SERVER_PORT</code> from your environment file.</p>
+        </section>
+
+        <section id="quickstart">
+          <h2>Quick Start and CLI</h2>
+          <p>
+            Use <code>init</code> for a normal project scaffold. Use <code>quick-start</code> when you want the
+            bundled starter APIs, auth models, migrations, seeders, roles, groups, permissions, and users.
+          </p>
+          <table>
+            <thead>
+              <tr><th>Command</th><th>Windows</th><th>macOS/Linux</th><th>Purpose</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Initialize project files</td><td><code>node_modules/.bin/crudsify-cli.cmd init</code></td><td><code>node_modules/.bin/crudsify-cli init</code></td><td>Copies the base CRUDSIFY project structure.</td></tr>
+              <tr><td>Quick-start backend</td><td><code>node_modules/.bin/crudsify-cli.cmd quick-start</code></td><td><code>node_modules/.bin/crudsify-cli quick-start</code></td><td>Copies predefined auth, user, role, group, permission, migration, and seeder files.</td></tr>
+              <tr><td>Create model and migration</td><td><code>node_modules/.bin/crudsify-cli.cmd model --name article --attributes title:string,body:text</code></td><td><code>node_modules/.bin/crudsify-cli model --name article --attributes title:string,body:text</code></td><td>Creates a Sequelize model plus matching migration.</td></tr>
+              <tr><td>Create migration only</td><td><code>node_modules/.bin/crudsify-cli.cmd migration --name article --attributes title:string,body:text</code></td><td><code>node_modules/.bin/crudsify-cli migration --name article --attributes title:string,body:text</code></td><td>Creates a migration without a model file.</td></tr>
+              <tr><td>Create audit-log migration</td><td><code>node_modules/.bin/crudsify-cli.cmd db-audit-log</code></td><td><code>node_modules/.bin/crudsify-cli db-audit-log</code></td><td>Copies the audit log migration needed for database audit storage.</td></tr>
+            </tbody>
+          </table>
+
+          <h3>Migrate and Seed</h3>
+          <pre><code>npx sequelize-cli db:migrate
+npm install @faker-js/faker --save-dev
+npx sequelize-cli db:seed:all</code></pre>
+          <p>
+            Seeders use <code>USER_DEFAULT_PASSWORD</code> and <code>USER_EMAIL_DOMAIN</code> from <code>.env</code>.
+            Role names and other project constants can be customized from <code>config/constants.js</code>.
+          </p>
+        </section>
+
+        <section id="env">
+          <h2>Environment</h2>
+          <p>Create a <code>.env</code> file from <code>.env.sample</code> and set values for your environment.</p>
+          <table>
+            <thead>
+              <tr><th>Variable</th><th>Purpose</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>NODE_ENV</code></td><td>Selects config values for <code>development</code>, <code>uat</code>, or <code>production</code>.</td></tr>
+              <tr><td><code>SERVER_PORT</code></td><td>Port used by the Express HTTP or HTTPS server.</td></tr>
+              <tr><td><code>JWT_SECRET</code>, <code>JWT_ALGO</code></td><td>JWT signing settings. Supported algorithms are <code>HS256</code>, <code>HS384</code>, and <code>HS512</code>.</td></tr>
+              <tr><td><code>BASIC_AUTH_USERNAME</code>, <code>BASIC_AUTH_PASSWORD</code></td><td>Required when Swagger is enabled.</td></tr>
+              <tr><td><code>API_DEV_URL</code>, <code>API_UAT_URL</code>, <code>API_PROD_URL</code></td><td>Server URLs used by Swagger configuration.</td></tr>
+              <tr><td><code>DB_*_USERNAME</code>, <code>DB_*_PASSWORD</code>, <code>DB_*_NAME</code>, <code>DB_*_HOST</code>, <code>DB_*_PORT</code>, <code>DB_*_DIALECT</code></td><td>Database settings per environment.</td></tr>
+              <tr><td><code>USER_DEFAULT_PASSWORD</code>, <code>USER_EMAIL_DOMAIN</code></td><td>Used by bundled seeders for starter users.</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="config">
+          <h2>Configuration</h2>
+          <p>
+            CRUDSIFY reads its defaults from the package and merges your project config from <code>config/index.js</code>.
+            To change a package setting, define the same key in your backend project's <code>config/index.js</code>.
+            Environment secrets and database connection values belong in <code>.env</code>.
+          </p>
+          <pre><code>module.exports = {
+  service: "Inventory API",
+  logQuery: true,
+  enablePolicies: true,
+  limit: 25,
+  maxLimit: 100,
+  maxEmbeds: 5,
+  maxEmbedDepth: 2,
+  dbPrimaryKey: {
+    name: "id",
+    type: "UUID",
+    autoIncrement: false
+  },
+  enableCreatedBy: true,
+  enableUpdatedBy: true,
+  enableDeletedBy: true
+};</code></pre>
+
+          <h3>Where to Define Configuration</h3>
+          <table>
+            <thead>
+              <tr><th>What you are changing</th><th>Where to define it</th><th>Example</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>CRUDSIFY package settings</td><td>Your app's <code>config/index.js</code></td><td><code>module.exports = { limit: 20, enableSwagger: true }</code></td></tr>
+              <tr><td>Database connection values</td><td>Your app's <code>.env</code></td><td><code>DB_DEV_HOST=localhost</code></td></tr>
+              <tr><td>JWT and Swagger credentials</td><td>Your app's <code>.env</code></td><td><code>JWT_SECRET=...</code>, <code>BASIC_AUTH_USERNAME=...</code></td></tr>
+              <tr><td>Custom constants merged with CRUDSIFY constants</td><td>Your app's <code>config/constants.js</code></td><td><code>module.exports = { STATUS: { ACTIVE: "active" } }</code></td></tr>
+              <tr><td>Per-model route behavior</td><td>The model file itself</td><td><code>Article.routeOptions = { allowDeleteMany: false }</code></td></tr>
+            </tbody>
+          </table>
+
+          <h3>Complete Package Settings</h3>
+          <table>
+            <thead>
+              <tr><th>Setting</th><th>Default</th><th>Define in</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>service</code></td><td><code>APIs</code></td><td><code>config/index.js</code></td><td>Service name included in logger metadata.</td></tr>
+              <tr><td><code>version</code></td><td><code>1.0.0</code></td><td><code>config/index.js</code></td><td>Service version included in logger metadata.</td></tr>
+              <tr><td><code>timezone</code></td><td><code>+05:30</code></td><td><code>config/index.js</code></td><td>Timezone passed to Sequelize.</td></tr>
+              <tr><td><code>logDir</code></td><td><code>./logs/</code></td><td><code>config/index.js</code></td><td>Directory where file logs and audit file logs are written.</td></tr>
+              <tr><td><code>logLevel</code></td><td><code>silly</code>, <code>verbose</code>, or <code>error</code></td><td><code>config/index.js</code></td><td>Winston log level. Can use Confidence environment filters.</td></tr>
+              <tr><td><code>logRoutes</code></td><td><code>false</code></td><td><code>config/index.js</code></td><td>Logs each generated route at startup.</td></tr>
+              <tr><td><code>logScopes</code></td><td><code>false</code></td><td><code>config/index.js</code></td><td>Logs generated authorization scopes for each endpoint.</td></tr>
+              <tr><td><code>logQuery</code></td><td><code>false</code></td><td><code>config/index.js</code></td><td>Logs SQL queries through the query logger.</td></tr>
+              <tr><td><code>logTTL</code></td><td><code>20d</code></td><td><code>config/index.js</code></td><td>How long normal rotated logs are kept.</td></tr>
+              <tr><td><code>logFileMaxSize</code></td><td><code>20m</code></td><td><code>config/index.js</code></td><td>Maximum log file size before rotation.</td></tr>
+              <tr><td><code>cors</code></td><td><code>false</code></td><td><code>config/index.js</code></td><td>Set to CORS options object to enable CORS middleware.</td></tr>
+              <tr><td><code>trustProxy</code></td><td><code>false</code></td><td><code>config/index.js</code></td><td>Express trust proxy value for reverse proxy deployments.</td></tr>
+              <tr><td><code>ssl.key</code>, <code>ssl.cert</code></td><td><code>false</code></td><td><code>config/index.js</code></td><td>Absolute paths to HTTPS private key and certificate. When both exist, CRUDSIFY starts HTTPS.</td></tr>
+              <tr><td><code>dbPrimaryKey</code></td><td><code>{ name: "id", type: "BIGINT", autoIncrement: true }</code></td><td><code>config/index.js</code></td><td>Primary key helper used by models, migrations, metadata, and auth relations.</td></tr>
+              <tr><td><code>absoluteModelPath</code></td><td><code>false</code></td><td><code>config/index.js</code></td><td>When true, <code>modelPath</code> is treated as an absolute path.</td></tr>
+              <tr><td><code>modelPath</code></td><td><code>models</code></td><td><code>config/index.js</code></td><td>Project folder where Sequelize models are loaded from.</td></tr>
+              <tr><td><code>modelOptions</code></td><td><code>{ timestamps: true, paranoid: true }</code></td><td><code>config/index.js</code></td><td>Global Sequelize model options and timestamp field naming used by helpers.</td></tr>
+              <tr><td><code>enableRecoverEndpoint</code></td><td><code>true</code></td><td><code>config/index.js</code></td><td>Enables generated <code>PATCH</code> recover routes for paranoid models.</td></tr>
+              <tr><td><code>allowHardDelete</code></td><td><code>false</code></td><td><code>config/index.js</code></td><td>Allows delete payloads to include <code>hardDelete: true</code>. Keep false for normal soft-delete APIs.</td></tr>
+              <tr><td><code>enableCreatedBy</code></td><td><code>false</code></td><td><code>config/index.js</code></td><td>Adds and sets <code>createdBy</code> metadata when authentication is enabled.</td></tr>
+              <tr><td><code>enableUpdatedBy</code></td><td><code>false</code></td><td><code>config/index.js</code></td><td>Adds and sets <code>updatedBy</code> metadata when authentication is enabled.</td></tr>
+              <tr><td><code>enableDeletedBy</code></td><td><code>false</code></td><td><code>config/index.js</code></td><td>Adds and sets <code>deletedBy</code> metadata for soft deletes when authentication is enabled.</td></tr>
+              <tr><td><code>limit</code></td><td><code>20</code></td><td><code>config/index.js</code></td><td>Default page size used when a list request does not send <code>$limit</code>.</td></tr>
+              <tr><td><code>maxLimit</code></td><td><code>100</code></td><td><code>config/index.js</code></td><td>Maximum allowed value for client <code>$limit</code>.</td></tr>
+              <tr><td><code>maxEmbeds</code></td><td><code>5</code></td><td><code>config/index.js</code></td><td>Maximum number of association names allowed in <code>$embed</code>.</td></tr>
+              <tr><td><code>maxEmbedDepth</code></td><td><code>2</code></td><td><code>config/index.js</code></td><td>Maximum nested association depth allowed in <code>$embed</code>, for example <code>author.company</code>.</td></tr>
+              <tr><td><code>allowParanoidQueries</code></td><td><code>false</code></td><td><code>config/index.js</code></td><td>Allows clients to request soft-deleted records with <code>$paranoid</code>.</td></tr>
+              <tr><td><code>jsonBodyLimit</code></td><td><code>1mb</code></td><td><code>config/index.js</code></td><td>Maximum JSON body size accepted by Express.</td></tr>
+              <tr><td><code>authentication</code></td><td><code>true</code></td><td><code>config/index.js</code></td><td>Enables authentication for generated endpoints unless route options disable it.</td></tr>
+              <tr><td><code>enableRecordScopes</code></td><td><code>false</code></td><td><code>config/index.js</code></td><td>Adds record-level authorization checks and a record scope field helper.</td></tr>
+              <tr><td><code>recordScopeKey</code></td><td><code>recordScope</code></td><td><code>config/index.js</code></td><td>JSON field name used for record-level authorization data.</td></tr>
+              <tr><td><code>authorizeRecordCreator</code></td><td>All actions <code>false</code></td><td><code>config/index.js</code></td><td>Automatically grants creator access for selected actions when record scopes are enabled.</td></tr>
+              <tr><td><code>generateRouteScopes</code></td><td><code>true</code></td><td><code>config/index.js</code></td><td>Generates route scope arrays on loaded models.</td></tr>
+              <tr><td><code>saltRounds</code></td><td><code>10</code></td><td><code>config/index.js</code></td><td>Bcrypt salt rounds used by hash helpers and auth flows.</td></tr>
+              <tr><td><code>jwt.secret</code>, <code>jwt.algo</code></td><td><code>JWT_SECRET</code>, <code>JWT_ALGO</code></td><td><code>.env</code> or override in <code>config/index.js</code></td><td>JWT verification and signing settings. Algorithms must be <code>HS256</code>, <code>HS384</code>, or <code>HS512</code>.</td></tr>
+              <tr><td><code>enableAuditLog</code></td><td><code>true</code></td><td><code>config/index.js</code></td><td>Turns audit logging middleware on or off.</td></tr>
+              <tr><td><code>auditLogStorage</code></td><td><code>file</code></td><td><code>config/index.js</code></td><td>Use <code>file</code> or <code>database</code>. Database mode requires audit log migration/table support.</td></tr>
+              <tr><td><code>auditLogTTL</code></td><td><code>20d</code>, production <code>60d</code></td><td><code>config/index.js</code></td><td>Retention for audit logs.</td></tr>
+              <tr><td><code>enablePolicies</code></td><td><code>true</code></td><td><code>config/index.js</code></td><td>Enables model pre/post policy middleware.</td></tr>
+              <tr><td><code>enablePayloadValidation</code></td><td><code>true</code></td><td><code>config/index.js</code></td><td>Validates generated route bodies with Joi.</td></tr>
+              <tr><td><code>enableQueryValidation</code></td><td><code>true</code></td><td><code>config/index.js</code></td><td>Validates generated route query strings with Joi.</td></tr>
+              <tr><td><code>enableSwagger</code></td><td>True except production</td><td><code>config/index.js</code></td><td>Registers Swagger UI at <code>/docs</code>.</td></tr>
+              <tr><td><code>swaggerOptions</code></td><td>Explorer enabled, docs collapsed</td><td><code>config/index.js</code></td><td>Options passed to <code>swagger-ui-express</code>.</td></tr>
+              <tr><td><code>absoluteApiPath</code></td><td><code>false</code></td><td><code>config/index.js</code></td><td>When true, <code>apiPath</code> is treated as an absolute path.</td></tr>
+              <tr><td><code>apiPath</code></td><td><code>apis</code></td><td><code>config/index.js</code></td><td>Project folder where custom API modules are loaded from.</td></tr>
+              <tr><td><code>absolutePluginPath</code></td><td><code>false</code></td><td><code>config/index.js</code></td><td>When true, <code>pluginPath</code> is treated as an absolute path.</td></tr>
+              <tr><td><code>pluginPath</code></td><td><code>plugins</code></td><td><code>config/index.js</code></td><td>Project folder where plugin modules are loaded from.</td></tr>
+              <tr><td><code>dbConnectionPool</code></td><td><code>{ max: 5, min: 0, acquire: 30000, idle: 10000 }</code></td><td><code>config/index.js</code></td><td>Sequelize connection pool options.</td></tr>
+              <tr><td><code>dialectOptions</code></td><td><code>{}</code></td><td><code>config/index.js</code></td><td>Options passed to the selected Sequelize dialect.</td></tr>
+              <tr><td><code>replications</code></td><td><code>false</code></td><td><code>config/index.js</code></td><td>Optional Sequelize replication configuration.</td></tr>
+              <tr><td><code>compression</code></td><td><code>{}</code></td><td><code>config/index.js</code></td><td>Options passed to Express compression middleware.</td></tr>
+              <tr><td><code>helmet</code></td><td><code>{}</code></td><td><code>config/index.js</code></td><td>Options passed to Helmet middleware.</td></tr>
+              <tr><td><code>basicAuth.username</code>, <code>basicAuth.password</code></td><td><code>BASIC_AUTH_USERNAME</code>, <code>BASIC_AUTH_PASSWORD</code></td><td><code>.env</code></td><td>Basic auth credentials required when Swagger is enabled.</td></tr>
+              <tr><td><code>database</code></td><td>Selected by <code>NODE_ENV</code></td><td><code>.env</code> via <code>config/config.js</code></td><td>Database username, password, name, host, port, and dialect for development, uat, and production.</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="models">
+          <h2>Models</h2>
+          <p>
+            Define Sequelize models in your project model directory. CRUDSIFY loads the models, applies helper fields,
+            and generates routes for model names that do not contain an underscore.
+          </p>
+          <pre><code>const { Model } = require("sequelize");
+const _ = require("lodash");
+const {
+  getPrimaryKey,
+  getTimestamps,
+  getMetadata,
+  getRecordScopes
+} = require("crudsify/helpers/model");
+
+module.exports = (sequelize, DataTypes) => {
+  class Article extends Model {
+    static associate(models) {
+      Article.hasMany(models.comment);
+    }
+  }
+
+  Article.init({
+    ..._.cloneDeep(getPrimaryKey(DataTypes)),
+    title: DataTypes.STRING,
+    body: DataTypes.TEXT,
+    status: DataTypes.STRING,
+    ..._.cloneDeep(getRecordScopes(DataTypes)),
+    ..._.cloneDeep(getTimestamps(DataTypes)),
+    ..._.cloneDeep(getMetadata(DataTypes))
+  }, {
+    sequelize,
+    modelName: "article"
+  });
+
+  return Article;
+};</code></pre>
+
+          <h3>Model Options</h3>
+          <table>
+            <thead>
+              <tr><th>Setting</th><th>Default</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>dbPrimaryKey</code></td><td><code>{ name: "id", type: "BIGINT", autoIncrement: true }</code></td><td>Primary key helper used in generated models and migrations.</td></tr>
+              <tr><td><code>modelOptions.timestamps</code></td><td><code>true</code></td><td>Adds created and updated timestamp fields.</td></tr>
+              <tr><td><code>modelOptions.paranoid</code></td><td><code>true</code></td><td>Enables Sequelize soft delete behavior.</td></tr>
+              <tr><td><code>modelOptions.createdAt</code>, <code>updatedAt</code>, <code>deletedAt</code></td><td>Sequelize defaults</td><td>Use custom timestamp field names or disable specific fields.</td></tr>
+            </tbody>
+          </table>
+
+          <h3>Route Options</h3>
+          <p>Attach <code>routeOptions</code> to a model to control generated endpoints and auth behavior.</p>
+          <pre><code>Article.routeOptions = {
+  alias: "articles",
+  readAuth: false,
+  allowDeleteMany: false,
+  comment: {
+    alias: "comments",
+    allowRemoveMany: false
+  }
+};</code></pre>
+          <table>
+            <thead>
+              <tr><th>Option</th><th>Effect</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>allowList</code></td><td>Controls <code>GET /resource</code>.</td></tr>
+              <tr><td><code>allowRead</code></td><td>Controls all read endpoints for the model.</td></tr>
+              <tr><td><code>allowCreate</code></td><td>Controls <code>POST /resource</code>.</td></tr>
+              <tr><td><code>allowUpdate</code></td><td>Controls <code>PUT /resource/:id</code>.</td></tr>
+              <tr><td><code>allowDelete</code>, <code>allowDeleteMany</code></td><td>Controls single and bulk delete endpoints.</td></tr>
+              <tr><td><code>allowRecover</code>, <code>allowRecoverMany</code></td><td>Controls single and bulk recover endpoints.</td></tr>
+              <tr><td><code>readAuth</code>, <code>createAuth</code>, <code>updateAuth</code>, <code>deleteAuth</code>, <code>recoverAuth</code></td><td>Enable or disable authentication per action.</td></tr>
+              <tr><td>Association options</td><td>Use child model keys to control <code>addAuth</code>, <code>removeAuth</code>, <code>readAuth</code>, <code>allowAdd</code>, <code>allowRemove</code>, <code>allowRemoveMany</code>, and <code>allowRead</code>.</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="server-options">
+          <h2>Server Options</h2>
+          <p>
+            The package export is called with an optional authentication strategy and an optional array of global
+            Express middlewares. Global middlewares are mounted before CRUDSIFY registers generated endpoints.
+          </p>
+          <pre><code>const crudsifyServer = require("crudsify");
+const { refreshStrategy } = require("./strategies/refresh");
+
+crudsifyServer(refreshStrategy, []);</code></pre>
+          <h3>Global Middleware Example</h3>
+          <pre><code>const rateLimit = require("express-rate-limit");
+const crudsifyServer = require("crudsify");
+const { refreshStrategy } = require("./strategies/refresh");
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 100,
+  standardHeaders: "draft-7",
+  legacyHeaders: false
+});
+
+crudsifyServer(refreshStrategy, [limiter]);</code></pre>
+        </section>
+
+        <section id="migrations">
+          <h2>Models and Migrations CLI</h2>
+          <p>
+            CRUDSIFY model helpers should be used in both model files and migrations so generated endpoints,
+            metadata, timestamps, primary keys, and record scopes stay aligned.
+          </p>
+          <pre><code>// models/group.js
+const { Model } = require("sequelize");
+const _ = require("lodash");
+const {
+  getPrimaryKey,
+  getTimestamps,
+  getMetadata,
+  getRecordScopes
+} = require("crudsify/helpers/model");
+
+module.exports = (sequelize, DataTypes) => {
+  class group extends Model {}
+  group.init({
+    ..._.cloneDeep(getPrimaryKey(DataTypes)),
+    name: { type: DataTypes.STRING, allowNull: false },
+    description: DataTypes.TEXT,
+    ..._.cloneDeep(getRecordScopes(DataTypes)),
+    ..._.cloneDeep(getTimestamps(DataTypes)),
+    ..._.cloneDeep(getMetadata(DataTypes))
+  }, {
+    sequelize,
+    modelName: "group"
+  });
+
+  return group;
+};</code></pre>
+          <pre><code>// migrations/XXXXXXXXXXXXXX-create-group.js
+const {
+  getPrimaryKey,
+  getTimestamps,
+  getMetadata,
+  getRecordScopes
+} = require("crudsify/helpers/model");
+
+module.exports = {
+  async up(queryInterface, Sequelize) {
+    await queryInterface.createTable("groups", {
+      ...getPrimaryKey(Sequelize),
+      name: { type: Sequelize.STRING, allowNull: false },
+      description: Sequelize.TEXT,
+      ...getRecordScopes(Sequelize),
+      ...getTimestamps(Sequelize),
+      ...getMetadata(Sequelize)
+    });
+  },
+  async down(queryInterface) {
+    await queryInterface.dropTable("groups");
+  }
+};</code></pre>
+        </section>
+
+        <section id="endpoints">
+          <h2>Generated Endpoints</h2>
+          <p>CRUDSIFY creates endpoints for each loaded model and for <code>HasMany</code> or <code>BelongsToMany</code> associations.</p>
+          <table>
+            <thead>
+              <tr><th>Method</th><th>Path</th><th>Purpose</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>GET</code></td><td><code>/:resource</code></td><td>List records.</td></tr>
+              <tr><td><code>GET</code></td><td><code>/:resource/:id</code></td><td>Find one record.</td></tr>
+              <tr><td><code>POST</code></td><td><code>/:resource</code></td><td>Create one record or an array of records.</td></tr>
+              <tr><td><code>PUT</code></td><td><code>/:resource/:id</code></td><td>Update one record.</td></tr>
+              <tr><td><code>DELETE</code></td><td><code>/:resource/:id</code></td><td>Delete one record.</td></tr>
+              <tr><td><code>DELETE</code></td><td><code>/:resource</code></td><td>Delete multiple records with <code>{ "data": [ids] }</code>.</td></tr>
+              <tr><td><code>PATCH</code></td><td><code>/:resource/:id</code></td><td>Recover one soft-deleted record.</td></tr>
+              <tr><td><code>PATCH</code></td><td><code>/:resource</code></td><td>Recover multiple soft-deleted records with <code>{ "data": [ids] }</code>.</td></tr>
+              <tr><td><code>GET</code></td><td><code>/:owner/:ownerId/:child</code></td><td>List associated child records.</td></tr>
+              <tr><td><code>POST</code></td><td><code>/:owner/:ownerId/:child</code></td><td>Add or create multiple associated child records.</td></tr>
+              <tr><td><code>PUT</code></td><td><code>/:owner/:ownerId/:child/:childId</code></td><td>Add one associated child record.</td></tr>
+              <tr><td><code>DELETE</code></td><td><code>/:owner/:ownerId/:child/:childId</code></td><td>Remove one associated child record.</td></tr>
+              <tr><td><code>DELETE</code></td><td><code>/:owner/:ownerId/:child</code></td><td>Remove multiple associated child records.</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="queries">
+          <h2>Query Parameters</h2>
+          <p>
+            List and find routes support query helpers for shaping results. Query defaults and limits are defined
+            in your backend project's <code>config/index.js</code>, not in the request handler.
+          </p>
+          <pre><code>// config/index.js in your backend project
+module.exports = {
+  limit: 20,              // default page size when $limit is not sent
+  maxLimit: 100,          // largest accepted $limit value from a client
+  maxEmbeds: 5,           // maximum number of $embed entries
+  maxEmbedDepth: 2,       // maximum nested $embed depth, such as author.company
+  allowParanoidQueries: false
+};</code></pre>
+          <table>
+            <thead>
+              <tr><th>Parameter</th><th>Routes</th><th>Configured by</th><th>Purpose</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>$limit</code></td><td>List</td><td><code>limit</code>, <code>maxLimit</code> in <code>config/index.js</code></td><td>Maximum records returned. If omitted, CRUDSIFY uses <code>limit</code>. If sent, it cannot exceed <code>maxLimit</code>.</td></tr>
+              <tr><td><code>$skip</code></td><td>List</td><td>Request only</td><td>Number of records to skip for offset pagination.</td></tr>
+              <tr><td><code>$page</code></td><td>List</td><td><code>$limit</code> request value or <code>limit</code> default</td><td>Page number for page-based pagination. Starts at <code>1</code>.</td></tr>
+              <tr><td><code>$sort</code></td><td>List</td><td>Model readable/sortable fields</td><td>Sort by model fields. Prefix a field with <code>-</code> for descending sort.</td></tr>
+              <tr><td><code>$select</code></td><td>List, Find</td><td>Model readable fields</td><td>Return only selected model fields.</td></tr>
+              <tr><td><code>$exclude</code></td><td>List</td><td>Request only</td><td>Exclude records by id.</td></tr>
+              <tr><td><code>$count</code></td><td>List</td><td>Request only</td><td>Return count information instead of a normal result set when supported by the handler.</td></tr>
+              <tr><td><code>$or</code></td><td>List</td><td>Request only</td><td>Use OR between field filters instead of the default AND behavior.</td></tr>
+              <tr><td><code>$embed</code></td><td>List, Find</td><td><code>maxEmbeds</code>, <code>maxEmbedDepth</code> in <code>config/index.js</code></td><td>Include associations. Valid values are association names from the Sequelize model.</td></tr>
+              <tr><td><code>$paranoid</code></td><td>List, Find</td><td><code>allowParanoidQueries</code> in <code>config/index.js</code></td><td>Include soft-deleted rows only when the setting is enabled.</td></tr>
+              <tr><td><code>fieldName</code></td><td>List</td><td>Model queryable fields</td><td>Filter by a model field, for example <code>?status=active</code>.</td></tr>
+              <tr><td><code>fieldNameOper</code></td><td>List</td><td>Model queryable fields</td><td>Choose the filter operator for a field. Supported values include <code>=</code>, <code>!=</code>, <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code>, <code>between</code>, <code>notBetween</code>, <code>in</code>, <code>notIn</code>, <code>like</code>, <code>notLike</code>, <code>regexp</code>, and <code>notregexp</code>.</td></tr>
+            </tbody>
+          </table>
+
+          <h3>Examples</h3>
+          <pre><code>GET /articles?$limit=10&$page=2
+GET /articles?$sort=-createdAt&status=published
+GET /articles?statusOper=in&status=published&status=draft
+GET /articles?$select=title&$select=status
+GET /articles?$embed=comments&$embed=author.company
+GET /articles?$or=true&status=draft&priority=high</code></pre>
+        </section>
+
+        <section id="validation">
+          <h2>Validation</h2>
+          <p>
+            CRUDSIFY generates Joi validation from Sequelize model attributes. It validates body, params, and query
+            input before handlers run.
+          </p>
+          <table>
+            <thead>
+              <tr><th>Setting</th><th>Default</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>enablePayloadValidation</code></td><td><code>true</code></td><td>Validates create, update, delete, recover, and association payloads.</td></tr>
+              <tr><td><code>enableQueryValidation</code></td><td><code>true</code></td><td>Validates list and find query parameters.</td></tr>
+              <tr><td><code>jsonBodyLimit</code></td><td><code>1mb</code></td><td>Caps request JSON body size.</td></tr>
+            </tbody>
+          </table>
+          <h3>Sequelize to Joi Mapping</h3>
+          <table>
+            <thead>
+              <tr><th>Sequelize type</th><th>Generated Joi type</th><th>Notes</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>STRING</code>, <code>TEXT</code>, <code>UUID</code>, <code>CHAR</code>, <code>CITEXT</code>, <code>INET</code>, <code>MACADDR</code>, <code>BLOB</code></td><td><code>Joi.string()</code></td><td>Can be refined with <code>regex</code> or <code>stringType</code>.</td></tr>
+              <tr><td><code>INTEGER</code>, <code>BIGINT</code>, <code>FLOAT</code>, <code>DECIMAL</code>, <code>DOUBLE</code>, <code>REAL</code>, <code>SMALLINT</code>, <code>TINYINT</code></td><td><code>Joi.number()</code></td><td>Numeric request values are validated as numbers.</td></tr>
+              <tr><td><code>DATE</code>, <code>DATEONLY</code></td><td><code>Joi.date()</code></td><td>Accepts date-compatible values.</td></tr>
+              <tr><td><code>TIME</code></td><td><code>Joi.string()</code></td><td>Must match <code>HH:mm:ss</code>.</td></tr>
+              <tr><td><code>BOOLEAN</code></td><td><code>Joi.bool()</code></td><td>Boolean body/query values.</td></tr>
+              <tr><td><code>ENUM</code></td><td><code>Joi.string().valid(...values)</code></td><td>Uses enum values from the model attribute.</td></tr>
+              <tr><td><code>ARRAY</code></td><td><code>Joi.array()</code></td><td>Items are generated from the nested type.</td></tr>
+              <tr><td><code>JSON</code></td><td><code>Joi.array()</code></td><td>Use <code>jsonType</code> on the model field for custom item validation.</td></tr>
+            </tbody>
+          </table>
+
+          <h3>Field Validation Controls</h3>
+          <table>
+            <thead>
+              <tr><th>Model field property</th><th>Effect</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>allowNull: false</code></td><td>Field is required on create.</td></tr>
+              <tr><td><code>requireOnUpdate: true</code></td><td>Field is required on update.</td></tr>
+              <tr><td><code>allowOnCreate: false</code></td><td>Field is excluded from generated create validation.</td></tr>
+              <tr><td><code>allowOnUpdate: false</code></td><td>Field is excluded from generated update validation.</td></tr>
+              <tr><td><code>queryable: false</code></td><td>Field cannot be used as a query filter.</td></tr>
+              <tr><td><code>description</code></td><td>Added to Joi and Swagger descriptions.</td></tr>
+              <tr><td><code>regex</code></td><td>Uses <code>Joi.string().regex(...)</code>.</td></tr>
+              <tr><td><code>stringType</code></td><td>Supports <code>email</code>, <code>uri</code>, <code>token</code>, <code>base64</code>, <code>lowercase</code>, <code>uppercase</code>, <code>hostname</code>, <code>hex</code>, <code>trim</code>, and <code>creditCard</code>.</td></tr>
+              <tr><td><code>createModel</code>, <code>updateModel</code></td><td>Override generated Joi for that field in create or update payloads.</td></tr>
+            </tbody>
+          </table>
+          <pre><code>email: {
+  type: DataTypes.STRING,
+  allowNull: false,
+  stringType: "email",
+  description: "User email address"
+},
+status: {
+  type: DataTypes.ENUM("draft", "published"),
+  allowOnUpdate: true,
+  queryable: true
+}</code></pre>
+
+          <h3>Joi Helpers</h3>
+          <pre><code>const {
+  generateJoiListQueryModel,
+  generateJoiFindQueryModel,
+  generateJoiCreateModel,
+  generateJoiUpdateModel,
+  isValidField
+} = require("crudsify/helpers/joi");
+
+const listQuery = generateJoiListQueryModel(article);
+const findQuery = generateJoiFindQueryModel(article);
+const createBody = generateJoiCreateModel(article);
+const updateBody = generateJoiUpdateModel(article);</code></pre>
+        </section>
+
+        <section id="auth">
+          <h2>Authentication</h2>
+          <p>
+            Authentication is enabled by default. Generated routes expect a bearer token in the
+            <code>Authorization</code> header unless disabled globally or per route.
+          </p>
+          <pre><code>Authorization: Bearer &lt;jwt-token&gt;</code></pre>
+          <p>The default token strategy verifies JWTs with <code>JWT_SECRET</code> and <code>JWT_ALGO</code>. You can pass a custom auth middleware when starting CRUDSIFY.</p>
+          <pre><code>const crudsify = require("crudsify");
+
+const authStrategy = async (req, res, next) => {
+  // Set req.auth = { isValid: true, credentials: { user, scope } }
+  next();
+};
+
+crudsify(authStrategy);</code></pre>
+          <table>
+            <thead>
+              <tr><th>Setting</th><th>Default</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>authentication</code></td><td><code>true</code></td><td>Globally enable auth for generated endpoints.</td></tr>
+              <tr><td><code>jwt.secret</code></td><td><code>JWT_SECRET</code></td><td>Secret used to verify generated JWTs.</td></tr>
+              <tr><td><code>jwt.algo</code></td><td><code>JWT_ALGO</code></td><td>Supported HMAC algorithm.</td></tr>
+              <tr><td><code>saltRounds</code></td><td><code>10</code></td><td>Rounds used when generating password hashes.</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="built-in-auth">
+          <h2>Built-In Auth APIs</h2>
+          <p>
+            The quick-start backend includes authentication endpoints from <code>crudsify/apis/auth.js</code> and
+            <code>crudsify/apis/access-token.js</code>. These routes are generated with <code>generateEndpoint</code>
+            and appear in Swagger when Swagger is enabled.
+          </p>
+          <table>
+            <thead>
+              <tr><th>Method</th><th>Path</th><th>Auth</th><th>Purpose</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>POST</code></td><td><code>/check-user</code></td><td>No</td><td>Accepts <code>mobile_email</code> and returns a generic success message to avoid account enumeration.</td></tr>
+              <tr><td><code>POST</code></td><td><code>/check-password</code></td><td>No</td><td>Returns password strength score and suggestions from <code>zxcvbn</code>.</td></tr>
+              <tr><td><code>POST</code></td><td><code>/send-otp</code></td><td>No</td><td>Creates a 4 digit OTP challenge token for a mobile number or email.</td></tr>
+              <tr><td><code>POST</code></td><td><code>/verify-otp</code></td><td>No</td><td>Verifies the OTP challenge and returns an OTP verified token.</td></tr>
+              <tr><td><code>POST</code></td><td><code>/register</code></td><td>No</td><td>Registers a user after both mobile and email OTP verification tokens are provided.</td></tr>
+              <tr><td><code>POST</code></td><td><code>/forgot-password</code></td><td>No</td><td>Verifies an OTP and returns a password reset token.</td></tr>
+              <tr><td><code>POST</code></td><td><code>/reset-password</code></td><td>No</td><td>Resets a password using a password reset token.</td></tr>
+              <tr><td><code>POST</code></td><td><code>/login</code></td><td>No</td><td>Creates a session and returns <code>accessToken</code>, <code>refreshToken</code>, user data, and scope.</td></tr>
+              <tr><td><code>GET</code></td><td><code>/access-token</code></td><td>Refresh token</td><td>Refreshes access credentials using <code>refreshStrategy</code>. New tokens are also set in response headers.</td></tr>
+              <tr><td><code>DELETE</code></td><td><code>/logout</code></td><td>Refresh token</td><td>Deletes the current session and clears token headers.</td></tr>
+              <tr><td><code>GET</code></td><td><code>/user/my/profile</code></td><td>Access token</td><td>Returns the current user with role embedded.</td></tr>
+              <tr><td><code>PUT</code></td><td><code>/user/my/profile</code></td><td>Access token</td><td>Updates the current user's editable profile fields.</td></tr>
+              <tr><td><code>DELETE</code></td><td><code>/user/my</code></td><td>Access token</td><td>Deletes the current user account.</td></tr>
+              <tr><td><code>PUT</code></td><td><code>/user/my/password</code></td><td>Access token</td><td>Changes the current user's password after old password and strength checks.</td></tr>
+              <tr><td><code>PUT</code></td><td><code>/user/:id/activate</code></td><td>Access token</td><td>Activates a user account, guarded by role rank policy.</td></tr>
+              <tr><td><code>PUT</code></td><td><code>/user/:id/deactivate</code></td><td>Access token</td><td>Deactivates a user account, guarded by role rank policy.</td></tr>
+              <tr><td><code>GET</code></td><td><code>/user/:id/scope</code></td><td>Access token</td><td>Returns a user's effective scopes.</td></tr>
+              <tr><td><code>GET</code></td><td><code>/permission/available</code></td><td>Access token when enabled</td><td>Lists permissions the current user can assign based on <code>assignScope</code>.</td></tr>
+            </tbody>
+          </table>
+          <h3>Common Auth Payloads</h3>
+          <pre><code>POST /send-otp
+{
+  "mobile_email": "user@example.com"
+}
+
+POST /verify-otp
+{
+  "token": "&lt;otp-challenge-token&gt;",
+  "otp": "1234"
+}
+
+POST /login
+{
+  "mobile_email": "user@example.com",
+  "password": "Strong password"
+}
+
+PUT /user/my/password
+{
+  "oldPassword": "Old password",
+  "password": "New strong password",
+  "confirmPassword": "New strong password"
+}</code></pre>
+          <p>
+            Public auth endpoints use <code>authAttempt</code> records for rate limiting. OTP values are stored as
+            bcrypt hashes and cannot be retrieved after creation. During local development only, setting
+            <code>EXPOSE_OTP_FOR_LOCAL_TESTING=true</code> may include the generated OTP message in the response.
+          </p>
+        </section>
+
+        <section id="strategies">
+          <h2>Token Strategies</h2>
+          <p>
+            CRUDSIFY ships three authentication strategies for different token flows. Each strategy expects
+            <code>Authorization: Bearer &lt;token&gt;</code> and sets <code>req.auth.credentials</code>.
+          </p>
+          <table>
+            <thead>
+              <tr><th>Strategy</th><th>Import</th><th>Token type</th><th>Behavior</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>tokenStrategy</code></td><td><code>crudsify/strategies/token</code></td><td><code>access</code></td><td>Validates access token, session id, session key, user status, and password-update requirement.</td></tr>
+              <tr><td><code>sessionStrategy</code></td><td><code>crudsify/strategies/session</code></td><td><code>access</code></td><td>Validates access token and sends a fresh access token in <code>X-Access-Token</code>.</td></tr>
+              <tr><td><code>refreshStrategy</code></td><td><code>crudsify/strategies/refresh</code></td><td><code>refresh</code></td><td>Validates refresh token and sends fresh <code>X-Access-Token</code> and <code>X-Refresh-Token</code> headers.</td></tr>
+            </tbody>
+          </table>
+          <pre><code>const crudsifyServer = require("crudsify");
+const { tokenStrategy } = require("./strategies/token");
+
+crudsifyServer(tokenStrategy, []);</code></pre>
+          <p>
+            Sessions are single-login by default: creating a new session removes older sessions for the same user.
+            If a user's stored password hash changes, existing sessions fail because the session stores the old
+            password hash.
+          </p>
+        </section>
+
+        <section id="authorization">
+          <h2>Authorization</h2>
+          <p>CRUDSIFY can generate route scopes and record scopes for action-level and record-level authorization.</p>
+          <div class="grid">
+            <div class="tile">
+              <h3>Route Scopes</h3>
+              <p>When <code>generateRouteScopes</code> is true, CRUDSIFY creates scopes such as <code>readArticle</code>, <code>createArticle</code>, <code>updateArticle</code>, <code>deleteArticle</code>, <code>recoverArticle</code>, and association scopes.</p>
+            </div>
+            <div class="tile">
+              <h3>Record Scopes</h3>
+              <p>When <code>enableRecordScopes</code> is true, records can include a JSON field such as <code>recordScope</code> to control read, update, delete, recover, and association access.</p>
+            </div>
+          </div>
+          <pre><code>module.exports = {
+  authentication: true,
+  generateRouteScopes: true,
+  enableRecordScopes: true,
+  recordScopeKey: "recordScope",
+  authorizeRecordCreator: {
+    root: false,
+    read: true,
+    update: true,
+    delete: false,
+    associate: false
+  }
+};</code></pre>
+          <h3>Scope Rules</h3>
+          <p>
+            Route scopes are compared with <code>req.auth.credentials.scope</code>. A scope prefixed with
+            <code>+</code> is required, a scope prefixed with <code>!</code> is forbidden, and normal scope values
+            allow access when at least one is present.
+          </p>
+          <pre><code>// User must have "manager", must not have "suspended", and may have "editor" or "owner".
+scope: ["+manager", "!suspended", "editor", "owner"]</code></pre>
+          <h3>Custom Route Scopes</h3>
+          <pre><code>user.routeScopes = {
+  rootScope: "Admin",
+  readScope: "User",
+  addUserGroupsScope: "Lead"
+};</code></pre>
+          <p>
+            Generated scopes include root/action scopes such as <code>readUser</code>, <code>createUser</code>,
+            <code>updateUser</code>, <code>deleteUser</code>, <code>recoverUser</code>, and association scopes such as
+            <code>addUserGroups</code>, <code>removeUserGroups</code>, and <code>getUserGroups</code>.
+          </p>
+          <h3>Record Scope Example</h3>
+          <pre><code>article.recordScope = {
+  root: ["Admin"],
+  read: ["Writer", "Editor"],
+  update: ["Editor"]
+};
+
+// A created record can store:
+recordScope: {
+  root: ["Admin"],
+  read: ["Writer", "Editor"],
+  update: ["Editor"]
+}</code></pre>
+        </section>
+
+        <section id="quickstart-models">
+          <h2>Quick-Start Models</h2>
+          <p>
+            The <code>quick-start</code> CLI command copies bundled models, migrations, and seeders from
+            <code>crudsify/</code>. These models provide a ready auth and authorization backend.
+          </p>
+          <table>
+            <thead>
+              <tr><th>Model</th><th>Generated routes</th><th>Purpose</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>user</code></td><td>CRUD except create, plus self-service and admin extra endpoints</td><td>Stores users, role relation, password hash, reset hash, active state, password update state, groups, and direct permissions.</td></tr>
+              <tr><td><code>role</code></td><td>CRUD and permission association routes</td><td>Role names and ranks. Lower rank can manage lower privilege users.</td></tr>
+              <tr><td><code>group</code></td><td>CRUD plus users and permissions association routes</td><td>Groups collect permissions and can be assigned to users.</td></tr>
+              <tr><td><code>permission</code></td><td>CRUD plus role/group/user association routes and <code>/permission/available</code></td><td>Permission names become scope values. <code>assignScope</code> controls who may assign them.</td></tr>
+              <tr><td><code>session</code></td><td>Hidden from generated CRUD</td><td>Stores active user sessions, session keys, and password hash snapshots.</td></tr>
+              <tr><td><code>otp</code></td><td>Hidden from generated CRUD</td><td>Stores OTP hashes for OTP challenge flows.</td></tr>
+              <tr><td><code>authAttempt</code></td><td>Hidden from generated CRUD</td><td>Stores recent authentication attempts for lockout and abuse detection.</td></tr>
+              <tr><td><code>users_permissions</code>, <code>roles_permissions</code>, <code>groups_permissions</code>, <code>users_groups</code></td><td>No direct generated CRUD because names contain underscores</td><td>Join models for many-to-many permissions and groups.</td></tr>
+            </tbody>
+          </table>
+
+          <h3>Permission State Semantics</h3>
+          <table>
+            <thead>
+              <tr><th>State</th><th>Effect in effective scope</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>Included</code></td><td>Permission name is added to the user's scope.</td></tr>
+              <tr><td><code>Excluded</code></td><td>Permission is ignored.</td></tr>
+              <tr><td><code>Forbidden</code></td><td>Permission is added with a <code>-</code> prefix, which can be matched by forbidden scope rules such as <code>!-deleteUser</code>.</td></tr>
+            </tbody>
+          </table>
+          <p>
+            A user's effective scope is built from role name, group names, effective permissions, and a user-specific
+            scope in the form <code>user-&lt;md5(userId)&gt;</code>.
+          </p>
+        </section>
+
+        <section id="built-in-policies">
+          <h2>Built-In Policies</h2>
+          <p>
+            Quick-start models use built-in policy helpers to protect role and permission administration. You can also
+            import these helpers into your own model policies.
+          </p>
+          <table>
+            <thead>
+              <tr><th>Policy</th><th>Import</th><th>Purpose</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>rankAuth(sequelize, userIdParam)</code></td><td><code>crudsify/policies/role-auth</code></td><td>Allows a user to update/delete/associate only users with a lower role rank.</td></tr>
+              <tr><td><code>promoteAuth(sequelize)</code></td><td><code>crudsify/policies/role-auth</code></td><td>Prevents assigning a role higher than the current user's role.</td></tr>
+              <tr><td><code>permissionAuth(sequelize, isOwner)</code></td><td><code>crudsify/policies/permission-auth</code></td><td>Allows assigning permissions only when the current user's scope intersects the permission's <code>assignScope</code>.</td></tr>
+              <tr><td><code>groupAuth(sequelize, isOwner)</code></td><td><code>crudsify/policies/group-auth</code></td><td>Allows assigning groups only when the user can assign all permissions contained in the group.</td></tr>
+            </tbody>
+          </table>
+          <pre><code>const { rankAuth, promoteAuth } = require("crudsify/policies/role-auth");
+const { permissionAuth } = require("crudsify/policies/permission-auth");
+const { groupAuth } = require("crudsify/policies/group-auth");
+
+user.policies = {
+  pre: {
+    update: [
+      rankAuth(sequelize, "id"),
+      promoteAuth(sequelize)
+    ],
+    associate: [
+      rankAuth(sequelize, "ownerId"),
+      permissionAuth(sequelize, false),
+      groupAuth(sequelize, false)
+    ]
+  }
+};</code></pre>
+        </section>
+
+        <section id="policies">
+          <h2>Policies</h2>
+          <p>
+            Policies are Express middleware arrays attached to models. They can run before or after generated handlers
+            for <code>root</code>, <code>read</code>, <code>create</code>, <code>update</code>, <code>delete</code>,
+            <code>recover</code>, and <code>associate</code> actions.
+          </p>
+          <pre><code>Article.policies = {
+  pre: {
+    create: [
+      (req, res, next) => {
+        req.body.status = req.body.status || "draft";
+        next();
+      }
+    ]
+  },
+  post: {
+    read: [
+      (req, res, next) => next()
+    ]
+  }
+};</code></pre>
+          <p>Use <code>enablePolicies: false</code> to disable all model policies.</p>
+        </section>
+
+        <section id="audit">
+          <h2>Audit Logs</h2>
+          <p>Audit logging records create, update, delete, recover, and association changes.</p>
+          <table>
+            <thead>
+              <tr><th>Setting</th><th>Default</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>enableAuditLog</code></td><td><code>true</code></td><td>Enables audit logging middleware.</td></tr>
+              <tr><td><code>auditLogStorage</code></td><td><code>file</code></td><td>Use <code>file</code> or <code>database</code>.</td></tr>
+              <tr><td><code>auditLogTTL</code></td><td><code>20d</code> or <code>60d</code> in production</td><td>Retention for audit logs.</td></tr>
+              <tr><td><code>logDir</code></td><td><code>./logs/</code></td><td>Directory for file logs.</td></tr>
+            </tbody>
+          </table>
+          <h3>Audit Record Shape</h3>
+          <table>
+            <thead>
+              <tr><th>Field</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>expires</code></td><td>Retention value used for the audit record.</td></tr>
+              <tr><td><code>method</code></td><td>HTTP method.</td></tr>
+              <tr><td><code>action</code></td><td>Operation such as create, update, delete, recover, add, remove, or custom API action.</td></tr>
+              <tr><td><code>endpoint</code></td><td>Requested endpoint path.</td></tr>
+              <tr><td><code>user</code></td><td>Authenticated user id when authentication is enabled.</td></tr>
+              <tr><td><code>tableName</code>, <code>childTableName</code></td><td>Main and child model table names for CRUD or association actions.</td></tr>
+              <tr><td><code>associationType</code></td><td>Sequelize association type for association changes.</td></tr>
+              <tr><td><code>records</code></td><td>Affected record ids.</td></tr>
+              <tr><td><code>payload</code>, <code>params</code></td><td>Request body and route params captured for traceability.</td></tr>
+              <tr><td><code>result</code></td><td>Handler result where available.</td></tr>
+              <tr><td><code>statusCode</code>, <code>responseMessage</code>, <code>isError</code></td><td>Response outcome and error marker.</td></tr>
+              <tr><td><code>ipAddress</code></td><td>Client IP resolved from the request.</td></tr>
+              <tr><td><code>notes</code></td><td>Optional notes for custom audit middleware.</td></tr>
+            </tbody>
+          </table>
+          <pre><code>{
+  "method": "POST",
+  "action": "create",
+  "endpoint": "/articles",
+  "user": "1",
+  "tableName": "articles",
+  "records": ["42"],
+  "payload": { "title": "Hello" },
+  "statusCode": 201,
+  "isError": false,
+  "ipAddress": "127.0.0.1"
+}</code></pre>
+          <p>
+            When using <code>auditLogStorage: "database"</code>, run the <code>db-audit-log</code> CLI command and
+            migrate the generated table before starting the server.
+          </p>
+        </section>
+
+        <section id="soft-delete">
+          <h2>Soft Delete, Recover, and Hard Delete</h2>
+          <p>
+            Soft delete is enabled when <code>modelOptions.paranoid</code> is true. Delete endpoints call Sequelize
+            destroy behavior and recover endpoints restore soft-deleted rows.
+          </p>
+          <pre><code>module.exports = {
+  modelOptions: {
+    timestamps: true,
+    paranoid: true
+  },
+  enableRecoverEndpoint: true,
+  allowHardDelete: false
+};</code></pre>
+          <p>
+            If <code>allowHardDelete</code> is true, delete requests may include <code>{ "hardDelete": true }</code>.
+            Keep it disabled unless the route is protected for administrative users.
+          </p>
+        </section>
+
+        <section id="metadata">
+          <h2>Metadata</h2>
+          <p>
+            Metadata fields attach actor information to records when authentication is enabled. Add the helper fields
+            to your models and migrations if you enable them.
+          </p>
+          <table>
+            <thead>
+              <tr><th>Setting</th><th>Field</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>enableCreatedBy</code></td><td><code>createdBy</code></td><td>Set on create and association create flows.</td></tr>
+              <tr><td><code>enableUpdatedBy</code></td><td><code>updatedBy</code></td><td>Set on update and association update flows.</td></tr>
+              <tr><td><code>enableDeletedBy</code></td><td><code>deletedBy</code></td><td>Set on soft delete when paranoid mode is active.</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="custom-api">
+          <h2>Custom APIs</h2>
+          <p>
+            Put custom API modules in your configured <code>apiPath</code>. They are required at startup, so each
+            module can call <code>generateEndpoint</code> to register its own route.
+          </p>
+          <pre><code>const Joi = require("joi");
+const { generateEndpoint } = require("crudsify/endpoints/generate");
+
+generateEndpoint({
+  method: "get",
+  path: "/health",
+  auth: false,
+  summary: "Health check",
+  tags: ["system"],
+  validate: {},
+  handler: (req, res, next) => {
+    res.json({ status: "ok" });
+    next();
+  },
+  afterMiddlewares: []
+});</code></pre>
+          <h3>generateEndpoint Options</h3>
+          <table>
+            <thead>
+              <tr><th>Option</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>method</code></td><td>HTTP method such as <code>get</code>, <code>post</code>, <code>put</code>, <code>patch</code>, or <code>delete</code>.</td></tr>
+              <tr><td><code>path</code></td><td>Express route path.</td></tr>
+              <tr><td><code>auth</code></td><td>When true, applies header validation, auth middleware, and optional scopes.</td></tr>
+              <tr><td><code>authMiddleware</code></td><td>Optional endpoint-specific auth middleware. Overrides the server-level auth strategy for this route.</td></tr>
+              <tr><td><code>swaggerPath</code></td><td>Alternative path used only for Swagger generation.</td></tr>
+              <tr><td><code>summary</code>, <code>tags</code></td><td>Swagger summary and tag metadata.</td></tr>
+              <tr><td><code>validate</code></td><td>Joi objects for <code>body</code>, <code>form</code>, <code>params</code>, and <code>query</code>.</td></tr>
+              <tr><td><code>scope</code></td><td>String or array of authorization scopes required for the endpoint.</td></tr>
+              <tr><td><code>isJsonFields</code>, <code>model</code></td><td>Enable JSON field query parsing for a Sequelize model.</td></tr>
+              <tr><td><code>middlewares</code></td><td>Middleware array executed before the handler.</td></tr>
+              <tr><td><code>handler</code></td><td>Main Express handler.</td></tr>
+              <tr><td><code>afterMiddlewares</code></td><td>Middleware array executed after the handler. If omitted, CRUDSIFY adds audit-log saving middleware.</td></tr>
+              <tr><td><code>log</code></td><td>Startup log message shown when <code>logRoutes</code> is enabled.</td></tr>
+            </tbody>
+          </table>
+
+          <h3>Model Extra Endpoints</h3>
+          <p>
+            Add <code>extraEndpoints</code> to a model when a custom route belongs naturally with that model. CRUDSIFY
+            calls each function before generating the model's standard CRUD routes.
+          </p>
+          <pre><code>const Joi = require("joi");
+const { generateEndpoint } = require("crudsify/endpoints/generate");
+const { updateHandler } = require("crudsify/handlers/create");
+const { sendResponse } = require("crudsify/helpers/sendResponse");
+
+article.extraEndpoints = [
+  () => {
+    generateEndpoint({
+      method: "put",
+      path: "/articles/:id/publish",
+      summary: "Publish an article",
+      tags: ["articles"],
+      auth: true,
+      scope: ["publishArticle", "Admin"],
+      validate: {
+        params: Joi.object({
+          id: Joi.string().required()
+        })
+      },
+      handler: async (req, res, next) => {
+        try {
+          const data = await updateHandler(article, {
+            params: { id: req.params.id },
+            body: { status: "published" }
+          });
+          sendResponse({ data, status: 200, res, next });
+        } catch (err) {
+          next(err);
+        }
+      },
+      log: "Generating Publish Article endpoint."
+    });
+  }
+];</code></pre>
+          <p>
+            Model hooks can customize generated behavior when handlers call hook points. Policies are preferred for
+            request middleware behavior, while hooks are useful for model-specific data transformations.
+          </p>
+        </section>
+
+        <section id="hooks">
+          <h2>Hooks</h2>
+          <p>
+            Model hooks let you preprocess a request or postprocess handler output without replacing CRUDSIFY's
+            handlers. Set <code>req.preHook</code> or <code>req.postHook</code> to skip hooks for a manual handler call.
+          </p>
+          <pre><code>article.hooks = {
+  list: {
+    pre: async (req) => req,
+    post: async (req, docs) => docs
+  },
+  find: {
+    pre: async (req) => req,
+    post: async (req, doc) => doc
+  },
+  create: {
+    pre: async (req) => {
+      req.body.status = req.body.status || "draft";
+      return req;
+    },
+    post: async (req, created) => created
+  },
+  update: {
+    pre: async (req) => req,
+    post: async (req, updated) => updated
+  },
+  delete: {
+    pre: async (req, hardDelete) => {},
+    post: async (req, hardDelete, deleted) => {}
+  },
+  recover: {
+    pre: async (req) => {},
+    post: async (req, recovered) => {}
+  }
+};</code></pre>
+          <h3>Association Hooks</h3>
+          <pre><code>user.hooks = {
+  getAll: {
+    permission: {
+      pre: async (req) => req,
+      post: async (req, docs) => docs
+    }
+  },
+  add: {
+    permission: {
+      pre: async (req) => req,
+      post: async (req, result) => result
+    }
+  },
+  remove: {
+    permission: {
+      pre: async (req) => req,
+      post: async (req) => {}
+    }
+  }
+};</code></pre>
+        </section>
+
+        <section id="handlers">
+          <h2>Handlers</h2>
+          <p>
+            Handlers expose CRUDSIFY behavior for custom APIs. They preserve query support, hooks, soft delete,
+            pagination, and association handling.
+          </p>
+          <table>
+            <thead>
+              <tr><th>Handler</th><th>Import from</th><th>Signature</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>listHandler</code></td><td><code>crudsify/handlers/list</code></td><td><code>listHandler(DB, model, req)</code></td></tr>
+              <tr><td><code>findHandler</code></td><td><code>crudsify/handlers/list</code></td><td><code>findHandler(DB, model, req)</code></td></tr>
+              <tr><td><code>associationGetAllHandler</code></td><td><code>crudsify/handlers/list</code></td><td><code>associationGetAllHandler(DB, ownerModel, association, req)</code></td></tr>
+              <tr><td><code>createHandler</code></td><td><code>crudsify/handlers/create</code></td><td><code>createHandler(model, req)</code></td></tr>
+              <tr><td><code>updateHandler</code></td><td><code>crudsify/handlers/create</code></td><td><code>updateHandler(model, req)</code></td></tr>
+              <tr><td><code>associationAddOneHandler</code></td><td><code>crudsify/handlers/create</code></td><td><code>associationAddOneHandler(ownerModel, association, req)</code></td></tr>
+              <tr><td><code>associationAddManyHandler</code></td><td><code>crudsify/handlers/create</code></td><td><code>associationAddManyHandler(ownerModel, association, req)</code></td></tr>
+              <tr><td><code>deleteHandler</code></td><td><code>crudsify/handlers/remove</code></td><td><code>deleteHandler(model, req)</code></td></tr>
+              <tr><td><code>associationRemoveOneHandler</code></td><td><code>crudsify/handlers/remove</code></td><td><code>associationRemoveOneHandler(ownerModel, association, req)</code></td></tr>
+              <tr><td><code>associationRemoveManyHandler</code></td><td><code>crudsify/handlers/remove</code></td><td><code>associationRemoveManyHandler(ownerModel, association, req)</code></td></tr>
+              <tr><td><code>recoverHandler</code></td><td><code>crudsify/handlers/recover</code></td><td><code>recoverHandler(model, req)</code></td></tr>
+              <tr><td><code>paginateList</code></td><td><code>crudsify/handlers/paginate</code></td><td><code>paginateList(model, req, conditions, subQuery, embeds)</code></td></tr>
+              <tr><td><code>paginateAssocList</code></td><td><code>crudsify/handlers/paginate</code></td><td><code>paginateAssocList(ownerModel, accessors, req, conditions, embeds, childModel)</code></td></tr>
+            </tbody>
+          </table>
+          <pre><code>const DB = require("crudsify/models");
+const { listHandler, findHandler } = require("crudsify/handlers/list");
+const { createHandler, updateHandler } = require("crudsify/handlers/create");
+const { deleteHandler } = require("crudsify/handlers/remove");
+const { recoverHandler } = require("crudsify/handlers/recover");
+
+const articles = await listHandler(DB, DB.article, {
+  query: { $limit: 10, $sort: "-createdAt" }
+});
+
+const article = await findHandler(DB, DB.article, {
+  params: { id: 1 },
+  query: { $embed: "comments" }
+});
+
+const created = await createHandler(DB.article, {
+  body: { title: "New article", body: "Content" }
+});
+
+const updated = await updateHandler(DB.article, {
+  params: { id: 1 },
+  body: { title: "Updated title" }
+});
+
+await deleteHandler(DB.article, {
+  params: { id: 1 },
+  body: { hardDelete: false },
+  allowHardDelete: false
+});
+
+await recoverHandler(DB.article, {
+  params: { id: 1 }
+});</code></pre>
+          <h3>Association Handler Example</h3>
+          <pre><code>const { associationAddManyHandler } = require("crudsify/handlers/create");
+const { associationGetAllHandler } = require("crudsify/handlers/list");
+
+await associationAddManyHandler(DB.user, DB.user.associations.permission, {
+  params: { ownerId: 1 },
+  body: { data: [1, 2, 3] }
+});
+
+const permissions = await associationGetAllHandler(
+  DB,
+  DB.user,
+  DB.user.associations.permission,
+  {
+    params: { ownerId: 1 },
+    query: { $limit: 20 }
+  }
+);</code></pre>
+        </section>
+
+        <section id="response-helper">
+          <h2>Response Helper</h2>
+          <p>Use <code>sendResponse</code> from custom endpoints to send a response and continue the middleware chain.</p>
+          <pre><code>const { sendResponse } = require("crudsify/helpers/sendResponse");
+
+sendResponse({
+  data: { message: "Hello world" },
+  status: 200,
+  res,
+  next
+});
+
+sendResponse({
+  json: { ok: true },
+  status: 201,
+  res,
+  next
+});
+
+sendResponse({
+  status: 204,
+  res,
+  next
+});</code></pre>
+          <table>
+            <thead>
+              <tr><th>Option</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>data</code></td><td>String or object sent with <code>res.send</code>.</td></tr>
+              <tr><td><code>json</code></td><td>Object sent with <code>res.json</code>. Takes precedence over <code>data</code>.</td></tr>
+              <tr><td><code>status</code></td><td>HTTP status. Defaults to <code>200</code>.</td></tr>
+              <tr><td><code>res</code></td><td>Express response object. Required.</td></tr>
+              <tr><td><code>next</code></td><td>Optional Express next function. Called after the response is sent.</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="utilities">
+          <h2>Utilities</h2>
+          <table>
+            <thead>
+              <tr><th>Utility</th><th>Signature</th><th>Purpose</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>ucfirst</code></td><td><code>ucfirst(string)</code></td><td>Uppercases the first letter and lowercases the remaining letters.</td></tr>
+              <tr><td><code>sortObjectByKeys</code></td><td><code>sortObjectByKeys(object)</code></td><td>Returns an object with keys sorted alphabetically.</td></tr>
+              <tr><td><code>generateHash</code></td><td><code>generateHash(key = false)</code></td><td>Returns <code>{ key, hash }</code> using bcrypt and configured <code>saltRounds</code>.</td></tr>
+              <tr><td><code>getIP</code></td><td><code>getIP(req)</code></td><td>Returns the request IP from Express/socket fields.</td></tr>
+              <tr><td><code>generateToken</code></td><td><code>generateToken(data, expirationPeriod)</code></td><td>Creates a JWT using configured <code>jwt.secret</code> and <code>jwt.algo</code>.</td></tr>
+              <tr><td><code>verifyToken</code></td><td><code>verifyToken(token)</code></td><td>Verifies a JWT using configured algorithm.</td></tr>
+              <tr><td><code>getScopes</code></td><td><code>getScopes(model, operation)</code></td><td>Reads route scopes for create, read, update, delete, recover, associate, or custom operation.</td></tr>
+              <tr><td><code>getPathName</code></td><td><code>getPathName(model)</code></td><td>Returns <code>model.routeOptions.alias</code> or model name.</td></tr>
+              <tr><td><code>getModelName</code></td><td><code>getModelName(model)</code></td><td>Returns the Sequelize model name.</td></tr>
+            </tbody>
+          </table>
+          <pre><code>const {
+  ucfirst,
+  generateHash,
+  generateToken,
+  verifyToken,
+  getPathName
+} = require("crudsify/utils");
+
+const name = ucfirst("article");
+const { key, hash } = generateHash();
+const token = generateToken({ user, scope: ["Admin"] }, "1h");
+const decoded = verifyToken(token);
+          const routePath = getPathName(article);</code></pre>
+        </section>
+
+        <section id="query-helpers">
+          <h2>Query Helpers</h2>
+          <p>
+            Query helpers live in <code>crudsify/helpers/query</code>. They are useful when writing custom handlers
+            that should behave like generated CRUDSIFY routes.
+          </p>
+          <table>
+            <thead>
+              <tr><th>Helper</th><th>Purpose</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>paginate(query)</code></td><td>Combines <code>$page</code> or <code>$skip</code> with <code>$limit</code> and returns Sequelize pagination options.</td></tr>
+              <tr><td><code>setSkip(query)</code></td><td>Returns Sequelize <code>offset</code> from <code>$skip</code>.</td></tr>
+              <tr><td><code>setPage(query)</code></td><td>Returns Sequelize <code>offset</code> from <code>$page</code> and effective limit.</td></tr>
+              <tr><td><code>setLimit(query)</code></td><td>Returns Sequelize <code>limit</code>, bounded by <code>maxLimit</code>.</td></tr>
+              <tr><td><code>setSort(query)</code></td><td>Returns Sequelize order entries from <code>$sort</code>.</td></tr>
+              <tr><td><code>getReadableFields(model)</code></td><td>Returns model fields that are not marked with <code>exclude</code>.</td></tr>
+              <tr><td><code>getSelectedFields(model, select)</code></td><td>Filters <code>$select</code> values to readable fields.</td></tr>
+              <tr><td><code>getSortableFields(model)</code></td><td>Returns ascending and descending sortable field names.</td></tr>
+              <tr><td><code>getQueryableFields(model)</code></td><td>Returns fields that are not <code>exclude</code> and not <code>queryable: false</code>.</td></tr>
+              <tr><td><code>createWhereCondition(query, model)</code></td><td>Builds Sequelize <code>where</code> conditions from field filters, operators, <code>$exclude</code>, and <code>$or</code>.</td></tr>
+              <tr><td><code>getEmbeds(DB, embed, associations)</code></td><td>Builds Sequelize include options from <code>$embed</code>.</td></tr>
+              <tr><td><code>getEmbedCounts(embed)</code></td><td>Finds <code>$embed</code> values ending in <code>.count</code>.</td></tr>
+              <tr><td><code>populateEmbedCounts(model, records, embedCounts, query)</code></td><td>Populates association count data on returned records.</td></tr>
+              <tr><td><code>getParanoidOption(query)</code></td><td>Returns Sequelize paranoid option based on <code>allowParanoidQueries</code> and <code>$paranoid=true</code>.</td></tr>
+            </tbody>
+          </table>
+          <pre><code>const queryHelper = require("crudsify/helpers/query");
+
+const conditions = queryHelper.createWhereCondition(req.query, article);
+const embeds = queryHelper.getEmbeds(DB, req.query.$embed, article.associations);
+const sort = queryHelper.setSort(req.query);
+const paginate = queryHelper.paginate(req.query);
+
+const docs = await article.findAll({
+  ...conditions,
+  include: embeds,
+  order: sort,
+  ...paginate
+});</code></pre>
+
+          <h3>Related Middleware</h3>
+          <table>
+            <thead>
+              <tr><th>Middleware</th><th>Import</th><th>Purpose</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>headerValidationMiddleware</code></td><td><code>crudsify/middlewares/validate</code></td><td>Requires <code>Authorization</code> when authentication is enabled.</td></tr>
+              <tr><td><code>validationMiddleware(joiObject, target)</code></td><td><code>crudsify/middlewares/validate</code></td><td>Validates <code>query</code>, <code>params</code>, or <code>body</code> and returns Joi details on bad requests.</td></tr>
+              <tr><td><code>jsonFieldQuery(model)</code></td><td><code>crudsify/middlewares/validate</code></td><td>Splits JSON field query values so JSON filtering can work.</td></tr>
+              <tr><td><code>getScopeMiddleware(scopes)</code></td><td><code>crudsify/middlewares/scope</code></td><td>Applies route-scope authorization to custom middleware chains.</td></tr>
+              <tr><td><code>getRecordScopeMiddleware(action, model)</code></td><td><code>crudsify/middlewares/scope</code></td><td>Applies record-level authorization for read, update, delete, recover, or association actions.</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="errors">
+          <h2>Error Handling</h2>
+          <p>
+            CRUDSIFY mounts <code>errorResponder</code> and <code>handleNotFoundError</code> after generated routes,
+            Swagger, and documentation routes. Custom endpoints should call <code>next(err)</code> so the shared
+            responder can format failures consistently.
+          </p>
+          <table>
+            <thead>
+              <tr><th>Error source</th><th>Response behavior</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Boom errors</td><td>Returned with the Boom status code and payload.</td></tr>
+              <tr><td><code>SequelizeValidationError</code></td><td>Returns <code>428 Precondition Required</code> with validation messages.</td></tr>
+              <tr><td><code>SequelizeUniqueConstraintError</code></td><td>Returns <code>409 Conflict</code> with duplicate field details.</td></tr>
+              <tr><td><code>SequelizeForeignKeyConstraintError</code></td><td>Returns <code>422 Unprocessable Entity</code> with a safer relationship message.</td></tr>
+              <tr><td><code>SequelizeDatabaseError</code> or unknown errors</td><td>Returns <code>500 Internal Server Error</code> with a generic message.</td></tr>
+              <tr><td>No matching route</td><td>Returns <code>404 Not Found</code> with <code>URL not found</code>.</td></tr>
+            </tbody>
+          </table>
+          <pre><code>generateEndpoint({
+  method: "post",
+  path: "/example",
+  handler: async (req, res, next) => {
+    try {
+      // custom work
+    } catch (err) {
+      next(err);
+    }
+  }
+});</code></pre>
+        </section>
+
+        <section id="security-constants">
+          <h2>Security Constants</h2>
+          <p>
+            CRUDSIFY constants can be extended from your app's <code>config/constants.js</code>. The quick-start auth
+            flow uses the following package constants.
+          </p>
+          <table>
+            <thead>
+              <tr><th>Constant</th><th>Default</th><th>Purpose</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>TOKEN_TYPES.ACCESS</code></td><td><code>access</code></td><td>Access-token marker.</td></tr>
+              <tr><td><code>TOKEN_TYPES.REFRESH</code></td><td><code>refresh</code></td><td>Refresh-token marker.</td></tr>
+              <tr><td><code>TOKEN_TYPES.OTP_CHALLENGE</code></td><td><code>otp-challenge</code></td><td>Token returned by <code>/send-otp</code>.</td></tr>
+              <tr><td><code>TOKEN_TYPES.OTP_VERIFIED</code></td><td><code>otp-verified</code></td><td>Token returned by <code>/verify-otp</code>.</td></tr>
+              <tr><td><code>TOKEN_TYPES.PASSWORD_RESET</code></td><td><code>password-reset</code></td><td>Token returned by <code>/forgot-password</code>.</td></tr>
+              <tr><td><code>EXPIRATION_PERIOD.SHORT</code></td><td><code>10m</code></td><td>Access token, OTP challenge, and password-reset lifetime.</td></tr>
+              <tr><td><code>EXPIRATION_PERIOD.MEDIUM</code></td><td><code>4h</code></td><td>OTP verified token lifetime.</td></tr>
+              <tr><td><code>EXPIRATION_PERIOD.LONG</code></td><td><code>24h</code></td><td>Refresh token lifetime.</td></tr>
+              <tr><td><code>OTP_VALIDITY_PERIOD_MS</code></td><td><code>600000</code></td><td>OTP remains active for 10 minutes.</td></tr>
+              <tr><td><code>PASSWORD_MAX_LENGTH</code></td><td><code>128</code></td><td>Maximum password length accepted by auth endpoints.</td></tr>
+              <tr><td><code>REQUIRED_PASSWORD_STRENGTH.USER</code></td><td><code>2</code></td><td>Minimum zxcvbn score for normal users.</td></tr>
+              <tr><td><code>REQUIRED_PASSWORD_STRENGTH.ADMIN</code></td><td><code>3</code></td><td>Minimum zxcvbn score for admins.</td></tr>
+              <tr><td><code>REQUIRED_PASSWORD_STRENGTH.SUPER_ADMIN</code></td><td><code>4</code></td><td>Minimum zxcvbn score for super admins.</td></tr>
+              <tr><td><code>LOCKOUT_PERIOD</code></td><td><code>30</code></td><td>Minutes used for auth-attempt lockout windows.</td></tr>
+              <tr><td><code>AUTH_ATTEMPTS.FOR_IP</code></td><td><code>50</code></td><td>Login attempt limit per IP in the lockout window.</td></tr>
+              <tr><td><code>AUTH_ATTEMPTS.FOR_IP_AND_USER</code></td><td><code>5</code></td><td>Login or OTP attempt limit for an IP plus identifier.</td></tr>
+              <tr><td><code>AUTH_ATTEMPTS.FOR_PUBLIC_IP</code></td><td><code>200</code></td><td>Public auth endpoint attempt limit per IP.</td></tr>
+              <tr><td><code>USER_ROLES</code></td><td><code>User</code>, <code>Admin</code>, <code>Super Admin</code></td><td>Bundled role names used by quick-start auth.</td></tr>
+              <tr><td><code>PERMISSION_STATES</code></td><td><code>Included</code>, <code>Excluded</code>, <code>Forbidden</code></td><td>Controls how role/group/user permissions affect effective scope.</td></tr>
+            </tbody>
+          </table>
+          <pre><code>// config/constants.js in your backend project
+module.exports = {
+  USER_ROLES: {
+    USER: "User",
+    ADMIN: "Admin",
+    SUPER_ADMIN: "Super Admin",
+    SUPPORT: "Support"
+  }
+};</code></pre>
+        </section>
+
+        <section id="plugins">
+          <h2>Plugins</h2>
+          <p>
+            Plugins live in the package plugin directory and in your configured project <code>pluginPath</code>.
+            Each <code>.js</code> file exports a function that receives the HTTP server and returns the plugin object.
+          </p>
+          <pre><code>module.exports = (server) => {
+  return {
+    name: "example",
+    startedAt: new Date()
+  };
+};</code></pre>
+          <p>Loaded plugins are available on <code>Crudsify.plugins</code>.</p>
+        </section>
+
+        <section id="swagger">
+          <h2>Swagger</h2>
+          <p>
+            Swagger UI is generated for registered endpoints when <code>enableSwagger</code> is true. The UI is mounted
+            at <code>/docs</code> and protected with basic auth.
+          </p>
+          <pre><code>module.exports = {
+  enableSwagger: true,
+  swaggerOptions: {
+    explorer: true,
+    swaggerOptions: {
+      docExpansion: "none"
+    },
+    customSiteTitle: "Crudsify API"
+  }
+};</code></pre>
+          <p>Set <code>BASIC_AUTH_USERNAME</code> and <code>BASIC_AUTH_PASSWORD</code> before enabling Swagger.</p>
+        </section>
+
+        <section id="checklist">
+          <h2>Backend Checklist</h2>
+          <ol>
+            <li>Install CRUDSIFY and run <code>crudsify-cli init</code>.</li>
+            <li>Fill <code>.env</code> with server, JWT, Swagger basic auth, and database values.</li>
+            <li>Configure <code>config/index.js</code> for primary keys, paths, auth, audit logs, and validation.</li>
+            <li>Create Sequelize models with CRUDSIFY helpers for primary key, timestamps, metadata, and record scopes.</li>
+            <li>Add migrations and run them with Sequelize CLI.</li>
+            <li>Set model <code>routeOptions</code>, <code>routeScopes</code>, policies, hooks, and associations as needed.</li>
+            <li>Review built-in auth routes, token strategies, quick-start models, policies, and security constants if using quick-start.</li>
+            <li>Use handlers, query helpers, response helper, and shared error handling for custom APIs.</li>
+            <li>Start the server and inspect <code>/crudsifydoc</code> for package guidance.</li>
+            <li>Open <code>/docs</code> to inspect the generated API contract when Swagger is enabled.</li>
+          </ol>
+        </section>
+      </main>
+    </div>
+    <script>
+      (function () {
+        const input = document.getElementById("doc-search");
+        const results = document.getElementById("search-results");
+        const sections = Array.from(document.querySelectorAll("main section"));
+
+        const index = sections.map((section) => {
+          const h2 = section.querySelector("h2");
+          const h3s = Array.from(section.querySelectorAll("h3")).map((heading) =>
+            heading.textContent.trim()
+          );
+          const title = h2 ? h2.textContent.trim() : section.id;
+          const text = section.textContent.replace(/\s+/g, " ").trim();
+          return {
+            id: section.id,
+            section,
+            title,
+            subtitles: h3s,
+            haystack: `${title} ${h3s.join(" ")} ${text}`.toLowerCase(),
+          };
+        });
+
+        let activeMatches = [];
+
+        const clearResults = () => {
+          activeMatches = [];
+          results.innerHTML = "";
+        };
+
+        const createResult = (match) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "search-result";
+          button.dataset.target = match.id;
+
+          const title = document.createElement("strong");
+          title.textContent = match.title;
+          button.appendChild(title);
+
+          const subtitle = document.createElement("span");
+          subtitle.textContent = match.subtitles.length
+            ? match.subtitles.slice(0, 3).join(" | ")
+            : "Section";
+          button.appendChild(subtitle);
+
+          return button;
+        };
+
+        const jumpTo = (id) => {
+          const section = document.getElementById(id);
+          if (!section) return;
+
+          section.classList.remove("search-hit");
+          section.scrollIntoView({ behavior: "smooth", block: "start" });
+          window.setTimeout(() => section.classList.add("search-hit"), 150);
+          window.setTimeout(() => section.classList.remove("search-hit"), 1800);
+        };
+
+        const search = () => {
+          const query = input.value.trim().toLowerCase();
+          clearResults();
+
+          if (!query) return;
+
+          const terms = query.split(/\s+/).filter(Boolean);
+          activeMatches = index
+            .map((item) => {
+              const score = terms.reduce((total, term) => {
+                if (item.title.toLowerCase().includes(term)) return total + 5;
+                if (item.subtitles.join(" ").toLowerCase().includes(term)) return total + 3;
+                if (item.haystack.includes(term)) return total + 1;
+                return total - 20;
+              }, 0);
+              return { ...item, score };
+            })
+            .filter((item) => item.score > 0)
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 12);
+
+          if (!activeMatches.length) {
+            const empty = document.createElement("button");
+            empty.type = "button";
+            empty.className = "search-result";
+            empty.disabled = true;
+            empty.innerHTML = "<strong>No matches</strong><span>Try config, auth, query, handler, or endpoint.</span>";
+            results.appendChild(empty);
+            return;
+          }
+
+          activeMatches.forEach((match) => results.appendChild(createResult(match)));
+        };
+
+        input.addEventListener("input", search);
+        input.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" && activeMatches.length) {
+            event.preventDefault();
+            jumpTo(activeMatches[0].id);
+          }
+          if (event.key === "Escape") {
+            input.value = "";
+            clearResults();
+          }
+        });
+
+        results.addEventListener("click", (event) => {
+          const button = event.target.closest(".search-result");
+          if (!button || !button.dataset.target) return;
+          jumpTo(button.dataset.target);
+        });
+      })();
+    </script>
+  </body>
+</html>
