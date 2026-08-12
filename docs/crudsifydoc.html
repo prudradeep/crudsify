@@ -18,6 +18,12 @@
         --warning-soft: #fef3c7;
         --code-bg: #111827;
         --code-text: #ecfdf5;
+        --sidebar: #0f172a;
+        --sidebar-panel: #111c31;
+        --sidebar-line: #243044;
+        --sidebar-text: #dbeafe;
+        --sidebar-muted: #94a3b8;
+        --sidebar-active: #38bdf8;
       }
 
       * {
@@ -52,45 +58,56 @@
         align-self: start;
         height: 100vh;
         overflow: auto;
-        padding: 28px 22px;
-        background: #101827;
-        color: #dbeafe;
+        padding: 24px 18px;
+        background: var(--sidebar);
+        color: var(--sidebar-text);
+        border-right: 1px solid var(--sidebar-line);
       }
 
-      aside h1 {
+      .brand {
+        padding: 0 4px 18px;
+        border-bottom: 1px solid var(--sidebar-line);
+        margin-bottom: 18px;
+      }
+
+      .brand h1 {
         margin: 0 0 6px;
-        font-size: 24px;
+        font-size: 22px;
         line-height: 1.2;
         letter-spacing: 0;
       }
 
-      aside p {
-        margin: 0 0 18px;
-        color: #a9b8d2;
+      .brand p {
+        margin: 0;
+        color: var(--sidebar-muted);
+        font-size: 13px;
       }
 
       .search {
+        position: relative;
         margin: 0 0 18px;
       }
 
       .search label {
         display: block;
         margin: 0 0 7px;
-        color: #e0f2fe;
-        font-size: 12px;
+        color: #bfdbfe;
+        font-size: 11px;
         font-weight: 700;
+        letter-spacing: 0.06em;
         text-transform: uppercase;
       }
 
       .search input {
         width: 100%;
         height: 40px;
-        padding: 8px 10px;
+        padding: 8px 11px;
         border: 1px solid #334155;
-        border-radius: 7px;
+        border-radius: 8px;
         background: #0b1220;
         color: #f8fafc;
         font: inherit;
+        font-size: 14px;
       }
 
       .search input:focus {
@@ -99,12 +116,17 @@
       }
 
       .search-results {
+        position: absolute;
+        z-index: 5;
+        left: 0;
+        right: 0;
         margin-top: 8px;
-        border: 1px solid #243044;
-        border-radius: 7px;
+        border: 1px solid var(--sidebar-line);
+        border-radius: 8px;
         background: #0b1220;
         max-height: 260px;
         overflow: auto;
+        box-shadow: 0 16px 36px rgb(0 0 0 / 0.28);
       }
 
       .search-results:empty {
@@ -114,7 +136,7 @@
       .search-result {
         display: block;
         width: 100%;
-        padding: 9px 10px;
+        padding: 10px 11px;
         border: 0;
         border-bottom: 1px solid #1f2937;
         background: transparent;
@@ -147,24 +169,71 @@
       }
 
       .nav-title {
-        margin: 18px 0 8px;
+        margin: 18px 8px 7px;
         color: #93c5fd;
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 800;
+        letter-spacing: 0.08em;
         text-transform: uppercase;
       }
 
+      .nav-group {
+        padding: 6px 0 10px;
+        border-bottom: 1px solid rgb(148 163 184 / 0.16);
+      }
+
+      .nav-group:last-child {
+        border-bottom: 0;
+      }
+
       nav a {
-        display: block;
-        padding: 6px 0;
-        color: #dbeafe;
+        position: relative;
+        display: flex;
+        align-items: center;
+        min-height: 32px;
+        padding: 6px 10px 6px 13px;
+        border-radius: 7px;
+        color: var(--sidebar-text);
         font-size: 14px;
+        line-height: 1.25;
+      }
+
+      nav a:hover {
+        background: var(--sidebar-panel);
+        color: #f8fafc;
+        text-decoration: none;
+      }
+
+      nav a:focus-visible {
+        outline: 2px solid var(--sidebar-active);
+        outline-offset: 2px;
       }
 
       nav a.sub {
-        padding-left: 12px;
+        margin-left: 8px;
+        padding-left: 22px;
         color: #b9c8df;
         font-size: 13px;
+      }
+
+      nav a.sub::before {
+        content: "";
+        position: absolute;
+        left: 10px;
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: #64748b;
+      }
+
+      nav a.active {
+        background: #122a44;
+        color: #f8fafc;
+        box-shadow: inset 3px 0 0 var(--sidebar-active);
+      }
+
+      nav a.active.sub::before {
+        background: var(--sidebar-active);
       }
 
       main {
@@ -324,10 +393,24 @@
         aside {
           position: static;
           height: auto;
+          padding: 20px 16px;
         }
 
         main {
           padding: 28px 18px 60px;
+        }
+
+        nav {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 12px;
+        }
+
+        .nav-group {
+          border: 1px solid var(--sidebar-line);
+          border-radius: 8px;
+          padding: 8px;
+          background: rgb(255 255 255 / 0.02);
         }
 
         .intro h2 {
@@ -343,51 +426,63 @@
   <body>
     <div class="layout">
       <aside>
-        <h1>CRUDSIFY</h1>
-        <p>Backend package documentation</p>
+        <div class="brand">
+          <h1>CRUDSIFY</h1>
+          <p>Backend package documentation</p>
+        </div>
         <div class="search">
           <label for="doc-search">Search documentation</label>
           <input id="doc-search" type="search" placeholder="Search config, auth, handlers..." autocomplete="off" />
           <div id="search-results" class="search-results" aria-live="polite"></div>
         </div>
         <nav aria-label="Documentation sections">
-          <div class="nav-title">Start</div>
-          <a href="#overview">Overview</a>
-          <a href="#install">Install and Initialize</a>
-          <a class="sub" href="#quickstart">Quick Start and CLI</a>
-          <a href="#env">Environment</a>
-          <div class="nav-title">Configure</div>
-          <a href="#config">Configuration</a>
-          <a class="sub" href="#server-options">Server Options</a>
-          <a href="#models">Models</a>
-          <a class="sub" href="#migrations">Models and Migrations CLI</a>
-          <a href="#endpoints">Generated Endpoints</a>
-          <a href="#queries">Query Parameters</a>
-          <a href="#validation">Validation</a>
-          <div class="nav-title">Security</div>
-          <a href="#auth">Authentication</a>
-          <a class="sub" href="#built-in-auth">Built-In Auth APIs</a>
-          <a class="sub" href="#strategies">Token Strategies</a>
-          <a href="#authorization">Authorization</a>
-          <a class="sub" href="#quickstart-models">Quick-Start Models</a>
-          <a class="sub" href="#built-in-policies">Built-In Policies</a>
-          <a href="#policies">Policies</a>
-          <a href="#audit">Audit Logs</a>
-          <a href="#soft-delete">Soft Delete</a>
-          <a href="#metadata">Metadata</a>
-          <div class="nav-title">Extend</div>
-          <a href="#custom-api">Custom APIs</a>
-          <a class="sub" href="#hooks">Hooks</a>
-          <a class="sub" href="#handlers">Handlers</a>
-          <a class="sub" href="#response-helper">Response Helper</a>
-          <a class="sub" href="#utilities">Utilities</a>
-          <a class="sub" href="#query-helpers">Query Helpers</a>
-          <a class="sub" href="#errors">Error Handling</a>
-          <a class="sub" href="#security-constants">Security Constants</a>
-          <a href="#plugins">Plugins</a>
-          <a href="#swagger">Swagger</a>
-          <div class="nav-title">Finish</div>
-          <a href="#checklist">Backend Checklist</a>
+          <div class="nav-group">
+            <div class="nav-title">Start</div>
+            <a href="#overview">Overview</a>
+            <a href="#install">Install and Initialize</a>
+            <a class="sub" href="#quickstart">Quick Start and CLI</a>
+            <a href="#env">Environment</a>
+          </div>
+          <div class="nav-group">
+            <div class="nav-title">Configure</div>
+            <a href="#config">Configuration</a>
+            <a class="sub" href="#server-options">Server Options</a>
+            <a href="#models">Models</a>
+            <a class="sub" href="#migrations">Models and Migrations CLI</a>
+            <a href="#endpoints">Generated Endpoints</a>
+            <a href="#queries">Query Parameters</a>
+            <a href="#validation">Validation</a>
+          </div>
+          <div class="nav-group">
+            <div class="nav-title">Security</div>
+            <a href="#auth">Authentication</a>
+            <a class="sub" href="#built-in-auth">Built-In Auth APIs</a>
+            <a class="sub" href="#strategies">Token Strategies</a>
+            <a href="#authorization">Authorization</a>
+            <a class="sub" href="#quickstart-models">Quick-Start Models</a>
+            <a class="sub" href="#built-in-policies">Built-In Policies</a>
+            <a href="#policies">Policies</a>
+            <a href="#audit">Audit Logs</a>
+            <a href="#soft-delete">Soft Delete</a>
+            <a href="#metadata">Metadata</a>
+          </div>
+          <div class="nav-group">
+            <div class="nav-title">Extend</div>
+            <a href="#custom-api">Custom APIs</a>
+            <a class="sub" href="#hooks">Hooks</a>
+            <a class="sub" href="#handlers">Handlers</a>
+            <a class="sub" href="#response-helper">Response Helper</a>
+            <a class="sub" href="#utilities">Utilities</a>
+            <a class="sub" href="#query-helpers">Query Helpers</a>
+            <a class="sub" href="#errors">Error Handling</a>
+            <a class="sub" href="#security-constants">Security Constants</a>
+            <a href="#plugins">Plugins</a>
+            <a href="#swagger">Swagger</a>
+          </div>
+          <div class="nav-group">
+            <div class="nav-title">Finish</div>
+            <a href="#checklist">Backend Checklist</a>
+          </div>
         </nav>
       </aside>
 
@@ -460,11 +555,13 @@ npx sequelize-cli db:seed:all</code></pre>
             <tbody>
               <tr><td><code>NODE_ENV</code></td><td>Selects config values for <code>development</code>, <code>uat</code>, or <code>production</code>.</td></tr>
               <tr><td><code>SERVER_PORT</code></td><td>Port used by the Express HTTP or HTTPS server.</td></tr>
+              <tr><td><code>TITLE</code>, <code>DESCRIPTION</code></td><td>OpenAPI and Swagger UI title/description values.</td></tr>
               <tr><td><code>JWT_SECRET</code>, <code>JWT_ALGO</code></td><td>JWT signing settings. Supported algorithms are <code>HS256</code>, <code>HS384</code>, and <code>HS512</code>.</td></tr>
               <tr><td><code>BASIC_AUTH_USERNAME</code>, <code>BASIC_AUTH_PASSWORD</code></td><td>Required when Swagger is enabled.</td></tr>
               <tr><td><code>API_DEV_URL</code>, <code>API_UAT_URL</code>, <code>API_PROD_URL</code></td><td>Server URLs used by Swagger configuration.</td></tr>
-              <tr><td><code>DB_*_USERNAME</code>, <code>DB_*_PASSWORD</code>, <code>DB_*_NAME</code>, <code>DB_*_HOST</code>, <code>DB_*_PORT</code>, <code>DB_*_DIALECT</code></td><td>Database settings per environment.</td></tr>
+              <tr><td><code>DB_DEV_*</code>, <code>DB_UAT_*</code>, <code>DB_PROD_*</code></td><td>Database settings per environment. Each prefix supports <code>USERNAME</code>, <code>PASSWORD</code>, <code>NAME</code>, <code>HOST</code>, <code>PORT</code>, and <code>DIALECT</code>.</td></tr>
               <tr><td><code>USER_DEFAULT_PASSWORD</code>, <code>USER_EMAIL_DOMAIN</code></td><td>Used by bundled seeders for starter users.</td></tr>
+              <tr><td><code>EXPOSE_OTP_FOR_LOCAL_TESTING</code></td><td>Allows OTP exposure only for local testing when set to <code>true</code> in <code>development</code> or <code>test</code>.</td></tr>
             </tbody>
           </table>
         </section>
@@ -493,6 +590,63 @@ npx sequelize-cli db:seed:all</code></pre>
   enableUpdatedBy: true,
   enableDeletedBy: true
 };</code></pre>
+
+          <h3>Environment-Level Configuration</h3>
+          <p>
+            CRUDSIFY uses <code>NODE_ENV</code> as the Confidence criteria named <code>env</code>.
+            Any package setting in your project's <code>config/index.js</code> can use <code>$filter: "env"</code>
+            to return different values for <code>development</code>, <code>uat</code>, and <code>production</code>.
+            Use <code>$default</code> for every environment that is not listed explicitly.
+          </p>
+          <pre><code>// config/index.js in your backend project
+module.exports = {
+  logLevel: {
+    $filter: "env",
+    development: "debug",
+    uat: "verbose",
+    production: "error",
+    $default: "info"
+  },
+  enableSwagger: {
+    $filter: "env",
+    production: false,
+    $default: true
+  },
+  auditLogStorage: {
+    $filter: "env",
+    production: "database",
+    $default: "file"
+  },
+  auditLogTTL: {
+    $filter: "env",
+    production: "60d",
+    $default: "20d"
+  },
+  cors: {
+    $filter: "env",
+    production: {
+      origin: ["https://app.example.com"],
+      credentials: true
+    },
+    $default: false
+  }
+};</code></pre>
+          <p>
+            Database credentials are already environment-aware through <code>.env</code>:
+            <code>DB_DEV_*</code> values are used for <code>development</code>, <code>DB_UAT_*</code>
+            for <code>uat</code>, and <code>DB_PROD_*</code> for <code>production</code>.
+          </p>
+          <h3>Read Configuration Values</h3>
+          <p>
+            Use <code>crudsify/config</code> when custom APIs, policies, hooks, or utilities need to read
+            the effective configuration after project overrides and environment filters are applied.
+          </p>
+          <pre><code>const configStore = require("crudsify/config");
+const authentication = configStore.get("/authentication");
+
+// or
+const { get } = require("crudsify/config");
+const authentication = get("/authentication");</code></pre>
 
           <h3>Where to Define Configuration</h3>
           <table>
@@ -682,6 +836,56 @@ crudsifyServer(refreshStrategy, [limiter]);</code></pre>
             CRUDSIFY model helpers should be used in both model files and migrations so generated endpoints,
             metadata, timestamps, primary keys, and record scopes stay aligned.
           </p>
+          <h3>Generate a Model and Migration</h3>
+          <p>
+            Use the <code>model</code> command when you want CRUDSIFY to create both the Sequelize model file
+            and its matching create-table migration. The command writes the model to <code>models</code>
+            by default, or to the folder configured by <code>modelPath</code>.
+          </p>
+          <pre><code># Windows
+node_modules/.bin/crudsify-cli.cmd model --name article --attributes title:string,body:text
+
+# macOS/Linux
+node_modules/.bin/crudsify-cli model --name article --attributes title:string,body:text</code></pre>
+          <p>
+            The command creates files like <code>models/article.js</code> and
+            <code>migrations/YYYYMMDDHHmmss-create-article.js</code>. The migration table name is pluralized
+            from <code>--name</code>, so <code>article</code> becomes <code>articles</code>.
+          </p>
+          <h3>Generate a Migration Only</h3>
+          <p>
+            Use the <code>migration</code> command when the model already exists or you only need a migration file.
+          </p>
+          <pre><code># Windows
+node_modules/.bin/crudsify-cli.cmd migration --name article --attributes title:string,body:text
+
+# macOS/Linux
+node_modules/.bin/crudsify-cli migration --name article --attributes title:string,body:text</code></pre>
+          <h3>CLI Arguments</h3>
+          <table>
+            <thead>
+              <tr><th>Argument</th><th>Required</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>--name</code></td><td>Yes</td><td>Model name used for the generated model class, model file, and migration table name.</td></tr>
+              <tr><td><code>--attributes</code></td><td>Yes</td><td>Comma-separated fields in <code>field:type</code>, <code>field:array:type</code>, or <code>field:enum:{value,value}</code> format.</td></tr>
+              <tr><td><code>--underscored</code></td><td>No</td><td>Adds <code>underscored: true</code> to the model and uses <code>created_at</code>/<code>updated_at</code> in the migration.</td></tr>
+            </tbody>
+          </table>
+          <pre><code># Basic fields
+node_modules/.bin/crudsify-cli model --name article --attributes title:string,body:text
+
+# Array and enum fields
+node_modules/.bin/crudsify-cli model --name article --attributes title:string,tags:array:string,status:enum:{draft,published}
+
+# Underscored timestamps
+node_modules/.bin/crudsify-cli model --name article --attributes title:string --underscored</code></pre>
+          <p>
+            Attribute types are passed through to Sequelize data types, so use names such as
+            <code>string</code>, <code>text</code>, <code>integer</code>, <code>boolean</code>,
+            <code>date</code>, <code>json</code>, <code>array</code>, and <code>enum</code>.
+          </p>
+          <h3>Generated File Shape</h3>
           <pre><code>// models/group.js
 const { Model } = require("sequelize");
 const _ = require("lodash");
@@ -1733,6 +1937,10 @@ module.exports = {
         const input = document.getElementById("doc-search");
         const results = document.getElementById("search-results");
         const sections = Array.from(document.querySelectorAll("main section"));
+        const navLinks = Array.from(document.querySelectorAll("nav a[href^='#']"));
+        const navById = new Map(
+          navLinks.map((link) => [link.getAttribute("href").slice(1), link])
+        );
 
         const index = sections.map((section) => {
           const h2 = section.querySelector("h2");
@@ -1782,8 +1990,28 @@ module.exports = {
 
           section.classList.remove("search-hit");
           section.scrollIntoView({ behavior: "smooth", block: "start" });
+          setActiveNav(id);
           window.setTimeout(() => section.classList.add("search-hit"), 150);
           window.setTimeout(() => section.classList.remove("search-hit"), 1800);
+        };
+
+        const setActiveNav = (id) => {
+          navLinks.forEach((link) => {
+            link.classList.toggle("active", link.getAttribute("href") === `#${id}`);
+          });
+        };
+
+        const visibleSection = () => {
+          const offset = 90;
+          return (
+            sections
+              .map((section) => ({
+                id: section.id,
+                top: section.getBoundingClientRect().top,
+              }))
+              .filter((item) => item.top <= offset)
+              .sort((a, b) => b.top - a.top)[0] || sections[0]
+          );
         };
 
         const search = () => {
@@ -1837,6 +2065,28 @@ module.exports = {
           if (!button || !button.dataset.target) return;
           jumpTo(button.dataset.target);
         });
+
+        navLinks.forEach((link) => {
+          link.addEventListener("click", () => {
+            setActiveNav(link.getAttribute("href").slice(1));
+          });
+        });
+
+        let ticking = false;
+        window.addEventListener("scroll", () => {
+          if (ticking) return;
+          ticking = true;
+          window.requestAnimationFrame(() => {
+            const current = visibleSection();
+            if (current && navById.has(current.id)) setActiveNav(current.id);
+            ticking = false;
+          });
+        });
+
+        const initialId = window.location.hash
+          ? window.location.hash.slice(1)
+          : sections[0] && sections[0].id;
+        if (initialId) setActiveNav(initialId);
       })();
     </script>
   </body>
