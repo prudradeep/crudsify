@@ -251,6 +251,14 @@
         animation: searchPulse 1.5s ease-out;
       }
 
+      .search-match-highlight {
+        border-radius: 5px;
+        background: #fde68a;
+        color: #111827;
+        box-shadow: 0 0 0 3px rgb(253 230 138 / 0.35);
+        scroll-margin-top: 90px;
+      }
+
       h2 {
         margin: 0 0 14px;
         font-size: 28px;
@@ -1942,6 +1950,19 @@ module.exports = {
           navLinks.map((link) => [link.getAttribute("href").slice(1), link])
         );
 
+        const collectTextNodes = (section) => {
+          const walker = document.createTreeWalker(section, NodeFilter.SHOW_TEXT, {
+            acceptNode(node) {
+              return node.nodeValue.trim()
+                ? NodeFilter.FILTER_ACCEPT
+                : NodeFilter.FILTER_REJECT;
+            },
+          });
+          const nodes = [];
+          while (walker.nextNode()) nodes.push(walker.currentNode);
+          return nodes;
+        };
+
         const index = sections.map((section) => {
           const h2 = section.querySelector("h2");
           const h3s = Array.from(section.querySelectorAll("h3")).map((heading) =>
@@ -1959,38 +1980,128 @@ module.exports = {
         });
 
         let activeMatches = [];
+        let activeHighlight = null;
 
         const clearResults = () => {
           activeMatches = [];
           results.innerHTML = "";
         };
 
+        const clearHighlight = () => {
+          if (!activeHighlight) return;
+
+          const parent = activeHighlight.parentNode;
+          if (parent) {
+            while (activeHighlight.firstChild) {
+              parent.insertBefore(activeHighlight.firstChild, activeHighlight);
+            }
+            parent.removeChild(activeHighlight);
+            parent.normalize();
+          }
+          activeHighlight = null;
+        };
+
+        const excerptFor = (text, start, length) => {
+          const excerptStart = Math.max(0, start - 42);
+          const excerptEnd = Math.min(text.length, start + length + 54);
+          const prefix = excerptStart > 0 ? "... " : "";
+          const suffix = excerptEnd < text.length ? " ..." : "";
+          return `${prefix}${text.slice(excerptStart, excerptEnd).replace(/\s+/g, " ").trim()}${suffix}`;
+        };
+
+        const searchNeedles = (query, terms) =>
+          Array.from(new Set([query, ...terms].filter(Boolean)));
+
+        const findOccurrences = (item, query, terms) => {
+          const needles = searchNeedles(query, terms);
+          const occurrences = [];
+
+          for (const needle of needles) {
+            for (const node of collectTextNodes(item.section)) {
+              const text = node.nodeValue;
+              const lowerText = text.toLowerCase();
+              let start = lowerText.indexOf(needle);
+              while (start !== -1) {
+                occurrences.push({
+                  node,
+                  start,
+                  length: needle.length,
+                  needle,
+                  excerpt: excerptFor(text, start, needle.length),
+                });
+                start = lowerText.indexOf(needle, start + needle.length);
+              }
+            }
+          }
+
+          return occurrences.sort((a, b) => {
+            if (a.node === b.node) return a.start - b.start;
+            const position = a.node.compareDocumentPosition(b.node);
+            return position & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
+          });
+        };
+
+        const findOccurrenceByOrdinal = (item, query, terms, ordinal) =>
+          findOccurrences(item, query, terms)[ordinal] || null;
+
+        const scoreFor = (item, terms) =>
+          terms.reduce((total, term) => {
+            if (item.title.toLowerCase().includes(term)) return total + 5;
+            if (item.subtitles.join(" ").toLowerCase().includes(term)) return total + 3;
+            if (item.haystack.includes(term)) return total + 1;
+            return total - 20;
+          }, 0);
+
+        const resultLabel = (match) => {
+          const total = match.totalOccurrences > 1 ? ` (${match.occurrenceNumber}/${match.totalOccurrences})` : "";
+          return `${match.title}${total}`;
+        };
+
         const createResult = (match) => {
           const button = document.createElement("button");
           button.type = "button";
           button.className = "search-result";
-          button.dataset.target = match.id;
+          button.dataset.matchIndex = String(activeMatches.indexOf(match));
 
           const title = document.createElement("strong");
-          title.textContent = match.title;
+          title.textContent = resultLabel(match);
           button.appendChild(title);
 
           const subtitle = document.createElement("span");
-          subtitle.textContent = match.subtitles.length
-            ? match.subtitles.slice(0, 3).join(" | ")
-            : "Section";
+          subtitle.textContent =
+            (match.occurrence && match.occurrence.excerpt) ||
+            (match.subtitles.length ? match.subtitles.slice(0, 3).join(" | ") : "Section");
           button.appendChild(subtitle);
 
           return button;
         };
 
-        const jumpTo = (id) => {
-          const section = document.getElementById(id);
+        const jumpTo = (match) => {
+          const section = document.getElementById(match.id);
           if (!section) return;
 
+          clearHighlight();
+          const query = input.value.trim().toLowerCase();
+          const terms = query.split(/\s+/).filter(Boolean);
+          const occurrence = findOccurrenceByOrdinal(match, query, terms, match.occurrenceOrdinal);
           section.classList.remove("search-hit");
-          section.scrollIntoView({ behavior: "smooth", block: "start" });
-          setActiveNav(id);
+          if (occurrence && occurrence.node.parentNode) {
+            const range = document.createRange();
+            range.setStart(occurrence.node, occurrence.start);
+            range.setEnd(
+              occurrence.node,
+              occurrence.start + occurrence.length
+            );
+
+            const highlight = document.createElement("span");
+            highlight.className = "search-match-highlight";
+            range.surroundContents(highlight);
+            activeHighlight = highlight;
+            highlight.scrollIntoView({ behavior: "smooth", block: "center" });
+          } else {
+            section.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+          setActiveNav(match.id);
           window.setTimeout(() => section.classList.add("search-hit"), 150);
           window.setTimeout(() => section.classList.remove("search-hit"), 1800);
         };
@@ -2016,23 +2127,29 @@ module.exports = {
 
         const search = () => {
           const query = input.value.trim().toLowerCase();
+          clearHighlight();
           clearResults();
 
           if (!query) return;
 
           const terms = query.split(/\s+/).filter(Boolean);
           activeMatches = index
-            .map((item) => {
-              const score = terms.reduce((total, term) => {
-                if (item.title.toLowerCase().includes(term)) return total + 5;
-                if (item.subtitles.join(" ").toLowerCase().includes(term)) return total + 3;
-                if (item.haystack.includes(term)) return total + 1;
-                return total - 20;
-              }, 0);
-              return { ...item, score };
+            .flatMap((item) => {
+              const score = scoreFor(item, terms);
+              if (score <= 0) return [];
+
+              const occurrences = findOccurrences(item, query, terms);
+              const totalOccurrences = occurrences.length;
+              return occurrences.map((occurrence, occurrenceOrdinal) => ({
+                ...item,
+                score,
+                occurrence,
+                occurrenceOrdinal,
+                occurrenceNumber: occurrenceOrdinal + 1,
+                totalOccurrences,
+              }));
             })
-            .filter((item) => item.score > 0)
-            .sort((a, b) => b.score - a.score)
+            .sort((a, b) => b.score - a.score || a.occurrenceOrdinal - b.occurrenceOrdinal)
             .slice(0, 12);
 
           if (!activeMatches.length) {
@@ -2052,18 +2169,20 @@ module.exports = {
         input.addEventListener("keydown", (event) => {
           if (event.key === "Enter" && activeMatches.length) {
             event.preventDefault();
-            jumpTo(activeMatches[0].id);
+            jumpTo(activeMatches[0]);
           }
           if (event.key === "Escape") {
             input.value = "";
+            clearHighlight();
             clearResults();
           }
         });
 
         results.addEventListener("click", (event) => {
           const button = event.target.closest(".search-result");
-          if (!button || !button.dataset.target) return;
-          jumpTo(button.dataset.target);
+          if (!button || !button.dataset.matchIndex) return;
+          const match = activeMatches[Number(button.dataset.matchIndex)];
+          if (match) jumpTo(match);
         });
 
         navLinks.forEach((link) => {
