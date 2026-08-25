@@ -476,6 +476,11 @@
           </div>
           <div class="nav-group">
             <div class="nav-title">Extend</div>
+            <a href="#middlewares">Middlewares</a>
+            <a class="sub" href="#middleware-record-scope">Metadata and Record Scope</a>
+            <a class="sub" href="#middleware-validation">Validation Middleware</a>
+            <a class="sub" href="#middleware-auth-errors">Authentication and Errors</a>
+            <a class="sub" href="#middleware-audit">Audit Logging Middleware</a>
             <a href="#custom-api">Custom APIs</a>
             <a class="sub" href="#hooks">Hooks</a>
             <a class="sub" href="#handlers">Handlers</a>
@@ -1458,6 +1463,86 @@ user.policies = {
               <tr><td><code>enableDeletedBy</code></td><td><code>deletedBy</code></td><td>Set on soft delete when paranoid mode is active.</td></tr>
             </tbody>
           </table>
+        </section>
+
+        <section id="middlewares">
+          <h2>Middlewares</h2>
+          <p>
+            CRUDSIFY exposes reusable Express middleware from the <code>middlewares/</code> directory. The
+            middleware in <code>handler.js</code> is internal to generated CRUD routes and is intentionally not
+            listed here. The middleware below can be used by CRUDSIFY itself or by custom endpoints.
+          </p>
+
+          <h3 id="middleware-record-scope">Metadata and Record Scope</h3>
+          <table>
+            <thead>
+              <tr><th>Middleware</th><th>Arguments</th><th>Behavior</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>addMeta(action)</code></td><td><code>create</code>, <code>update</code>, or <code>delete</code></td><td>Adds the authenticated user's configured primary-key value to <code>createdBy</code>, <code>updatedBy</code>, or <code>deletedBy</code>. Supports single objects and arrays. Requires <code>req.auth.credentials.user</code>; otherwise calls <code>next</code> with a bad-request error.</td></tr>
+              <tr><td><code>addAuthRecordCreatorSope(model)</code></td><td>Sequelize model</td><td>Adds <code>user-&lt;md5(userId)&gt;</code> to each enabled creator record-scope action from <code>authorizeRecordCreator</code> and the model configuration. Supports single objects and arrays. The exported name contains the existing <code>Sope</code> spelling.</td></tr>
+              <tr><td><code>addRecordScope(model)</code></td><td>Sequelize model</td><td>Adds the model's configured <code>recordScope</code> values to the configured <code>recordScopeKey</code> field. Supports single objects and arrays.</td></tr>
+              <tr><td><code>getScopeMiddleware(scopes)</code></td><td>Scope string array</td><td>Checks authenticated scopes. A leading <code>+</code> requires a scope, a leading <code>!</code> forbids a scope, and an unprefixed value is a selectable scope. Supports request templates such as <code>{params.id}</code>. Fails with <code>403 Insufficient scope</code> when authorization does not pass.</td></tr>
+              <tr><td><code>getRecordScopeMiddleware(action, model)</code></td><td>Action and Sequelize model</td><td>Checks the record's configured action and root scopes. It also filters bulk delete/recover IDs and adds a read query condition for collection reads. Returns not-found, bad-request, or forbidden errors as appropriate.</td></tr>
+            </tbody>
+          </table>
+
+          <h3 id="middleware-validation">Validation Middleware</h3>
+          <table>
+            <thead>
+              <tr><th>Middleware</th><th>Arguments</th><th>Behavior</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>headerValidationMiddleware</code></td><td>None</td><td>Validates request headers using CRUDSIFY's header schema. Invalid headers are passed to the error pipeline as unauthorized errors.</td></tr>
+              <tr><td><code>validationMiddleware(joiObject, validate)</code></td><td>Joi schema and <code>query</code>, <code>params</code>, or <code>body</code></td><td>Validates the selected request input with <code>abortEarly: false</code>. Validation failures return a <code>400</code> response containing Joi error details.</td></tr>
+              <tr><td><code>jsonFieldQuery(model)</code></td><td>Sequelize model</td><td>Converts query values for JSON model fields into arrays, splitting comma-separated values, while leaving CRUD query operators unchanged.</td></tr>
+            </tbody>
+          </table>
+
+          <h3 id="middleware-auth-errors">Authentication and Errors</h3>
+          <table>
+            <thead>
+              <tr><th>Middleware</th><th>Behavior</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>basicAuthMiddleware</code></td><td>Checks the request's Basic Authentication credentials against <code>basicAuth.username</code> and <code>basicAuth.password</code> using timing-safe comparisons. Successful requests continue; failures return <code>401</code> and a <code>WWW-Authenticate</code> header.</td></tr>
+              <tr><td><code>errorResponder</code></td><td>Logs errors and converts Boom, Sequelize, aggregate, and unexpected errors into standardized HTTP responses. It maps common Sequelize validation, uniqueness, foreign-key, and database errors to appropriate Boom responses.</td></tr>
+              <tr><td><code>handleNotFoundError</code></td><td>Logs an unmatched route and returns a standardized <code>404 URL not found</code> response.</td></tr>
+            </tbody>
+          </table>
+
+          <h3 id="middleware-audit">Audit Logging Middleware</h3>
+          <p>
+            Audit middleware stores a normalized audit record on <code>req.auditLog</code>. The record includes the
+            request method, action, endpoint, user, model names, record IDs, payload, parameters, result, status,
+            response message, and client IP address. The log middleware should run after the handler so
+            <code>res.data</code> is available.
+          </p>
+          <table>
+            <thead>
+              <tr><th>Middleware</th><th>Arguments</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>logCreateMiddleware(model)</code></td><td>Model</td><td>Creates a POST audit record for create operations.</td></tr>
+              <tr><td><code>logUpdateMiddleware(model)</code></td><td>Model</td><td>Creates a PUT audit record for an update operation.</td></tr>
+              <tr><td><code>logDeleteMiddleware(model)</code></td><td>Model</td><td>Creates a DELETE audit record for delete operations.</td></tr>
+              <tr><td><code>logRecoverMiddleware(model)</code></td><td>Model</td><td>Creates a PATCH audit record for recover operations.</td></tr>
+              <tr><td><code>logAddMiddleware(ownerModel, childModel, associationType)</code></td><td>Owner model, child model, association type</td><td>Creates an audit record for adding one or more associated records.</td></tr>
+              <tr><td><code>logRemoveMiddleware(ownerModel, childModel, associationType)</code></td><td>Owner model, child model, association type</td><td>Creates an audit record for removing one or more associated records.</td></tr>
+              <tr><td><code>logApiMiddleware(options)</code></td><td>Optional action, model, child, association, records, and payload-filter options</td><td>Creates a generic audit record for custom APIs. It becomes a no-op when <code>enableAuditLog</code> is disabled and supports <code>payloadFilter</code>.</td></tr>
+              <tr><td><code>saveLogMiddleware</code></td><td>None</td><td>Persists <code>req.auditLog</code> to the configured file or database audit-log storage when <code>enableAuditLog</code> is enabled.</td></tr>
+            </tbody>
+          </table>
+          <pre><code>const { addMeta } = require("crudsify/middlewares/add-meta-data");
+const { validationMiddleware } = require("crudsify/middlewares/validate");
+const { logApiMiddleware, saveLogMiddleware } = require("crudsify/middlewares/audit-log");
+
+middlewares: [
+  addMeta("create"),
+  validationMiddleware(createSchema, "body"),
+  logApiMiddleware({ action: "Create", name: "Article" })
+],
+afterMiddlewares: [saveLogMiddleware]</code></pre>
         </section>
 
         <section id="custom-api">
