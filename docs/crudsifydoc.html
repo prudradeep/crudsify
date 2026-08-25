@@ -1582,7 +1582,7 @@ generateEndpoint({
               <tr><td><code>validate</code></td><td>Joi objects for <code>body</code>, <code>form</code>, <code>params</code>, and <code>query</code>.</td></tr>
               <tr><td><code>scope</code></td><td>String or array of authorization scopes required for the endpoint.</td></tr>
                <tr><td><code>isJsonFields</code>, <code>model</code></td><td>Enable JSON field query parsing for a Sequelize model.</td></tr>
-               <tr><td><code>requestModel</code></td><td>Sequelize model associated with the request. CRUDSIFY assigns it to <code>req.model</code> before validation, authentication, policies, and the handler run. This also allows shared error handling to identify the model when an error occurs outside the main handler.</td></tr>
+               <tr><td><code>requestModel</code></td><td>Sequelize model associated with the request. CRUDSIFY assigns it to <code>req.model</code> before validation, authentication, policies, and the handler run for model-aware logging or custom error handling.</td></tr>
               <tr><td><code>middlewares</code></td><td>Middleware array executed before the handler.</td></tr>
               <tr><td><code>handler</code></td><td>Main Express handler.</td></tr>
               <tr><td><code>afterMiddlewares</code></td><td>Middleware array executed after the handler. If omitted, CRUDSIFY adds audit-log saving middleware.</td></tr>
@@ -1907,9 +1907,9 @@ const docs = await article.findAll({
             responder can format failures consistently.
           </p>
           <p>
-            Generated model routes initialize <code>req.model</code> at route entry. Custom routes that need model-aware
-            error messages should pass the related Sequelize model as <code>requestModel</code> to
-            <code>generateEndpoint</code>.
+            Generated model routes initialize <code>req.model</code> at route entry for model-aware logging or custom
+            error handling. Standard unique-constraint responses use the duplicate field and value directly, so they do
+            not depend on <code>req.model</code>.
           </p>
           <table>
             <thead>
