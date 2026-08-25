@@ -71,6 +71,7 @@ const generateEndpoint = ({
   scope,
   isJsonFields,
   model,
+  requestModel,
   authMiddleware: endpointAuthMiddleware,
   middlewares,
   handler,
@@ -105,6 +106,13 @@ const generateEndpoint = ({
       endpointAuthMiddleware || authMiddleware,
       ...middlewares,
     ];
+  }
+
+  if (requestModel) {
+    middlewares.unshift((req, res, next) => {
+      req.model = requestModel;
+      next();
+    });
   }
 
   afterMiddlewares = afterMiddlewares

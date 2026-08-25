@@ -94,6 +94,7 @@ exports.deleteOneEndpoint = function (model) {
   postPolicies.forEach((val) => middlewares.push(val));
 
   generateEndpoint({
+    requestModel: model,
     method: "delete",
     path: `/${routePath}/:id`,
     summary: `Delete a ${routePath}`,
@@ -191,6 +192,7 @@ exports.deleteManyEndpoint = function (model) {
   postPolicies.forEach((val) => middlewares.push(val));
 
   generateEndpoint({
+    requestModel: model,
     method: "delete",
     path: `/${routePath}`,
     summary: `Delete multiple ${routePath}`,
@@ -306,6 +308,7 @@ exports.associationRemoveOneEndpoint = function (ownerModel, association) {
   postPolicies.forEach((val) => middlewares.push(val));
 
   generateEndpoint({
+    requestModel: ownerModel,
     method: "delete",
     path: `/${ownerAlias}/:ownerId/${childAlias}/:childId`,
     summary: `Remove a single ${childAlias} from a ${ownerAlias}'s list of ${childAlias}`,
@@ -443,6 +446,7 @@ exports.associationRemoveManyEndpoint = function (ownerModel, association) {
   postPolicies.forEach((val) => middlewares.push(val));
 
   generateEndpoint({
+    requestModel: ownerModel,
     method: "delete",
     path: `/${ownerAlias}/:ownerId/${childAlias}`,
     summary: `Remove multiple ${childAlias} from a ${ownerAlias}'s list of ${childAlias}`,

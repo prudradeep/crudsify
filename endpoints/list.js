@@ -75,6 +75,7 @@ exports.listEndpoint = function (DB, model) {
   postPolicies.forEach((val) => middlewares.push(val));
 
   generateEndpoint({
+    requestModel: model,
     method: "get",
     path: `/${routePath}`,
     summary: `Get a list of ${routePath}`,
@@ -147,6 +148,7 @@ exports.findEndpoint = function (DB, model) {
   postPolicies.forEach((val) => middlewares.push(val));
 
   generateEndpoint({
+    requestModel: model,
     method: "get",
     path: `/${routePath}/:id`,
     summary: `Get a specific ${routePath}`,
@@ -243,6 +245,7 @@ exports.associationGetAllEndpoint = function (DB, ownerModel, association) {
   postPolicies.forEach((val) => middlewares.push(val));
 
   generateEndpoint({
+    requestModel: ownerModel,
     method: "get",
     path: `/${ownerAlias}/:ownerId/${childAlias}`,
     summary: `Get all of the ${childAlias} for a ${ownerAlias}`,

@@ -65,6 +65,7 @@ exports.recoverOneEndpoint = function (model) {
     postPolicies.forEach((val) => middlewares.push(val));
   
     generateEndpoint({
+      requestModel: model,
       method: "patch",
       path: `/${routePath}/:id`,
       summary: `Recover a ${routePath}`,
@@ -146,6 +147,7 @@ exports.recoverOneEndpoint = function (model) {
     postPolicies.forEach((val) => middlewares.push(val));
   
     generateEndpoint({
+      requestModel: model,
       method: "patch",
       path: `/${routePath}`,
       summary: `Recover multiple ${routePath}`,

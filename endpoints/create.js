@@ -97,6 +97,7 @@ exports.createEndpoint = function (model) {
   postPolicies.forEach((val) => middlewares.push(val));
 
   generateEndpoint({
+    requestModel: model,
     method: "post",
     path: `/${routePath}`,
     summary: `Create one or more new ${routePath}`,
@@ -179,6 +180,7 @@ exports.updateEndpoint = function (model) {
   postPolicies.forEach((val) => middlewares.push(val));
 
   generateEndpoint({
+    requestModel: model,
     method: "put",
     path: `/${routePath}/:id`,
     summary: `Update a ${routePath}`,
@@ -335,6 +337,7 @@ exports.associationAddManyEndpoint = function (ownerModel, association) {
   postPolicies.forEach((val) => middlewares.push(val));
 
   generateEndpoint({
+    requestModel: ownerModel,
     method: "post",
     path: `/${ownerAlias}/:ownerId/${childAlias}`,
     summary: `Add multiple ${childAlias} to a ${ownerAlias}'s list of ${childAlias}`,
@@ -466,6 +469,7 @@ exports.associationAddOneEndpoint = function (ownerModel, association) {
   postPolicies.forEach((val) => middlewares.push(val));
 
   generateEndpoint({
+    requestModel: ownerModel,
     method: "put",
     path: `/${ownerAlias}/:ownerId/${childAlias}/:childId`,
     summary: `Add a single ${childAlias} to a ${ownerAlias}'s list of ${childAlias}`,
