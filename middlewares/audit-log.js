@@ -328,7 +328,7 @@ exports.saveLogMiddleware = (req, res, next) => {
     if (configStore.get("/enableAuditLog")) {
       if (req.auditLog) {
         if (configStore.get("/auditLogStorage") === AUDIT_LOG_STORAGE.FILE) {
-          AuditLogger.log("audit", JSON.stringify(req.auditLog));
+          AuditLogger.log("audit", req.auditLog);
         } else if (
           configStore.get("/auditLogStorage") === AUDIT_LOG_STORAGE.DB
         ) {

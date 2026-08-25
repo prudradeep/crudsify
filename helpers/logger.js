@@ -13,7 +13,7 @@ const getTransports = () => {
   let Transports = [
     new transports.DailyRotateFile({
       dirname: `${logDir}/combined`,
-      filename: `combined-%DATE%.log`,
+      filename: `combined-%DATE%.jsonl`,
       datePattern: "YYYY-MM-DD",
       zippedArchive: true,
       maxSize: configStore.get("/logFileMaxSize"),
@@ -28,7 +28,7 @@ const getTransports = () => {
     new transports.DailyRotateFile({
       level: "error",
       dirname: `${logDir}/error`,
-      filename: `error-%DATE%.log`,
+      filename: `error-%DATE%.jsonl`,
       datePattern: "YYYY-MM-DD",
       zippedArchive: true,
       maxSize: configStore.get("/logFileMaxSize"),
@@ -76,7 +76,7 @@ winstonContainer.add("audit", {
     new transports.DailyRotateFile({
       level: "audit",
       dirname: `${logDir}/audit`,
-      filename: `audit-%DATE%.log`,
+      filename: `audit-%DATE%.jsonl`,
       datePattern: "YYYY-MM-DD",
       zippedArchive: true,
       maxSize: configStore.get("/logFileMaxSize"),
@@ -101,7 +101,7 @@ winstonContainer.add("query", {
     new transports.DailyRotateFile({
       level: "query",
       dirname: `${logDir}/query`,
-      filename: `query-%DATE%.log`,
+      filename: `query-%DATE%.jsonl`,
       datePattern: "YYYY-MM-DD",
       zippedArchive: true,
       maxSize: configStore.get("/logFileMaxSize"),
