@@ -6,7 +6,9 @@ module.exports = {
     const {
       getPrimaryKey,
       getTimestamps,
+      addTimestampIndexes,
       getMetadata,
+      addMetadataIndexes,
       getRecordScopes,
     } = require("crudsify/helpers/model");
     await queryInterface.createTable('<%= tableName %>', {
@@ -21,6 +23,8 @@ module.exports = {
       ...getTimestamps(Sequelize),
       ...getMetadata(Sequelize),
     });
+    await addTimestampIndexes(queryInterface, '<%= tableName %>', Sequelize);
+    await addMetadataIndexes(queryInterface, '<%= tableName %>', Sequelize);
   },
 
   async down (queryInterface, Sequelize) {

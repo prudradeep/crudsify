@@ -174,7 +174,7 @@ exports.associationRemoveManyHandler = async function (
       );
     }
     const owner = await ownerModel.findByPk(req.params.ownerId);
-    await owner[accessors.removeMultiple](req.body, { force: hardDelete });
+    await owner[accessors.removeMultiple](req.body.data, { force: hardDelete });
     try {
       if (
         ownerModel.hooks &&

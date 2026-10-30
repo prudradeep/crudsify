@@ -1,6 +1,7 @@
 "use strict";
 
 const Sequelize = require("sequelize");
+const { createHash } = require("crypto");
 const _ = require("lodash");
 const configStore = require("../config");
 const { ucfirst } = require("../utils");
@@ -67,6 +68,47 @@ exports.getTimestamps = (DataTypes) => {
   return timestamps;
 };
 
+const columnIndexName = (tableName, column, kind) => {
+  const name = `${tableName}_${column}_${kind}_idx`;
+  if (name.length <= 64) return name;
+  const suffix = createHash("sha256").update(name).digest("hex").slice(0, 8);
+  return `${name.slice(0, 55)}_${suffix}`;
+};
+
+const addColumnIndexes = async (queryInterface, tableName, columnsToIndex, kind) => {
+  const columns = await queryInterface.describeTable(tableName);
+  const indexes = await queryInterface.showIndex(tableName);
+
+  for (const column of columnsToIndex) {
+    if (!columns[column]) continue;
+    const covered = indexes.some((index) => {
+      const firstField = index.fields && index.fields[0];
+      return firstField && (firstField.attribute || firstField.name) === column;
+    });
+    if (covered) continue;
+
+    const name = columnIndexName(tableName, column, kind);
+    await queryInterface.addIndex(tableName, [column], { name });
+    indexes.push({ fields: [{ attribute: column }], name });
+  }
+};
+
+const removeColumnIndexes = async (queryInterface, tableName, columnsToIndex, kind) => {
+  const indexes = await queryInterface.showIndex(tableName);
+  for (const column of columnsToIndex) {
+    const name = columnIndexName(tableName, column, kind);
+    if (indexes.some((index) => index.name === name)) {
+      await queryInterface.removeIndex(tableName, name);
+    }
+  }
+};
+
+exports.addTimestampIndexes = (queryInterface, tableName, DataTypes) =>
+  addColumnIndexes(queryInterface, tableName, Object.keys(exports.getTimestamps(DataTypes)), "timestamp");
+
+exports.removeTimestampIndexes = (queryInterface, tableName, DataTypes) =>
+  removeColumnIndexes(queryInterface, tableName, Object.keys(exports.getTimestamps(DataTypes)), "timestamp");
+
 exports.getMetadata = (DataTypes) => {
   let metadata = {};
 
@@ -91,6 +133,12 @@ exports.getMetadata = (DataTypes) => {
   }
   return metadata;
 };
+
+exports.addMetadataIndexes = (queryInterface, tableName, DataTypes) =>
+  addColumnIndexes(queryInterface, tableName, Object.keys(exports.getMetadata(DataTypes)), "metadata");
+
+exports.removeMetadataIndexes = (queryInterface, tableName, DataTypes) =>
+  removeColumnIndexes(queryInterface, tableName, Object.keys(exports.getMetadata(DataTypes)), "metadata");
 
 exports.getRecordScopes = (DataTypes) => {
   if (configStore.get("/enableRecordScopes")) {

@@ -7,6 +7,7 @@ module.exports = {
     const {
       getPrimaryKey,
       getTimestamps,
+      addTimestampIndexes,
     } = require("crudsify/helpers/model");
     await queryInterface.createTable("auditLogs", {
       ...getPrimaryKey(Sequelize),
@@ -66,6 +67,7 @@ module.exports = {
       },
       ...getTimestamps(Sequelize),
     });
+    await addTimestampIndexes(queryInterface, "auditLogs", Sequelize);
   },
   async down(queryInterface, Sequelize) {
     await queryInterface.dropTable("auditLogs");
