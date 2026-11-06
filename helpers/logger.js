@@ -2,12 +2,22 @@
 
 const { format, transports, Container } = require("winston");
 require("winston-daily-rotate-file");
-const { ecsFormat } = require('@elastic/ecs-winston-format');
-const { combine, timestamp, colorize } = format;
+const { ecsFormat } = require("@elastic/ecs-winston-format");
+const { combine, timestamp } = format;
 const configStore = require("../config");
 const logDir = configStore.get("/logDir");
-const defaultMeta = { service: {name: configStore.get("/service"), version: configStore.get("/version"), environment: process.env.NODE_ENV }};
+const defaultMeta = {
+  service: {
+    name: configStore.get("/service"),
+    version: configStore.get("/version"),
+    environment: process.env.NODE_ENV || "development",
+  },
+};
 const winstonContainer = new Container();
+
+// Keep a full ISO-8601 timestamp (including milliseconds and UTC offset) in
+// both file and console records so events can be compared across hosts.
+const getStructuredFormat = () => combine(timestamp(), ecsFormat());
 
 const getTransports = () => {
   let Transports = [
@@ -18,12 +28,7 @@ const getTransports = () => {
       zippedArchive: true,
       maxSize: configStore.get("/logFileMaxSize"),
       maxFiles: configStore.get("/logTTL"),
-      format: combine(
-        timestamp({
-          format: "YYYY-MM-DDTHH:MM:SS",
-        }),
-        ecsFormat()
-      ),
+      format: getStructuredFormat(),
     }),
     new transports.DailyRotateFile({
       level: "error",
@@ -33,30 +38,15 @@ const getTransports = () => {
       zippedArchive: true,
       maxSize: configStore.get("/logFileMaxSize"),
       maxFiles: configStore.get("/logTTL"),
-      format: combine(
-        timestamp({
-          format: "YYYY-MM-DDTHH:MM:SS",
-        }),
-        ecsFormat()
-      ),
+      format: getStructuredFormat(),
+    }),
+    // Structured stdout/stderr is collected by common production runtimes,
+    // and is also convenient during local development.
+    new transports.Console({
+      handleExceptions: true,
+      format: getStructuredFormat(),
     }),
   ];
-
-  if (process.env.NODE_ENV !== "production") {
-    Transports.push(
-      new transports.Console({
-        handleExceptions: true,
-        format: combine(
-          colorize({
-            all: true,
-          }),
-          timestamp({
-            format: "YYYY-MM-DDTHH:MM:SS",
-          }),
-        ),
-      })
-    );
-  }
   return Transports;
 };
 
@@ -81,12 +71,7 @@ winstonContainer.add("audit", {
       zippedArchive: true,
       maxSize: configStore.get("/logFileMaxSize"),
       maxFiles: configStore.get("/auditLogTTL"),
-      format: combine(
-        timestamp({
-          format: "YYYY-MM-DDTHH:MM:SS",
-        }),
-        ecsFormat()
-      ),
+      format: getStructuredFormat(),
     }),
   ],
 });
@@ -106,12 +91,7 @@ winstonContainer.add("query", {
       zippedArchive: true,
       maxSize: configStore.get("/logFileMaxSize"),
       maxFiles: configStore.get("/logTTL"),
-      format: combine(
-        timestamp({
-          format: "YYYY-MM-DDTHH:MM:SS",
-        }),
-        ecsFormat()
-      ),
+      format: getStructuredFormat(),
     }),
   ],
 });
@@ -120,13 +100,27 @@ const Logger = winstonContainer.get("logger");
 const AuditLogger = winstonContainer.get("audit");
 const QueryLogger = winstonContainer.get("query");
 
-const logger_error_old = Logger.error;
-Logger.error = function (err) {
-  if (err.message) {
-    return logger_error_old.call(this, err.stack);
-  } else {
-    return logger_error_old.call(this, new Error().stack + ":" + err);
+const loggerError = Logger.error;
+Logger.error = function (error, ...args) {
+  if (!(error instanceof Error)) {
+    return loggerError.call(this, error, ...args);
   }
+
+  const [metadata = {}, ...rest] = args;
+  const suppliedMetadata =
+    metadata && typeof metadata === "object" && !Array.isArray(metadata)
+      ? metadata
+      : {};
+
+  return loggerError.call(this, error.message || error.name, {
+    ...suppliedMetadata,
+    error: {
+      ...suppliedMetadata.error,
+      type: error.name,
+      message: error.message,
+      stack: error.stack,
+    },
+  }, ...rest);
 };
 
 module.exports = { Logger, AuditLogger, QueryLogger };

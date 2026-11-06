@@ -28,7 +28,7 @@ const handleForeignKeyConstraint = (errorMessage) => {
 };
 
 const errorResponder = (err, req, res, next) => {
-  Logger.error(err.toString());
+  Logger.error(err);
   if (err.isBoom) {
     return sendResponse(err, res);
   } else if (isSequelizeError(err)) {
